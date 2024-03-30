@@ -1,5 +1,5 @@
 [![Java-Build Action Status](https://github.com/Hotmoka/io-takamaka-code/actions/workflows/java_build.yml/badge.svg)](https://github.com/Hotmoka/io-takamaka-code/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/io.hotmoka/io-takamaka-code.svg?label=Maven%20Central)](https://central.sonatype.com/search?smo=true&q=a:io-hotmoka-node-remote+a:io-hotmoka-node-remote-api)
+[![Maven Central](https://img.shields.io/maven-central/v/io.hotmoka/io-takamaka-code.svg?label=Maven%20Central)](https://central.sonatype.com/search?smo=true&q=a:io-takamaka-code+a:io-takamaka-code-constants)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 # The runtime support library of the Takamaka language.
