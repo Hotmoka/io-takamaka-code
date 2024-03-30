@@ -34,7 +34,7 @@ Note: submodules whose artifact must be deployed on Maven Central must activate 
   <packaging>pom</packaging>
   <version>parent</version>
   <name>io-takamaka-code</name>
-  <description>This project defines utility classes for closeables objects.</description>
+  <description>This project defines the support library of the Takamaka language for smart contracts.</description>
   <url>https://github.com/Hotmoka/io-takamaka-code</url>
 
   <organization>
