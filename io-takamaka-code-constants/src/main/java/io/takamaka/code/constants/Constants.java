@@ -29,7 +29,7 @@ public final class Constants {
 
 	static {
 		// we access the Maven properties from the pom.xml file of the parent project
-		try (InputStream is = Constants.class.getClassLoader().getResourceAsStream("maven.properties")) {
+		try (InputStream is = Constants.class.getModule().getResourceAsStream("io.takamaka.code.maven.properties")) {
 			var mavenProperties = new Properties();
 			mavenProperties.load(is);
 			TAKAMAKA_VERSION = mavenProperties.getProperty("io.takamaka.code.version");
