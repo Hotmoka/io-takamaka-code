@@ -340,11 +340,6 @@ public final class Constants {
 	public final static String THROWS_EXCEPTIONS_NAME = IO_TAKAMAKA_CODE_LANG_PACKAGE_NAME + "ThrowsExceptions";
 
 	/**
-	 * The name of the class type for {@code io.takamaka.code.lang.SelfCharged}.
-	 */
-	public final static String SELF_CHARGED_NAME = IO_TAKAMAKA_CODE_LANG_PACKAGE_NAME + "SelfCharged";
-
-	/**
 	 * The name of the class type for {@code io.takamaka.code.lang.Event}.
 	 */
 	public final static String EVENT_NAME = IO_TAKAMAKA_CODE_LANG_PACKAGE_NAME + "Event";

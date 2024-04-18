@@ -68,11 +68,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	private final long maxCumulativeSizeOfDependencies;
 
 	/**
-	 * True if and only if the use of the {@code @@SelfCharged} annotation is allowed.
-	 */
-	private final boolean allowsSelfCharged;
-
-	/**
 	 * True if and only if the use of the {@code faucet()} methods of the gametes is allowed without a valid signature.
 	 */
 	private final boolean allowsUnsignedFaucet;
@@ -123,7 +118,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 *                       Beyond this threshold, the message gets truncated
 	 * @param maxDependencies the maximal number of dependencies per transaction
 	 * @param maxCumulativeSizeOfDependencies the maximal cumulative size of the the dependencies per transaction
-	 * @param allowsSelfCharged true if and only if the use of the {@code @@SelfCharged} annotation is allowed
 	 * @param allowsUnsignedFaucet true if and only if the use of the {@code faucet()} methods of the gametes is allowed without a valid signature
 	 * @param skipsVerification true if and only if the verification of the classes of the jars installed in the node must be skipped
 	 * @param signature the name of the signature algorithm that must be used to sign the requests sent to the node
@@ -133,7 +127,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * @param builderOfGasStation the builder of the gas station of the node having the manifest
 	 * @throws RequirementViolationException if any parameter is null or any builder yields null or the maximal error length is negative
 	 */
-	public Manifest(String genesisTime, String chainId, long maxErrorLength, long maxDependencies, long maxCumulativeSizeOfDependencies, boolean allowsSelfCharged,
+	public Manifest(String genesisTime, String chainId, long maxErrorLength, long maxDependencies, long maxCumulativeSizeOfDependencies,
 			boolean allowsUnsignedFaucet, boolean skipsVerification, String signature, Gamete gamete, long verificationVersion,
 			Function<Manifest<V>, Validators<V>> builderOfValidators, Function<Manifest<V>, GasStation<V>> builderOfGasStation) {
 
@@ -155,7 +149,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 		this.maxErrorLength = maxErrorLength;
 		this.maxDependencies = maxDependencies;
 		this.maxCumulativeSizeOfDependencies = maxCumulativeSizeOfDependencies;
-		this.allowsSelfCharged = allowsSelfCharged;
 		this.allowsUnsignedFaucet = allowsUnsignedFaucet;
 		this.skipsVerification = skipsVerification;
 		this.signature = signature;
@@ -214,15 +207,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 */
 	public final @View long getMaxCumulativeSizeOfDependencies() {
 		return maxCumulativeSizeOfDependencies;
-	}
-
-	/**
-	 * Determines if the use of the {@code @@SelfCharged} annotation is allowed.
-	 * 
-	 * @return true if and only if it is allowed
-	 */
-	public final @View boolean allowsSelfCharged() {
-		return allowsSelfCharged;
 	}
 
 	/**
