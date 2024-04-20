@@ -55,12 +55,12 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * The maximal length of the error message kept in the store of the node.
 	 * Beyond this threshold, the message gets truncated.
 	 */
-	private final long maxErrorLength;
+	private final int maxErrorLength;
 
 	/**
 	 * The maximal number of dependencies in the classpath of a transaction.
 	 */
-	private final long maxDependencies;
+	private final int maxDependencies;
 
 	/**
 	 * The maximal cumulative size (in bytes) of the instrumented jars of the dependencies of a transaction.
@@ -127,7 +127,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * @param builderOfGasStation the builder of the gas station of the node having the manifest
 	 * @throws RequirementViolationException if any parameter is null or any builder yields null or the maximal error length is negative
 	 */
-	public Manifest(String genesisTime, String chainId, long maxErrorLength, long maxDependencies, long maxCumulativeSizeOfDependencies,
+	public Manifest(String genesisTime, String chainId, int maxErrorLength, int maxDependencies, long maxCumulativeSizeOfDependencies,
 			boolean allowsUnsignedFaucet, boolean skipsVerification, String signature, Gamete gamete, long verificationVersion,
 			Function<Manifest<V>, Validators<V>> builderOfValidators, Function<Manifest<V>, GasStation<V>> builderOfGasStation) {
 
@@ -185,7 +185,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * 
 	 * @return the length
 	 */
-	public final @View long getMaxErrorLength() {
+	public final @View int getMaxErrorLength() {
 		return maxErrorLength;
 	}
 
@@ -195,7 +195,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * 
 	 * @return the maximal number of dependencies
 	 */
-	public final @View long getMaxDependencies() {
+	public final @View int getMaxDependencies() {
 		return maxDependencies;
 	}
 
