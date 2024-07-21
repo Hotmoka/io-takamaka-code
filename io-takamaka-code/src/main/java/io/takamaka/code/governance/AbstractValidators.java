@@ -322,6 +322,23 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	}
 
 	@Override
+	@FromContract @Payable public void rewardMokamintNode(BigInteger amount, BigInteger minted, String publicKeyOfNodeBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
+		require(isSystemCall(), "a node can only be rewarded with a system request");
+
+		manifest.accountsLedger.add(amount, publicKeyOfNodeBase64);
+
+		updateGasPrice(gasConsumed);
+		updateParameters(minted, numberOfTransactionsSinceLastReward);
+	}
+
+	@Override
+	@FromContract @Payable public void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64) {
+		require(isSystemCall(), "a miner can only be rewarded with a system request");
+
+		manifest.accountsLedger.add(amount, publicKeyOfMinerBase64);
+	}
+
+	@Override
 	@Payable @FromContract
 	public final SimplePoll<V> newPoll(BigInteger amount, SimplePoll.Action action) {
 		require(amount.compareTo(ticketForNewPoll) >= 0, () -> "a new poll costs " + ticketForNewPoll + " coins");

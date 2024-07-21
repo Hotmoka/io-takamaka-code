@@ -54,7 +54,7 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	 * @param amount the amount to distribute to the validators
 	 * @param minted the subset of {@code amount} that has been minted during the last reward;
 	 *               this means that {@code amount} is the sum of gas costs incurred by the
-	 *               payers of the transactions and an extra inflation that is exactly {@code minted}
+	 *               payers of the transactions and an extra inflation that is exactly {@code minted} coins
 	 * @param behaving space-separated identifiers of validators that behaved correctly
 	 * @param misbehaving space-separated identifiers of validators that misbehaved
 	 * @param gasConsumed the gas consumed for CPU, RAM usage or storage by the transactions
@@ -63,6 +63,31 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	 *                                            the previous reward
 	 */
 	@FromContract @Payable void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
+
+	/**
+	 * Rewards the Mokamint node that has created a block. Hotmoka Mokamint nodes
+	 * call this method at regular intervals; for instance, after each committed block in blockchain.
+	 * Its goal is to reward the node that created the block, with the deadline provided by a miner.
+	 * 
+	 * @param amount the amount to distribute to the node
+	 * @param minted the subset of {@code amount} that has been minted during the last reward
+	 * @param publicKeyOfNodeBase64 the key of the node
+	 * @param gasConsumed the gas consumed for CPU, RAM usage or storage by the transactions
+	 *                    executed since the previous reward
+	 * @param numberOfTransactionsSinceLastReward the number of transactions executed since
+	 *                                            the previous reward
+	 */
+	@FromContract @Payable public void rewardMokamintNode(BigInteger amount, BigInteger minted, String publicKeyOfNodeBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
+
+	/**
+	 * Rewards the Mokamint miner that found the deadline for a block. Hotmoka Mokamint nodes
+	 * call this method at regular intervals; for instance, after each committed block in blockchain.
+	 * Its goal is to reward the miner that found the deadline for a block.
+	 * 
+	 * @param amount the amount to distribute to the miner
+	 * @param publicKeyOfMinerBase64 the key of the miner
+	 */
+	@FromContract @Payable public void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64);
 
 	/**
 	 * Yields the earnings collected by the given validator and not yet sent to it.
