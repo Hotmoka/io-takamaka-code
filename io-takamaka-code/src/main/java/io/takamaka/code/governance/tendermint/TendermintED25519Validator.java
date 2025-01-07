@@ -114,7 +114,7 @@ public final class TendermintED25519Validator extends Validator implements Accou
 			return bytesToHex(sha256.digest()).substring(0, 40);
 		}
 		catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException(e);
+			throw new RuntimeException("SHA-256 is not available");
 		}
 	}
 
@@ -125,7 +125,7 @@ public final class TendermintED25519Validator extends Validator implements Accou
 	 * @return the string
 	 */
 	private static String bytesToHex(byte[] bytes) {
-		final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
+		final byte[] HEX_ARRAY = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 	    byte[] hexChars = new byte[bytes.length * 2];
 	    for (int j = 0; j < bytes.length; j++) {
 	        int v = bytes[j] & 0xFF;

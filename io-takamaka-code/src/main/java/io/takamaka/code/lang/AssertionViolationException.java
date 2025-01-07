@@ -30,14 +30,4 @@ public class AssertionViolationException extends RuntimeException {
 	public AssertionViolationException(String message) {
 		super(message);
 	}
-
-	/**
-	 * Creates a new exception with the given message and cause.
-	 * 
-	 * @param message the message
-	 * @param cause the cause
-	 */
-	public AssertionViolationException(String message, Throwable cause) {
-		super(message, cause);
-	}
 }

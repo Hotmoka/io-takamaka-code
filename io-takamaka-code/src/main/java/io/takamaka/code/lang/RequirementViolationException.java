@@ -30,14 +30,4 @@ public class RequirementViolationException extends RuntimeException {
 	public RequirementViolationException(String message) {
 		super(message);
 	}
-
-	/**
-	 * Builds an exception with the given message and cause.
-	 * 
-	 * @param message the message
-	 * @param cause the cause
-	 */
-	public RequirementViolationException(String message, Throwable cause) {
-		super(message, cause);
-	}
 }
