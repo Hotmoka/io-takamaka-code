@@ -19,11 +19,9 @@ package io.takamaka.code.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -648,8 +646,13 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	}
 
 	@Override
-	public <A> A[] toArray(IntFunction<A[]> generator) {
-		return stream().toArray(generator);
+	public V[] toArray(IntFunction<V[]> generator) {
+		V[] result = generator.apply(length);
+		int pos = 0;
+		for (V element: this)
+			result[pos++] = element;
+
+		return result;
 	}
 
 	@Override
@@ -692,7 +695,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 			}
 
 			@Override
-			public <A> A[] toArray(IntFunction<A[]> generator) {
+			public V[] toArray(IntFunction<V[]> generator) {
 				return StorageTreeArray.this.toArray(generator);
 			}
 
@@ -722,6 +725,16 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 
 	@Override
 	public String toString() {
-		return stream().map(Objects::toString).collect(Collectors.joining(",", "[", "]"));
+		String result = "[";
+		boolean first = true;
+		for (V element: this)
+			if (first) {
+				result += element;
+				first = false;
+			}
+			else
+				result += "," + element;
+
+		return result + "]";
 	}
 }

@@ -119,9 +119,13 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	protected abstract A mkAccount(BigInteger balance, String publicKey);
 
 	private static BigInteger[] buildBalances(String balancesAsStringSequence) {
-		return splitAtSpaces(balancesAsStringSequence).stream()
-			.map(BigInteger::new)
-			.toArray(BigInteger[]::new);
+		List<String> list = splitAtSpaces(balancesAsStringSequence);
+		var result = new BigInteger[list.size()];
+		int pos = 0;
+		for (String s: list)
+			result[pos++] = new BigInteger(s);
+
+		return result;
 	}
 
 	private static String[] buildPublicKeys(String publicKeysAsStringSequence) {

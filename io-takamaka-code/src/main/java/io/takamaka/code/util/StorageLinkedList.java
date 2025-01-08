@@ -19,10 +19,8 @@ package io.takamaka.code.util;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -230,7 +228,17 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 
 	@Override @View
 	public String toString() {
-		return stream().map(Objects::toString).collect(Collectors.joining(",", "[", "]"));
+		String result = "[";
+		boolean first = true;
+		for (E element: this)
+			if (first) {
+				result += element;
+				first = false;
+			}
+			else
+				result += "," + element;
+
+		return result + "]";
 	}
 
 	@Override
@@ -259,8 +267,13 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	}
 
 	@Override
-	public <A> A[] toArray(IntFunction<A[]> generator) {
-		return stream().toArray(generator);
+	public E[] toArray(IntFunction<E[]> generator) {
+		E[] result = generator.apply(size);
+		int pos = 0;
+		for (E element: this)
+			result[pos++] = element;
+
+		return result;
 	}
 
 	@Override
@@ -318,7 +331,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			}
 
 			@Override
-			public <A> A[] toArray(IntFunction<A[]> generator) {
+			public E[] toArray(IntFunction<E[]> generator) {
 				return StorageLinkedList.this.toArray(generator);
 			}
 

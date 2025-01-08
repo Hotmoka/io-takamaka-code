@@ -21,8 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -596,7 +594,17 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 
 	@Override
 	public String toString() {
-		return stream().map(Objects::toString).collect(Collectors.joining(",", "[", "]"));
+		String result = "[";
+		boolean first = true;
+		for (V element: this)
+			if (first) {
+				result += element;
+				first = false;
+			}
+			else
+				result += "," + element;
+
+		return result + "]";
 	}
 
 	@Override

@@ -85,13 +85,10 @@ public interface StorageArrayView<V> extends Iterable<V> {
 	 * Yields an array containing the elements of this storage array, in their order,
 	 * using the provided generator function to allocate the returned array.
 	 * 
-	 * @param <A> the type of the elements of the resulting array
 	 * @param generator the array generator
 	 * @return the array
-	 * @throws ArrayStoreException if the runtime type of the array returned from the array generator
-	 *                             is not a supertype of the runtime type of every element in this storage array
 	 */
-	<A> A[] toArray(IntFunction<A[]> generator);
+	V[] toArray(IntFunction<V[]> generator);
 
 	/**
 	 * Yields a snapshot of this array. The snapshot contains the elements in this array

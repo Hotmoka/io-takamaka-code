@@ -385,9 +385,13 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * @return the array
 	 */
 	protected static BigInteger[] buildPowers(String powersAsStringSequence) {
-		return splitAtSpaces(powersAsStringSequence).stream()
-			.map(BigInteger::new)
-			.toArray(BigInteger[]::new);
+		List<String> list = splitAtSpaces(powersAsStringSequence);
+		var result = new BigInteger[list.size()];
+		int pos = 0;
+		for (String s: list)
+			result[pos++] = new BigInteger(s);
+
+		return result;
 	}
 
 	/**

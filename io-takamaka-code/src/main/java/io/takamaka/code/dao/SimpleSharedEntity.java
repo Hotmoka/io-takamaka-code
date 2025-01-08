@@ -21,9 +21,6 @@ import static io.takamaka.code.lang.Takamaka.require;
 import static java.math.BigInteger.ZERO;
 
 import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.takamaka.code.dao.SharedEntity.Offer;
@@ -75,19 +72,16 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	 * @param shareholders the initial shareholders; if there are repetitions, their shares are merged
 	 * @param shares the initial shares of each initial shareholder. This must be as many as {@code shareholders}
 	 */
-	public SimpleSharedEntity(Stream<S> shareholders, Stream<BigInteger> shares) {
+	public SimpleSharedEntity(S[] shareholders, BigInteger[] shares) {
 		require(shareholders != null, "shareholders cannot be null");
 		require(shares != null, "shares cannot be null");
-	
-		List<S> shareholdersAsList = shareholders.collect(Collectors.toList());
-		List<BigInteger> sharesAsList = shares.collect(Collectors.toList());
-	
-		require(shareholdersAsList.size() == sharesAsList.size(), "shareholders and shares must have the same length");
-	
-		Iterator<BigInteger> it = sharesAsList.iterator();
-		for (S shareholder: shareholdersAsList) {
+
+		require(shareholders.length == shares.length, "shareholders and shares must have the same length");
+
+		for (int pos = 0; pos < shareholders.length; pos++) {
+			S shareholder = shareholders[pos];
 			require(shareholder != null, "shareholders cannot be null");
-			BigInteger share = it.next();
+			BigInteger share = shares[pos];
 			require(share != null && share.signum() > 0, "shares must be positive big integers");
 			addShares(shareholder, share);
 		}
@@ -97,23 +91,19 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	}
 
 	/**
-	 * Creates a shared entity with the given set of shareholders and respective shares.
-	 *
-	 * @param shareholders the initial shareholders; if there are repetitions, their shares are merged
-	 * @param shares the initial shares of each initial shareholder. This must have the same length as {@code shareholders}
-	 */
-	public SimpleSharedEntity(S[] shareholders, BigInteger[] shares) {
-		this(Stream.of(shareholders), Stream.of(shares));
-	}
-
-	/**
 	 * Creates a shared entity with one shareholder.
 	 *
 	 * @param shareholder the initial shareholder
 	 * @param share the initial share of the initial shareholder
 	 */
 	public SimpleSharedEntity(S shareholder, BigInteger share) {
-		this(Stream.of(shareholder), Stream.of(share));
+		require(shareholder != null, "shareholders cannot be null");
+		require(share != null && share.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder, share);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
 	}
 
 	/**
@@ -124,8 +114,15 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
      * @param share1       the initial share of the first shareholder
      * @param share2       the initial share of the second shareholder
      */
-    public SimpleSharedEntity(S shareholder1, S shareholder2, BigInteger share1, BigInteger share2) {
-    	this(Stream.of(shareholder1, shareholder2), Stream.of(share1, share2));
+	public SimpleSharedEntity(S shareholder1, S shareholder2, BigInteger share1, BigInteger share2) {
+    	require(shareholder1 != null && shareholder2 != null, "shareholders cannot be null");
+		require(share1 != null && share2 != null && share1.signum() > 0 && share2.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder1, share1);
+		addShares(shareholder2, share2);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
     }
 
     /**
@@ -138,8 +135,16 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
      * @param share2       the initial share of the second shareholder
      * @param share3       the initial share of the third shareholder
      */
-    public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, BigInteger share1, BigInteger share2, BigInteger share3) {
-    	this(Stream.of(shareholder1, shareholder2, shareholder3), Stream.of(share1, share2, share3));
+	public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, BigInteger share1, BigInteger share2, BigInteger share3) {
+    	require(shareholder1 != null && shareholder2 != null && shareholder3 != null, "shareholders cannot be null");
+		require(share1 != null && share2 != null && share1.signum() > 0 && share2.signum() > 0 && share3.signum() > 0 && share3.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder1, share1);
+		addShares(shareholder2, share2);
+		addShares(shareholder3, share3);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
     }
 
     /**
@@ -154,8 +159,17 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
      * @param share3       the initial share of the third shareholder
      * @param share4       the initial share of the fourth shareholder
      */
-    public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, S shareholder4, BigInteger share1, BigInteger share2, BigInteger share3, BigInteger share4) {
-    	this(Stream.of(shareholder1, shareholder2, shareholder3, shareholder4), Stream.of(share1, share2, share3, share4));
+	public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, S shareholder4, BigInteger share1, BigInteger share2, BigInteger share3, BigInteger share4) {
+    	require(shareholder1 != null && shareholder2 != null && shareholder3 != null && shareholder4 != null, "shareholders cannot be null");
+		require(share1 != null && share2 != null && share1.signum() > 0 && share2.signum() > 0 && share3.signum() > 0 && share3.signum() > 0 && share4 .signum() > 0 && share4.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder1, share1);
+		addShares(shareholder2, share2);
+		addShares(shareholder3, share3);
+		addShares(shareholder4, share4);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
     }
 
     @Override
