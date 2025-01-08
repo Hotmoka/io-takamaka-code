@@ -133,7 +133,7 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	}
 
 	private static List<String> splitAtSpaces(String s) {
-		List<String> list = new ArrayList<>();
+		var list = new ArrayList<String>();
 		int pos;
 		while ((pos = s.indexOf(' ')) >= 0) {
 			list.add(s.substring(0, pos));
@@ -153,7 +153,20 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	 */
 	@Override
 	public final Iterator<A> iterator() {
-		return stream().iterator();
+		var it = accounts.iterator();
+
+		return new Iterator<A>() {
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public A next() {
+				return it.next().getValue();
+			}
+		};
 	}
 
 	/**
