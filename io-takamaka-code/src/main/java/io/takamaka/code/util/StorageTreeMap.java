@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -893,7 +892,10 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 
 	@Override
 	public Stream<Entry<K,V>> stream() {
-		return StreamSupport.stream(spliterator(), false);
+		var it = iterator();
+		return Stream.generate(() -> null)
+				.takeWhile(__ -> it.hasNext())
+				.map(__ -> it.next());
 	}
 
 	@Override

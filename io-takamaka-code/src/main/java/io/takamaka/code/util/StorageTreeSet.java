@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -589,7 +588,10 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 
 	@Override
 	public Stream<V> stream() {
-		return StreamSupport.stream(spliterator(), false);
+		var it = iterator();
+		return Stream.generate(() -> null)
+				.takeWhile(__ -> it.hasNext())
+				.map(__ -> it.next());
 	}
 
 	@Override

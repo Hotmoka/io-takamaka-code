@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -428,12 +428,15 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 
 	@Override
 	public IntStream stream() {
-		return StreamSupport.stream(spliterator(), false).mapToInt(Byte::byteValue);
+		var it = iterator();
+		return Stream.generate(() -> null)
+				.takeWhile(__ -> it.hasNext())
+				.mapToInt(__ -> it.next().intValue());
 	}
 
 	@Override
 	public byte[] toArray() {
-		byte[] result = new byte[length];
+		var result = new byte[length];
 		int pos = 0;
 		for (Byte b: this)
 			result[pos++] = b;

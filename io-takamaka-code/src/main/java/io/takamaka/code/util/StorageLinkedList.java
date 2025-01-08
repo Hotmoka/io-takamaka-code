@@ -22,7 +22,6 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -263,7 +262,10 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 
 	@Override
 	public Stream<E> stream() {
-		return StreamSupport.stream(spliterator(), false);
+		var it = iterator();
+		return Stream.generate(() -> null)
+			.takeWhile(__ -> it.hasNext())
+			.map(__ -> it.next());
 	}
 
 	@Override

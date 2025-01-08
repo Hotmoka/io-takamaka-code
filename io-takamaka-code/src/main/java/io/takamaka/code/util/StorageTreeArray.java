@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -642,7 +641,10 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 
 	@Override
 	public Stream<V> stream() {
-		return StreamSupport.stream(spliterator(), false);
+		var it = iterator();
+		return Stream.generate(() -> null)
+				.takeWhile(__ -> it.hasNext())
+				.map(__ -> it.next());
 	}
 
 	@Override
