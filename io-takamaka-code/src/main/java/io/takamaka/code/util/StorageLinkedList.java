@@ -152,11 +152,19 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private static <K> boolean equals(K e1, K e2) {
+		if (e1 instanceof Comparable<?>)
+			return ((Comparable<K>) e1).compareTo(e2) == 0;
+		else
+			return ((Storage) e1).compareByStorageReference((Storage) e2) == 0;
+	}
+
 	@Override
 	public boolean remove(Object e) {
 		for (Node<E> cursor = first, previous = null; cursor != null; previous = cursor, cursor = cursor.next) {
 			E element = cursor.element;
-			if (e == null ? element == null : e.equals(element)) {
+			if (e == null ? element == null : (element != null && equals(e, element))) {
 				if (last == cursor)
 					last = previous;
 
@@ -179,7 +187,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	public @View boolean contains(Object e) {
 		for (Node<E> cursor = first; cursor != null; cursor = cursor.next) {
 			E element = cursor.element;
-			if (e == null ? element == null : e.equals(element))
+			if (e == null ? element == null : (element != null && equals(e, element)))
 				return true;
 		}
 
