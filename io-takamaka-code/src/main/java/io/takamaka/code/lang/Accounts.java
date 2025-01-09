@@ -19,9 +19,7 @@ package io.takamaka.code.lang;
 import static io.takamaka.code.lang.Takamaka.require;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Stream;
 
 import io.takamaka.code.util.StorageIntMap;
@@ -119,31 +117,37 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	protected abstract A mkAccount(BigInteger balance, String publicKey);
 
 	private static BigInteger[] buildBalances(String balancesAsStringSequence) {
-		List<String> list = splitAtSpaces(balancesAsStringSequence);
-		var result = new BigInteger[list.size()];
+		String[] segments = splitAtSpaces(balancesAsStringSequence);
+		var result = new BigInteger[segments.length];
 		int pos = 0;
-		for (String s: list)
+		for (String s: segments)
 			result[pos++] = new BigInteger(s);
 
 		return result;
 	}
 
 	private static String[] buildPublicKeys(String publicKeysAsStringSequence) {
-		return splitAtSpaces(publicKeysAsStringSequence).toArray(String[]::new);
+		return splitAtSpaces(publicKeysAsStringSequence);
 	}
 
-	private static List<String> splitAtSpaces(String s) {
-		var list = new ArrayList<String>();
+	private static String[] splitAtSpaces(String s) {
+		int counter = s.isEmpty() ? 0 : 1;
+		for (int i = 0; i < s.length() - 1; i++)
+			if (s.charAt(i) == ' ')
+				counter++;
+
+		var result = new String[counter];
 		int pos;
+		int i = 0;
 		while ((pos = s.indexOf(' ')) >= 0) {
-			list.add(s.substring(0, pos));
+			result[i++] = s.substring(0, pos);
 			s = s.substring(pos + 1);
 		}
 
 		if (!s.isEmpty())
-			list.add(s);
+			result[i++] = s;
 
-		return list;
+		return result;
 	}
 
 	/**

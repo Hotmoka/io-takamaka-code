@@ -23,8 +23,6 @@ import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.ZERO;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 import io.takamaka.code.dao.Poll;
 import io.takamaka.code.dao.PollWithTimeWindow;
@@ -312,8 +310,8 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
 		require(isSystemCall(), "the validators can only be rewarded with a system request");
 
-		List<String> behavingIDs = splitAtSpaces(behaving);
-		List<String> misbehavingIDs = splitAtSpaces(misbehaving);
+		String[] behavingIDs = splitAtSpaces(behaving);
+		String[] misbehavingIDs = splitAtSpaces(misbehaving);
 		rewardBehavingValidators(behavingIDs);
 		slashMisbehavingValidators(misbehavingIDs);
 		slashNotBehavingValidators(behavingIDs, misbehavingIDs);
@@ -385,10 +383,10 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * @return the array
 	 */
 	protected static BigInteger[] buildPowers(String powersAsStringSequence) {
-		List<String> list = splitAtSpaces(powersAsStringSequence);
-		var result = new BigInteger[list.size()];
+		String[] array = splitAtSpaces(powersAsStringSequence);
+		var result = new BigInteger[array.length];
 		int pos = 0;
-		for (String s: list)
+		for (String s: array)
 			result[pos++] = new BigInteger(s);
 
 		return result;
@@ -398,20 +396,26 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * Slits the given string at spaces.
 	 * 
 	 * @param s the string
-	 * @return the list of parts
+	 * @return the array of parts
 	 */
-	protected static List<String> splitAtSpaces(String s) {
-		List<String> list = new ArrayList<>();
+	protected static String[] splitAtSpaces(String s) {
+		int counter = s.isEmpty() ? 0 : 1;
+		for (int i = 0; i < s.length() - 1; i++)
+			if (s.charAt(i) == ' ')
+				counter++;
+
+		var result = new String[counter];
 		int pos;
+		int i = 0;
 		while ((pos = s.indexOf(' ')) >= 0) {
-			list.add(s.substring(0, pos));
+			result[i++] = s.substring(0, pos);
 			s = s.substring(pos + 1);
 		}
-	
+
 		if (!s.isEmpty())
-			list.add(s);
-	
-		return list;
+			result[i++] = s;
+
+		return result;
 	}
 
 	private void updateParameters(BigInteger minted, BigInteger numberOfTransactionsSinceLastReward) {
@@ -447,15 +451,16 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		}
 	}
 
-	private void rewardBehavingValidators(List<String> behavingIDs) {
-		if (!behavingIDs.isEmpty()) {
+	private void rewardBehavingValidators(String[] behavingIDs) {
+		if (behavingIDs.length > 0) {
 			// compute the total power of the well behaving validators; this is always positive
 			BigInteger totalPower = getShareholders()
-				.filter(validator -> behavingIDs.contains(validator.id()))
+				.filter(validator -> contains(behavingIDs, validator.id()))
 				.map(this::sharesOf)
 				.reduce(ZERO, BigInteger::add);
 
-			behavingIDs.forEach(alreadyNotBehaving::remove);
+			for (String id: behavingIDs)
+				alreadyNotBehaving.remove(id);
 
 			// compute the total amount of staked coins
 			BigInteger totalStaked = stakes.values().reduce(BigInteger.ZERO, BigInteger::add);
@@ -467,7 +472,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 				// percentStaked of the distribution gets staked for the well-behaving validators, in proportion to their power
 				final BigInteger addedToStakes = toDistribute.multiply(BigInteger.valueOf(percentStaked)).divide(_100_000_000);
 				getShareholders()
-					.filter(validator -> behavingIDs.contains(validator.id()))
+					.filter(validator -> contains(behavingIDs, validator.id()))
 					//.forEachOrdered(validator -> stakes.update(validator, BigInteger.ZERO, old -> old.add(addedToStakes.multiply(sharesOf(validator)).divide(totalPower))));
 					.forEachOrdered(validator -> {
 						BigInteger toAdd = addedToStakes.multiply(sharesOf(validator)).divide(totalPower);
@@ -481,7 +486,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 				// distribute immediately the rest to the well-behaving validators, in proportion to their power
 				final BigInteger paid = toDistribute.subtract(addedToStakes);
 				getShareholders()
-					.filter(validator -> behavingIDs.contains(validator.id()))
+					.filter(validator -> contains(behavingIDs, validator.id()))
 					.forEachOrdered(validator -> validator.receive(paid.multiply(sharesOf(validator)).divide(totalPower)));
 			}
 		}
@@ -492,18 +497,26 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		manifest.gasStation.takeNoteOfGasConsumedDuringLastReward(gasConsumed);
 	}
 
-	private void slashNotBehavingValidators(List<String> behavingIDs, List<String> misbehavingIDs) {
+	private void slashNotBehavingValidators(String[] behavingIDs, String[] misbehavingIDs) {
 		getShareholders()
-			.filter(validator -> !behavingIDs.contains(validator.id()) && !misbehavingIDs.contains(validator.id()))
+			.filter(validator -> !contains(behavingIDs, validator.id()) && !contains(misbehavingIDs, validator.id()))
 			.forEachOrdered(this::slashForNotBehaving);
 	}
 
-	private void slashMisbehavingValidators(List<String> misbehavingIDs) {
-		if (!misbehavingIDs.isEmpty()) {
+	private void slashMisbehavingValidators(String[] misbehavingIDs) {
+		if (misbehavingIDs.length > 0) {
 			getShareholders()
-				.filter(validator -> misbehavingIDs.contains(validator.id()))
+				.filter(validator -> contains(misbehavingIDs, validator.id()))
 				.forEachOrdered(this::slashForMisbehaving);
 		}
+	}
+
+	private static boolean contains(String[] array, String element) {
+		for (String a: array)
+			if (a.equals(element))
+				return true;
+
+		return false;
 	}
 
 	private void slashForMisbehaving(V validator) {

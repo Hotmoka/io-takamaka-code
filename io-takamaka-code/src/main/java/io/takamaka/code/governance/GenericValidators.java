@@ -17,7 +17,6 @@ limitations under the License.
 package io.takamaka.code.governance;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.function.Function;
 
 import io.takamaka.code.lang.Exported;
@@ -92,8 +91,8 @@ public class GenericValidators extends AbstractValidators<Validator> {
 	}
 
 	private static Validator[] buildValidators(String publicKeysAsStringSequence) {
-		List<String> list = splitAtSpaces(publicKeysAsStringSequence);
-		var result = new Validator[list.size()];
+		String[] list = splitAtSpaces(publicKeysAsStringSequence);
+		var result = new Validator[list.length];
 		int pos = 0;
 		for (String s: list)
 			result[pos++] = new Validator(s);

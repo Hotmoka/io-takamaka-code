@@ -16,9 +16,7 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.IntFunction;
@@ -827,29 +825,40 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 		return new StorageMapIterator<>(root);
 	}
 
+	private static class Stack<V> {
+		private final V head;
+		private final Stack<V> tail;
+
+		private Stack(V head, Stack<V> tail) {
+			this.head = head;
+			this.tail = tail;
+		}
+	}
+
 	private static class StorageMapIterator<V> implements Iterator<Entry<V>> {
 		// the path under enumeration; it holds that the left children
 		// have already been enumerated
-		private final List<Node<V>> stack = new ArrayList<>();
+		private Stack<Node<V>> stack = null;
 
 		private StorageMapIterator(Node<V> root) {
 			// initially, the stack contains the leftmost path of the tree
 			for (var cursor = root; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return !stack.isEmpty();
+			return stack != null;
 		}
 
 		@Override
 		public Entry<V> next() {
-			var topmost = stack.remove(stack.size() - 1);
+			var topmost = stack.head;
+			stack = stack.tail;
 
 			// we add the leftmost path of the right child of topmost
 			for (var cursor = topmost.right; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 
 			return topmost;
 		}
@@ -861,25 +870,6 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 		return Stream.generate(() -> null)
 				.takeWhile(__ -> it.hasNext())
 				.map(__ -> it.next());
-	}
-
-	@Override
-	public List<Integer> keyList() {
-		List<Integer> keys = new ArrayList<>();
-		if (root != null)
-			keyList(root, keys);
-
-		return keys;
-	}
-
-	private static <V> void keyList(Node<V> x, List<Integer> keys) {
-		if (x.left != null)
-			keyList(x.left, keys);
-
-		keys.add(x.key);
-
-		if (x.right != null)
-			keyList(x.right, keys);
 	}
 
 	@Override
@@ -978,11 +968,6 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 			@Override
 			public Stream<Entry<V>> stream() {
 				return StorageTreeIntMap.this.stream();
-			}
-
-			@Override
-			public List<Integer> keyList() {
-				return StorageTreeIntMap.this.keyList();
 			}
 
 			@Override

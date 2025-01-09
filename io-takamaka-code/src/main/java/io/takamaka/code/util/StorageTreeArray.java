@@ -16,9 +16,7 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -601,9 +599,19 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 		return new StorageArrayIterator<>(root, length);
 	}
 
+	private static class Stack<V> {
+		private final V head;
+		private final Stack<V> tail;
+
+		private Stack(V head, Stack<V> tail) {
+			this.head = head;
+			this.tail = tail;
+		}
+	}
+
 	private static class StorageArrayIterator<V> implements Iterator<V> {
 		// the path under enumeration; it holds that the left children have already been enumerated
-		private final List<Node<V>> stack = new ArrayList<>();
+		private Stack<Node<V>> stack = null;
 		private int nextKey;
 		private final int length;
 
@@ -612,7 +620,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 
 			// initially, the stack contains the leftmost path of the tree
 			for (Node<V> cursor = root; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 		}
 
 		@Override
@@ -623,16 +631,17 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 		@Override
 		public V next() {
 			// first check if we are in a hole of null values
-			if (stack.isEmpty() || nextKey < stack.get(stack.size() - 1).index) {
+			if (stack == null || nextKey < stack.head.index) {
 				nextKey++;
 				return null;
 			}
 
-			Node<V> topmost = stack.remove(stack.size() - 1);
+			Node<V> topmost = stack.head;
+			stack = stack.tail;
 
 			// we add the leftmost path of the right child of topmost
 			for (Node<V> cursor = topmost.right; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 
 			nextKey++;
 			return topmost.value;

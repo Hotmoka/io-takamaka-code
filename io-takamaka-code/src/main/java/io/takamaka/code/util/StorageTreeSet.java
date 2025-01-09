@@ -16,10 +16,8 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
@@ -558,29 +556,40 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		return new StorageSetIterator<>(root);
 	}
 
+	private static class Stack<V> {
+		private final V head;
+		private final Stack<V> tail;
+
+		private Stack(V head, Stack<V> tail) {
+			this.head = head;
+			this.tail = tail;
+		}
+	}
+
 	private static class StorageSetIterator<V> implements Iterator<V> {
 		// the path under enumeration; it is always true that the left children
 		// have already been enumerated
-		private final List<Node<V>> stack = new ArrayList<>();
+		private Stack<Node<V>> stack = null;
 
 		private StorageSetIterator(Node<V> root) {
 			// initially, the stack contains the leftmost path of the tree
 			for (Node<V> cursor = root; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return !stack.isEmpty();
+			return stack != null;
 		}
 
 		@Override
 		public V next() {
-			Node<V> topmost = stack.remove(stack.size() - 1);
+			Node<V> topmost = stack.head;
+			stack = stack.tail;
 
 			// we add the leftmost path of the right child of topmost
 			for (Node<V> cursor = topmost.right; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 
 			return topmost.value;
 		}

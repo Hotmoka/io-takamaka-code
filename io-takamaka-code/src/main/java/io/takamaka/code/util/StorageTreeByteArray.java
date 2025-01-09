@@ -16,9 +16,7 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
@@ -387,10 +385,20 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 		return new BytesIterator(root, length);
 	}
 
+	private static class Stack<V> {
+		private final V head;
+		private final Stack<V> tail;
+
+		private Stack(V head, Stack<V> tail) {
+			this.head = head;
+			this.tail = tail;
+		}
+	}
+
 	private static class BytesIterator implements Iterator<Byte> {
 		// the path under enumeration; it holds that the left children
 		// have already been enumerated
-		private final List<Node> stack = new ArrayList<>();
+		private Stack<Node> stack = null;
 		private int nextKey;
 		private final int length;
 
@@ -399,7 +407,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 
 			// initially, the stack contains the leftmost path of the tree
 			for (Node cursor = root; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 		}
 
 		@Override
@@ -410,16 +418,17 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 		@Override
 		public Byte next() {
 			// first check if we are in a hole of default values
-			if (stack.isEmpty() || nextKey < stack.get(stack.size() - 1).index) {
+			if (stack == null || nextKey < stack.head.index) {
 				nextKey++;
 				return 0;
 			}
 
-			Node topmost = stack.remove(stack.size() - 1);
+			Node topmost = stack.head;
+			stack = stack.tail;
 
 			// we add the leftmost path of the right child of topmost
 			for (Node cursor = topmost.right; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 
 			nextKey++;
 			return topmost.value;

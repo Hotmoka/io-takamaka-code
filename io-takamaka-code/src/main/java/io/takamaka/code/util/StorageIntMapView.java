@@ -16,7 +16,6 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -166,13 +165,6 @@ public interface StorageIntMapView<V> extends Iterable<StorageIntMapView.Entry<V
 	 * @return the stream
 	 */
 	Stream<Entry<V>> stream();
-
-	/**
-	 * Yields the keys of this map, in increasing order.
-	 * 
-	 * @return the keys
-	 */
-	List<Integer> keyList();
 
 	/**
 	 * Yields the ordered stream of the keys of this map, in increasing order.
