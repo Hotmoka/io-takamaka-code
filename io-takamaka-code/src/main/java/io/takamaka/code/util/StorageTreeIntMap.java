@@ -17,7 +17,6 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -74,15 +73,6 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 	 * Builds an empty map.
 	 */
 	public StorageTreeIntMap() {}
-
-	/**
-	 * Creates a map initialized to the same bindings as the given parent map.
-	 * 
-	 * @param parent the parent map
-	 */
-	public StorageTreeIntMap(Map<Integer, ? extends V> parent) {
-		parent.forEach(this::put);
-	}
 
 	/**
 	 * Yields a snapshot of the given map.
