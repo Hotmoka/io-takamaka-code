@@ -25,5 +25,6 @@ module io.takamaka.code {
 	exports io.takamaka.code.governance.tendermint;
 	exports io.takamaka.code.util;
 	exports io.takamaka.code.math;
+	exports io.takamaka.code.security;
 	exports io.takamaka.code.tokens;
 }

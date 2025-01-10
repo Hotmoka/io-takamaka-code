@@ -18,7 +18,6 @@ package io.takamaka.code.governance.tendermint;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
@@ -27,6 +26,7 @@ import io.takamaka.code.lang.AccountED25519;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.security.SHA256Digest;
 
 /**
  * The validator of a Tendermint network. It can be used to
@@ -109,7 +109,7 @@ public final class TendermintED25519Validator extends Validator implements Accou
 
 	private String computeId() {
 		try {
-			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+			var sha256 = new SHA256Digest();
 			sha256.update(Base64.getDecoder().decode(publicKey()));
 			return bytesToHex(sha256.digest()).substring(0, 40);
 		}
@@ -126,7 +126,7 @@ public final class TendermintED25519Validator extends Validator implements Accou
 	 */
 	private static String bytesToHex(byte[] bytes) {
 		final byte[] HEX_ARRAY = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-	    byte[] hexChars = new byte[bytes.length * 2];
+	    var hexChars = new byte[bytes.length * 2];
 	    for (int j = 0; j < bytes.length; j++) {
 	        int v = bytes[j] & 0xFF;
 	        hexChars[j * 2] = HEX_ARRAY[v >>> 4];
