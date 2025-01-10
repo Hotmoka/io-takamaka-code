@@ -82,16 +82,6 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
     }
 
     /**
-     * Creates an unsigned big integer from a string and a radix.
-     *
-     * @param value the string, that must represent a non-negative integer in {@code radix} base
-     * @param radix the coding base of {@code val}, such as 2 for binary
-     */
-    public UnsignedBigInteger(String value, int radix) {
-        this(new BigInteger(value, radix));
-    }
-
-    /**
      * A constructor for internal use, that does not verify that {@code val} is non-negative.
      *
      * @param value the value to allocate (it is assumed that it is non-negative)
@@ -284,12 +274,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      */
     @Override
     public @View boolean equals(Object other) {
-        return other == this || (other instanceof UnsignedBigInteger && value.equals(((UnsignedBigInteger) other).value));
-    }
-
-    @Override
-    public @View int hashCode() {
-        return value.hashCode();
+        return other == this || (other instanceof UnsignedBigInteger ubi && value.equals(ubi.value));
     }
 
     /**
@@ -310,16 +295,6 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
     @Override
     public @View String toString() {
         return value.toString();
-    }
-
-    /**
-     * Returns the string representation of this unsigned big integer in the given radix.
-     *
-     * @param radix the radix
-     * @return the representation
-     */
-    public @View String toString(int radix) {
-        return value.toString(radix);
     }
 
     /**
