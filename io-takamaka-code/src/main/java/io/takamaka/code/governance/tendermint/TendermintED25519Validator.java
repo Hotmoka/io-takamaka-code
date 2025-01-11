@@ -19,7 +19,6 @@ package io.takamaka.code.governance.tendermint;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 import io.takamaka.code.governance.Validator;
 import io.takamaka.code.lang.AccountED25519;
@@ -27,6 +26,7 @@ import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.security.SHA256Digest;
+import io.takamaka.code.util.Base64;
 
 /**
  * The validator of a Tendermint network. It can be used to
@@ -110,7 +110,7 @@ public final class TendermintED25519Validator extends Validator implements Accou
 	private String computeId() {
 		try {
 			var sha256 = new SHA256Digest();
-			sha256.update(Base64.getDecoder().decode(publicKey()));
+			sha256.update(new Base64().decode(publicKey()));
 			return bytesToHex(sha256.digest()).substring(0, 40);
 		}
 		catch (NoSuchAlgorithmException e) {

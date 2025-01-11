@@ -325,6 +325,11 @@ public final class Constants {
 	public final static String PAYABLE_NAME = IO_TAKAMAKA_CODE_LANG_PACKAGE_NAME + "Payable";
 
 	/**
+	 * The name of the class type for {@code io.takamaka.code.lang.WhiteListedDuringInitialization}.
+	 */
+	public final static String WHITE_LISTED_DURING_INITIALIZATION_NAME = IO_TAKAMAKA_CODE_LANG_PACKAGE_NAME + "WhiteListedDuringInitialization";
+
+	/**
 	 * The name of the class type for {@code io.takamaka.code.lang.RedPayable}.
 	 */
 	public final static String RED_PAYABLE_NAME = IO_TAKAMAKA_CODE_LANG_PACKAGE_NAME + "RedPayable";
