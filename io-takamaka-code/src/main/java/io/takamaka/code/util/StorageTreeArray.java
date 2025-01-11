@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -307,7 +308,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public @View V get(int index) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in get is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in get is outside bounds [0,", length, ")"));
 
 		return get(root, index);
 	}
@@ -332,7 +333,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public @View V getOrDefault(int index, V _default) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in getOrDefault is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in getOrDefault is outside bounds [0,", length, ")"));
 
 		return getOrDefault(root, index, _default);
 	}
@@ -350,7 +351,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public V getOrDefault(int index, Supplier<? extends V> _default) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in getOrDefault is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in getOrDefault is outside bounds [0,", length, ")"));
 
 		return getOrDefault(root, index, _default);
 	}
@@ -369,7 +370,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void set(int index, V value) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in set is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in set is outside bounds [0,", length, ")"));
 
 		root = set(root, index, value);
 		mkRootBlack();
@@ -395,7 +396,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void update(int index, UnaryOperator<V> how) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in update is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in update is outside bounds [0,", length, ")"));
 
 		root = update(root, index, how);
 		mkRootBlack();
@@ -420,7 +421,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void update(int index, V _default, UnaryOperator<V> how) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in update is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in update is outside bounds [0,", length, ")"));
 
 		root = update(root, index, _default, how);
 		mkRootBlack();
@@ -448,7 +449,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void update(int index, Supplier<? extends V> _default, UnaryOperator<V> how) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in update is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in update is outside bounds [0,", length, ")"));
 
 		root = update(root, index, _default, how);
 		mkRootBlack();
@@ -740,12 +741,12 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 		boolean first = true;
 		for (V element: this)
 			if (first) {
-				result += element;
+				result = StringSupport.concat(result, element);
 				first = false;
 			}
 			else
-				result += "," + element;
+				result = StringSupport.concat(result, ",", element);
 
-		return result + "]";
+		return StringSupport.concat(result, "]");
 	}
 }

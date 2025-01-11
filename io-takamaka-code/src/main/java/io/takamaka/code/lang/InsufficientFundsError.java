@@ -31,6 +31,6 @@ public class InsufficientFundsError extends Error {
 	 * @param amount the missing amount of funds
 	 */
 	public InsufficientFundsError(BigInteger amount) {
-		super("Missing " + amount + " coin units to invoke payable code");
+		super(StringSupport.concat("Missing ", amount, " coin units to invoke payable code"));
 	}
 }

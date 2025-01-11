@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -524,7 +525,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 
 	@Override
 	public @View V select(int k) {
-		if (k < 0 || k >= size()) throw new IllegalArgumentException("argument to select() is invalid: " + k);
+		if (k < 0 || k >= size()) throw new IllegalArgumentException(StringSupport.concat("argument to select() is invalid: ", k));
 		return select(root, k).value;
 	}
 
@@ -609,13 +610,13 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		boolean first = true;
 		for (V element: this)
 			if (first) {
-				result += element;
+				result = StringSupport.concat(result, element);
 				first = false;
 			}
 			else
-				result += "," + element;
+				result = StringSupport.concat(result, ",", element);
 
-		return result + "]";
+		return StringSupport.concat(result, "]");
 	}
 
 	@Override

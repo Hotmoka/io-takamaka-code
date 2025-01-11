@@ -24,6 +24,7 @@ import io.takamaka.code.dao.SharedEntity.Offer;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
+import io.takamaka.code.lang.StringSupport;
 
 /**
  * A shared entity with a capped number of shareholders.
@@ -48,7 +49,7 @@ public class SharedEntityWithCappedShareholders<S extends PayableContract, O ext
 	public SharedEntityWithCappedShareholders(S[] shareholders, BigInteger[] shares, int cap) {
 		super(shareholders, shares);
 
-		require(getShares().size() <= cap, () -> "too many shareholders, the limit is " + cap);
+		require(getShares().size() <= cap, () -> StringSupport.concat("too many shareholders, the limit is ", cap));
 		this.cap = cap;
 	}
 
@@ -62,7 +63,7 @@ public class SharedEntityWithCappedShareholders<S extends PayableContract, O ext
 	public SharedEntityWithCappedShareholders(S shareholder, BigInteger share, int cap) {
     	super(shareholder, share);
 
-		require(1 <= cap, () -> "too many shareholders, the limit is " + cap);
+		require(1 <= cap, () -> StringSupport.concat("too many shareholders, the limit is ", cap));
 		this.cap = cap;
     }
 
@@ -78,7 +79,7 @@ public class SharedEntityWithCappedShareholders<S extends PayableContract, O ext
 	public SharedEntityWithCappedShareholders(S shareholder1, S shareholder2, BigInteger share1, BigInteger share2, int cap) {
     	super(shareholder1, shareholder2, share1, share2);
 
-		require(2 <= cap, () -> "too many shareholders, the limit is " + cap);
+		require(2 <= cap, () -> StringSupport.concat("too many shareholders, the limit is ", cap));
 		this.cap = cap;
     }
 
@@ -96,7 +97,7 @@ public class SharedEntityWithCappedShareholders<S extends PayableContract, O ext
 	public SharedEntityWithCappedShareholders(S shareholder1, S shareholder2, S shareholder3, BigInteger share1, BigInteger share2, BigInteger share3, int cap) {
     	super(shareholder1, shareholder2, shareholder3, share1, share2, share3);
 
-		require(3 <= cap, () -> "too many shareholders, the limit is " + cap);
+		require(3 <= cap, () -> StringSupport.concat("too many shareholders, the limit is ", cap));
 		this.cap = cap;
     }
 
@@ -116,13 +117,13 @@ public class SharedEntityWithCappedShareholders<S extends PayableContract, O ext
 	public SharedEntityWithCappedShareholders(S shareholder1, S shareholder2, S shareholder3, S shareholder4, BigInteger share1, BigInteger share2, BigInteger share3, BigInteger share4, int cap) {
     	super(shareholder1, shareholder2, shareholder3, shareholder4, share1, share2, share3, share4);
 
-		require(4 <= cap, () -> "too many shareholders, the limit is " + cap);
+		require(4 <= cap, () -> StringSupport.concat("too many shareholders, the limit is ", cap));
 		this.cap = cap;
     }
 
     @Override
     public @FromContract(PayableContract.class) @Payable void accept(BigInteger amount, S buyer, O offer) {
         super.accept(amount, buyer, offer);
-        require(getShares().size() <= cap, () -> "too many shareholders, the limit is " + cap);
+        require(getShares().size() <= cap, () -> StringSupport.concat("too many shareholders, the limit is ", cap));
     }
 }

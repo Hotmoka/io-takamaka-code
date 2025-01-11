@@ -27,6 +27,7 @@ import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.ExternallyOwnedAccount;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
@@ -274,7 +275,7 @@ public class ERC721 extends Contract implements IERC721 {
 		require(_exists(tokenId), "URI query for non-existent token");
 
 		String baseURI = _baseURI();
-		return !baseURI.isEmpty() ? (baseURI + tokenId) : "";
+		return !baseURI.isEmpty() ? StringSupport.concat(baseURI, tokenId) : "";
 	}
 
 	/**

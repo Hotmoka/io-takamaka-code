@@ -34,6 +34,7 @@ import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageSet;
@@ -293,7 +294,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		// only instances of Validator can become shareholders (ie, actual validators)
 
 		BigInteger costWithSurchage = offer.cost.multiply(BigInteger.valueOf(buyerSurcharge + 100_000_000L)).divide(_100_000_000);
-		require(costWithSurchage.compareTo(amount) <= 0, "not enough money to accept the offer: you need " + costWithSurchage);
+		require(costWithSurchage.compareTo(amount) <= 0, StringSupport.concat("not enough money to accept the offer: you need ", costWithSurchage));
 		super.accept(amount, buyer, offer);
 
 		// if the seller is not a validator anymore, we send to it its staked coins
@@ -339,10 +340,10 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@Override
 	@Payable @FromContract
 	public final SimplePoll<V> newPoll(BigInteger amount, SimplePoll.Action action) {
-		require(amount.compareTo(ticketForNewPoll) >= 0, () -> "a new poll costs " + ticketForNewPoll + " coins");
+		require(amount.compareTo(ticketForNewPoll) >= 0, () -> StringSupport.concat("a new poll costs ", ticketForNewPoll, " coins"));
 		checkThatItCanStartPoll(caller());
 	
-		SimplePoll<V> poll = new SimplePoll<>(this, action) {
+		var poll = new SimplePoll<V>(this, action) {
 	
 			@Override
 			public void close() {
@@ -359,10 +360,10 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@Override
 	@Payable @FromContract
 	public final PollWithTimeWindow<V> newPoll(BigInteger amount, SimplePoll.Action action, long start, long duration) {
-		require(amount.compareTo(ticketForNewPoll) >= 0, () -> "a new poll costs " + ticketForNewPoll + " coins");
+		require(amount.compareTo(ticketForNewPoll) >= 0, () -> StringSupport.concat("a new poll costs ", ticketForNewPoll, " coins"));
 		checkThatItCanStartPoll(caller());
 	
-		PollWithTimeWindow<V> poll = new PollWithTimeWindow<>(this, action, start, duration) {
+		var poll = new PollWithTimeWindow<V>(this, action, start, duration) {
 	
 			@Override
 			public void close() {

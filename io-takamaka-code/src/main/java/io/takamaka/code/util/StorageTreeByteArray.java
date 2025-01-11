@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -307,7 +308,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	@Override
 	public @View byte get(int index) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in get is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in get is outside bounds [0,", length, ")"));
 
 		return get(root, index);
 	}
@@ -332,7 +333,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	@Override
 	public void set(int index, byte value) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in set is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in set is outside bounds [0,", length, ")"));
 
 		root = set(root, index, value);
 		mkRootBlack();

@@ -19,6 +19,7 @@ package io.takamaka.code.util;
 import java.util.Iterator;
 
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -33,13 +34,13 @@ abstract class AbstractStorageByteArrayView extends Storage implements StorageBy
 		boolean first = true;
 		for (Byte b: this)
 			if (first) {
-				result += b;
+				result = StringSupport.concat(result, b);
 				first = false;
 			}
 			else
-				result += "," + b;
+				result = StringSupport.concat(result, ",", b);
 
-		return result + "]";
+		return StringSupport.concat(result, "]");
 	}
 
 	@Override

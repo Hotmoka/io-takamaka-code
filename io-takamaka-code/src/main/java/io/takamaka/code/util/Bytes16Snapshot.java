@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Immutable;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -111,7 +112,7 @@ public final class Bytes16Snapshot extends AbstractStorageByteArrayView {
 		if (elements == null)
 			throw new IllegalArgumentException("Expected a non-null array of elements");
 		if (elements.length != length)
-			throw new IllegalArgumentException("Expected " + length + " elements, but got " + elements.length);
+			throw new IllegalArgumentException(StringSupport.concat("Expected ", length, " elements, but got ", elements.length));
 
 		byte0 = elements[0];
 		byte1 = elements[1];

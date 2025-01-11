@@ -26,6 +26,7 @@ import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
@@ -185,7 +186,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 		BigInteger max = eligibleVoters.get(voter);
 		require(max != null, "you are not a shareholder");
 		require(!votersUpToNow.containsKey(voter), "you have already voted");
-		require(votes != null && votes.signum() >= 0 && votes.compareTo(max) <= 0, () -> "you are only allowed to cast between 0 and " + max + "votes, inclusive");
+		require(votes != null && votes.signum() >= 0 && votes.compareTo(max) <= 0, () -> StringSupport.concat("you are only allowed to cast between 0 and ", max, "votes, inclusive"));
 	}
 
 	/**

@@ -23,6 +23,7 @@ import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -73,7 +74,7 @@ public class Bytes16 extends AbstractStorageByteArrayView implements StorageByte
 		if (elements == null)
 			throw new IllegalArgumentException("Expected a non-null array of elements");
 		if (elements.length != length)
-			throw new IllegalArgumentException("Expected " + length + " elements, but got " + elements.length);
+			throw new IllegalArgumentException(StringSupport.concat("Expected ", length, " elements, but got ", elements.length));
 
 		for (int pos = 0; pos < length; pos++)
 			set(pos, elements[pos]);

@@ -21,6 +21,7 @@ import static io.takamaka.code.lang.Takamaka.require;
 import java.math.BigInteger;
 
 import io.takamaka.code.lang.Exported;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
@@ -68,7 +69,7 @@ public abstract class ERC721URIStorage extends ERC721 implements IERC721URIStora
 		if (base.isEmpty())
 			return tokenURI;
 		else if (!tokenURI.isEmpty())
-			return base + tokenURI;
+			return StringSupport.concat(base, tokenURI);
 		else
 			return super.tokenURI(tokenId);
 	}

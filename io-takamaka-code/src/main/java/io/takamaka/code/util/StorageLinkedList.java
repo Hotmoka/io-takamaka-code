@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -239,13 +240,13 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 		boolean first = true;
 		for (E element: this)
 			if (first) {
-				result += element;
+				result = StringSupport.concat(result, element);
 				first = false;
 			}
 			else
-				result += "," + element;
+				result = StringSupport.concat(result, ",", element);
 
-		return result + "]";
+		return StringSupport.concat(result, "]");
 	}
 
 	@Override

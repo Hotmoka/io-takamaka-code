@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -586,7 +587,7 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 
 	@Override
 	public @View int select(int k) {
-		if (k < 0 || k >= size()) throw new IllegalArgumentException("argument to select() is invalid: " + k);
+		if (k < 0 || k >= size()) throw new IllegalArgumentException(StringSupport.concat("argument to select() is invalid: ", k));
 		return select(root, k).key;
 	}
 
