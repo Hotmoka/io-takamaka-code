@@ -24,6 +24,7 @@ import io.takamaka.code.dao.SharedEntity.Offer;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
+import io.takamaka.code.math.BigIntegerSupport;
 
 /**
  * A shared entity where a shareholder must sell all its shares when it places an offer.
@@ -97,7 +98,7 @@ public class SharedEntityWithIntegralShares<S extends PayableContract, O extends
 
 	@Override
 	public @FromContract(PayableContract.class) @Payable void place(BigInteger amount, O offer) {
-		require(sharesOf(offer.seller).equals(offer.sharesOnSale), "the seller must sell its shares in full");
+		require(BigIntegerSupport.equals(sharesOf(offer.seller), offer.sharesOnSale), "the seller must sell its shares in full");
 		super.place(amount, offer);
 	}
 }

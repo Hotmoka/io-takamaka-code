@@ -18,6 +18,8 @@ package io.takamaka.code.lang;
 
 import java.math.BigInteger;
 
+import io.takamaka.code.math.BigIntegerSupport;
+
 /**
  * A contract is a storage object with a balance of coin. It is controlled
  * by the methods of its code.
@@ -86,11 +88,11 @@ public abstract class Contract extends Storage {
 	private void pay(Contract beneficiary, BigInteger amount) {
 		Takamaka.require(amount != null, "the paid amount cannot be null");
 		Takamaka.require(amount.signum() >= 0, "the paid amount cannot be negative");
-		if (balance.compareTo(amount) < 0)
-			throw new InsufficientFundsError(amount.subtract(balance));
+		if (BigIntegerSupport.compareTo(balance, amount) < 0)
+			throw new InsufficientFundsError(BigIntegerSupport.subtract(amount, balance));
 
-		balance = balance.subtract(amount);
-		beneficiary.balance = beneficiary.balance.add(amount);
+		balance = BigIntegerSupport.subtract(balance, amount);
+		beneficiary.balance = BigIntegerSupport.add(beneficiary.balance, amount);
 	}
 
 	/**
@@ -144,11 +146,11 @@ public abstract class Contract extends Storage {
 	private void payRed(Contract beneficiary, BigInteger amount) {
 		Takamaka.require(amount != null, "Payed amount cannot be null");
 		Takamaka.require(amount.signum() >= 0, "Payed amount cannot be negative");
-		if (balanceRed.compareTo(amount) < 0)
-			throw new InsufficientFundsError(amount.subtract(balanceRed));
+		if (BigIntegerSupport.compareTo(balanceRed, amount) < 0)
+			throw new InsufficientFundsError(BigIntegerSupport.subtract(amount, balanceRed));
 	
-		balanceRed = balanceRed.subtract(amount);
-		beneficiary.balanceRed = beneficiary.balanceRed.add(amount);
+		balanceRed = BigIntegerSupport.subtract(balanceRed, amount);
+		beneficiary.balanceRed = BigIntegerSupport.add(beneficiary.balanceRed, amount);
 	}
 
 	/**

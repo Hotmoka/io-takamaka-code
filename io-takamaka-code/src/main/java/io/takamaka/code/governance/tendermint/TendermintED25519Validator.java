@@ -17,13 +17,13 @@ limitations under the License.
 package io.takamaka.code.governance.tendermint;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 
 import io.takamaka.code.governance.Validator;
 import io.takamaka.code.lang.AccountED25519;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.security.SHA256Digest;
 import io.takamaka.code.util.Base64;
@@ -111,7 +111,7 @@ public final class TendermintED25519Validator extends Validator implements Accou
 		try {
 			var sha256 = new SHA256Digest();
 			sha256.update(new Base64().decode(publicKey()));
-			return bytesToHex(sha256.digest()).substring(0, 40);
+			return StringSupport.substring(bytesToHex(sha256.digest()), 0, 40);
 		}
 		catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException("SHA-256 is not available");
@@ -133,6 +133,6 @@ public final class TendermintED25519Validator extends Validator implements Accou
 	        hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
 	    }
 	
-	    return new String(hexChars, StandardCharsets.UTF_8);
+	    return StringSupport.fromUTF8(hexChars);
 	}
 }

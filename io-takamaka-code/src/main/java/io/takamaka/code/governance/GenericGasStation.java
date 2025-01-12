@@ -29,6 +29,7 @@ import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.math.BigIntegerSupport;
 
 /**
  * A gas station contract that allows the gas price to fluctuates, depending on the amount
@@ -123,9 +124,9 @@ public class GenericGasStation<V extends Validator> extends Contract implements 
 		this.ignoresGasPrice = ignoresGasPrice;
 		this.targetGasAtReward = targetGasAtReward;
 		this.oblivion = BigInteger.valueOf(oblivion);
-		this.COMPLEMENT_OF_OBLIVION = maxOblivion.subtract(this.oblivion);
-		this.pastGasConsumedWeighted = targetGasAtReward.multiply(COMPLEMENT_OF_OBLIVION);
-		this.DIVISOR = targetGasAtReward.multiply(maxOblivion);
+		this.COMPLEMENT_OF_OBLIVION = BigIntegerSupport.subtract(maxOblivion, this.oblivion);
+		this.pastGasConsumedWeighted = BigIntegerSupport.multiply(targetGasAtReward, COMPLEMENT_OF_OBLIVION);
+		this.DIVISOR = BigIntegerSupport.multiply(targetGasAtReward, maxOblivion);
 		this.gasPrice = initialGasPrice;
 		this.initialGasPrice = initialGasPrice;
 		this.remainder = ZERO;
@@ -137,16 +138,13 @@ public class GenericGasStation<V extends Validator> extends Contract implements 
 		require(gasConsumed.signum() >= 0, "the gas consumed cannot be negative");
 
 		// we give OBLIVION weight to the latest gas consumed and the complement to the past
-		BigInteger weighted =
-			gasConsumed.multiply(oblivion)
-			.add(pastGasConsumedWeighted);
-
-		pastGasConsumedWeighted = weighted.multiply(COMPLEMENT_OF_OBLIVION).divide(maxOblivion);
+		BigInteger weighted = BigIntegerSupport.add(BigIntegerSupport.multiply(gasConsumed, oblivion), pastGasConsumedWeighted);
+		pastGasConsumedWeighted = BigIntegerSupport.divide(BigIntegerSupport.multiply(weighted, COMPLEMENT_OF_OBLIVION), maxOblivion);
 
 		BigInteger previousGasPrice = gasPrice;
-		BigInteger[] division = previousGasPrice.multiply(weighted)
-			.add(remainder)
-			.divideAndRemainder(DIVISOR);
+		BigInteger[] division = BigIntegerSupport.divideAndRemainder(
+				BigIntegerSupport.add(BigIntegerSupport.multiply(previousGasPrice, weighted), remainder),
+				DIVISOR);
 
 		gasPrice = division[0];
 		remainder = division[1];
@@ -155,7 +153,7 @@ public class GenericGasStation<V extends Validator> extends Contract implements 
 		if (gasPrice.signum() == 0)
 			gasPrice = ONE;
 
-		if (!gasPrice.equals(previousGasPrice))
+		if (!BigIntegerSupport.equals(gasPrice, previousGasPrice))
 			event(new GasPriceUpdate(gasPrice));
 	}
 

@@ -19,6 +19,8 @@ package io.takamaka.code.lang;
 import static java.math.BigInteger.valueOf;
 import java.math.BigInteger;
 
+import io.takamaka.code.math.BigIntegerSupport;
+
 /**
  * The coins of the Takamaka language. They are, in increasing order of magnitude:
  * 
@@ -111,7 +113,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger alicudi(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000L));
 	}
 
 	/**
@@ -122,7 +124,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level2(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000L));
 	}
 
 	/**
@@ -144,7 +146,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger alicudi(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000L));
 	}
 
 	/**
@@ -155,7 +157,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level2(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000L));
 	}
 
 	/**
@@ -177,7 +179,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger filicudi(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000L));
 	}
 
 	/**
@@ -188,7 +190,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level3(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000L));
 	}
 
 	/**
@@ -210,7 +212,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger filicudi(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000L));
 	}
 
 	/**
@@ -221,7 +223,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level3(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000L));
 	}
 
 	/**
@@ -243,7 +245,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger stromboli(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000L));
 	}
 
 	/**
@@ -254,7 +256,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level4(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000L));
 	}
 
 	/**
@@ -276,7 +278,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger stromboli(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000L));
 	}
 
 	/**
@@ -287,7 +289,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level4(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000L));
 	}
 
 	/**
@@ -309,7 +311,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger vulcano(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000_000L));
 	}
 
 	/**
@@ -320,7 +322,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level5(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000_000L));
 	}
 
 	/**
@@ -342,7 +344,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger vulcano(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000_000L));
 	}
 	
 	/**
@@ -353,7 +355,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level5(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000_000L));
 	}
 
 	/**
@@ -375,7 +377,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger salina(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000_000_000L));
 	}
 
 	/**
@@ -386,7 +388,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level6(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000_000_000L));
 	}
 
 	/**
@@ -408,7 +410,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger salina(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000_000_000L));
 	}
 
 	/**
@@ -419,7 +421,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level6(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000_000_000L));
 	}
 
 	/**
@@ -441,7 +443,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger lipari(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000_000_000_000L));
 	}
 
 	/**
@@ -452,7 +454,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level7(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(howMany, valueOf(1_000_000_000_000_000_000L));
 	}
 
 	/**
@@ -474,7 +476,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger lipari(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000_000_000_000L));
 	}
 
 	/**
@@ -485,7 +487,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level7(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000_000_000L));
+		return BigIntegerSupport.multiply(valueOf(howMany), valueOf(1_000_000_000_000_000_000L));
 	}
 
 	/**
@@ -507,7 +509,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger moka(BigInteger howMany) {
-		return howMany.multiply(valueOf(1_000_000_000_000_000_000L).multiply(valueOf(1_000L)));
+		return BigIntegerSupport.multiply(howMany, BigIntegerSupport.multiply(valueOf(1_000_000_000_000_000_000L), valueOf(1_000L)));
 	}
 
 	/**
@@ -529,7 +531,7 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger moka(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000_000_000L).multiply(valueOf(1_000L)));
+		return BigIntegerSupport.multiply(valueOf(howMany), BigIntegerSupport.multiply(valueOf(1_000_000_000_000_000_000L), valueOf(1_000L)));
 	}
 
 	/**
@@ -540,6 +542,6 @@ public class Coin {
 	 * @return the amount, as a {@link java.math.BigInteger}
 	 */
 	public static BigInteger level8(long howMany) {
-		return valueOf(howMany).multiply(valueOf(1_000_000_000_000_000_000L).multiply(valueOf(1_000L)));
+		return BigIntegerSupport.multiply(valueOf(howMany), BigIntegerSupport.multiply(valueOf(1_000_000_000_000_000_000L), valueOf(1_000L)));
 	}
 }

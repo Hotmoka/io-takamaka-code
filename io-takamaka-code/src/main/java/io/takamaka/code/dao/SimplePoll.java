@@ -28,6 +28,7 @@ import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
 import io.takamaka.code.util.StorageMapView.Entry;
@@ -112,7 +113,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 		require(action != null, "the action cannot be null");
 
 		this.eligibleVoters = eligibleVoters.getShares();
-		this.totalVotesCastable = this.eligibleVoters.stream().map(Entry::getValue).reduce(ZERO, BigInteger::add);
+		this.totalVotesCastable = this.eligibleVoters.stream().map(Entry::getValue).reduce(ZERO, BigIntegerSupport::add);
 		this.action = action;
 		this.snapshotOfVotersUpToNow = votersUpToNow.snapshot();
 		this.votesCastUpToNow = ZERO;
@@ -155,7 +156,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 		checkIfCanVote(caller, votes);
 		// this unsafe cast will always succeed, since checkIfCanVote has verified that the caller is an eligible voter
 		votersUpToNow.put((Voter) caller, votes);
-		votesCastUpToNow = votesCastUpToNow.add(votes);
+		votesCastUpToNow = BigIntegerSupport.add(votesCastUpToNow, votes);
 		snapshotOfVotersUpToNow = votersUpToNow.snapshot();
 	}
 
@@ -186,7 +187,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 		BigInteger max = eligibleVoters.get(voter);
 		require(max != null, "you are not a shareholder");
 		require(!votersUpToNow.containsKey(voter), "you have already voted");
-		require(votes != null && votes.signum() >= 0 && votes.compareTo(max) <= 0, () -> StringSupport.concat("you are only allowed to cast between 0 and ", max, "votes, inclusive"));
+		require(votes != null && votes.signum() >= 0 && BigIntegerSupport.compareTo(votes, max) <= 0, () -> StringSupport.concat("you are only allowed to cast between 0 and ", max, "votes, inclusive"));
 	}
 
 	/**
@@ -196,6 +197,6 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 	 * @return true if and only if the goal has been reached
 	 */
 	protected boolean goalReached() {
-		return totalVotesCastable.compareTo(votesCastUpToNow.multiply(TWO)) < 0;
+		return BigIntegerSupport.compareTo(totalVotesCastable, BigIntegerSupport.multiply(votesCastUpToNow, TWO)) < 0;
 	}
 }

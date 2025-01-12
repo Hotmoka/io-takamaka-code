@@ -30,6 +30,7 @@ import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
 import io.takamaka.code.util.StorageSet;
@@ -184,7 +185,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 
     @Override
     public @View BigInteger getTotalShares() {
-    	return shares.values().reduce(BigInteger.ZERO, BigInteger::add);
+    	return shares.values().reduce(BigInteger.ZERO, BigIntegerSupport::add);
     }
 
     @Override
@@ -207,14 +208,14 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		return offers.stream()
 			.filter(offer -> offer.seller == shareholder && offer.isOngoing())
 			.map(offer -> offer.sharesOnSale)
-			.reduce(ZERO, BigInteger::add);
+			.reduce(ZERO, BigIntegerSupport::add);
 	}
 
     @Override
 	public @FromContract(PayableContract.class) @Payable void place(BigInteger amount, O offer) {
 		require(offer.seller == caller(), "only the seller can place its own offer");
 		require(shares.containsKey(offer.seller), "the seller is not a shareholder");
-		require(sharesOf(offer.seller).subtract(sharesOnSaleOf(offer.seller)).compareTo(offer.sharesOnSale) >= 0, "the seller has not enough shares to sell");
+		require(BigIntegerSupport.compareTo(BigIntegerSupport.subtract(sharesOf(offer.seller), sharesOnSaleOf(offer.seller)), offer.sharesOnSale) >= 0, "the seller has not enough shares to sell");
 		cleanUpOffers(null);
 		offers.add(offer);
 		snapshotOfOffers = offers.snapshot();
@@ -226,7 +227,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
     	require(caller() == buyer, "only the future owner can buy the shares");
 		require(offers.contains(offer), "unknown offer");
 		require(offer.isOngoing(), "the sale offer is not ongoing anymore");
-		require(offer.cost.compareTo(amount) <= 0, "not enough money to accept the offer");
+		require(BigIntegerSupport.compareTo(offer.cost, amount) <= 0, "not enough money to accept the offer");
 		require(offer.buyer == null || buyer == offer.buyer, "the sale offer is reserved for another buyer");
 		cleanUpOffers(offer);
 		removeShares(offer.seller, offer.sharesOnSale);
@@ -310,7 +311,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 
 			@Override @View
 			public BigInteger getTotalShares() {
-				return snapshotOfShares.values().reduce(BigInteger.ZERO, BigInteger::add);
+				return snapshotOfShares.values().reduce(BigInteger.ZERO, BigIntegerSupport::add);
 			}
 
 			@Override @View
@@ -331,10 +332,10 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		BigInteger toDistribute = sharesOf(toRemove);
 		shares.remove(toRemove);
 		event(new ShareholderRemoved<>(toRemove));
-		BigInteger total = shares.values().reduce(ZERO, BigInteger::add);
+		BigInteger total = shares.values().reduce(ZERO, BigIntegerSupport::add);
 		if (total.signum() > 0)
 			// TODO: avoid approximation: the last should get all the remaining shares
-			shares.keys().forEachOrdered(shareholder -> shares.update(shareholder, old -> old.add(toDistribute.multiply(old).divide(total))));
+			shares.keys().forEachOrdered(shareholder -> shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total))));
 	
 		snapshotOfShares = shares.snapshot();
 	}
@@ -346,7 +347,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	 * @param removed the shares to remove
 	 */
 	private void removeShares(S shareholder, BigInteger removed) {
-		shares.update(shareholder, old -> old.subtract(removed));
+		shares.update(shareholder, old -> BigIntegerSupport.subtract(old, removed));
 		if (shares.get(shareholder).signum() == 0) {
 			shares.remove(shareholder);
 			event(new ShareholderRemoved<>(shareholder));
@@ -370,6 +371,6 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 				event(new ShareholderAdded<>(shareholder));
 				return ZERO;
 			},
-			share::add);
+			bi -> BigIntegerSupport.add(bi, share));
 	}
 }

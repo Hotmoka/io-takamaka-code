@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageIntMap;
 import io.takamaka.code.util.StorageTreeIntMap;
 
@@ -53,7 +54,7 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		require(publicKeys != null, "the public keys cannot be null");
 		int length = balances.length;
 		require(length == publicKeys.length, "the balances must be as many as the public keys");
-		require(amount.equals(Stream.of(balances).reduce(BigInteger.ZERO, BigInteger::add)),
+		require(BigIntegerSupport.equals(amount, Stream.of(balances).reduce(BigInteger.ZERO, BigIntegerSupport::add)),
 			"the amount paid for creating this collector must be equal to the sum of the balances of the accounts being created");
 
 		this.accounts = new StorageTreeIntMap<>();
@@ -73,7 +74,7 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		require(redBalances != null, "balances cannot be null");
 		int length = accounts.size();
 		require(length == redBalances.length, "the red balances must be as many as the accounts");
-		require(amount.equals(Stream.of(redBalances).reduce(BigInteger.ZERO, BigInteger::add)),
+		require(BigIntegerSupport.equals(amount, Stream.of(redBalances).reduce(BigInteger.ZERO, BigIntegerSupport::add)),
 			"the amount paid for this method must be equal to the sum of the red balances of the accounts being created");
 
 		for (int pos = 0; pos < length; pos++)
@@ -121,7 +122,7 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		var result = new BigInteger[segments.length];
 		int pos = 0;
 		for (String s: segments)
-			result[pos++] = new BigInteger(s);
+			result[pos++] = BigIntegerSupport.from(s);
 
 		return result;
 	}
@@ -139,9 +140,9 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		var result = new String[counter];
 		int pos;
 		int i = 0;
-		while ((pos = s.indexOf(' ')) >= 0) {
-			result[i++] = s.substring(0, pos);
-			s = s.substring(pos + 1);
+		while ((pos = StringSupport.indexOf(s, ' ')) >= 0) {
+			result[i++] = StringSupport.substring(s, 0, pos);
+			s = StringSupport.substring(s, pos + 1);
 		}
 
 		if (!s.isEmpty())

@@ -29,6 +29,7 @@ import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
 import io.takamaka.code.util.StorageSet;
@@ -161,12 +162,12 @@ public class ERC721 extends Contract implements IERC721 {
 
 		beforeTokenTransfer(from, to, tokenId);
 		clearApproval(tokenId);
-		balances.put(from, balanceOf(from).subtract(BigInteger.ONE));
-		balances.put(to, balanceOf(to).add(BigInteger.ONE));
+		balances.put(from, BigIntegerSupport.subtract(balanceOf(from), BigInteger.ONE));
+		balances.put(to, BigIntegerSupport.add(balanceOf(to), BigInteger.ONE));
 		owners.put(tokenId, to);
 
-		if (to instanceof IERC721Receiver)
-			((IERC721Receiver) to).onReceive(this, from, to, tokenId);
+		if (to instanceof IERC721Receiver ierc721)
+			ierc721.onReceive(this, from, to, tokenId);
 
 		updateSnapshot();
 
@@ -252,11 +253,11 @@ public class ERC721 extends Contract implements IERC721 {
 			"mint destination must be an externally owned account or implement IERC721Receiver");
 
 		beforeTokenTransfer(null, to, tokenId);
-		balances.put(to, balanceOf(to).add(BigInteger.ONE));
+		balances.put(to, BigIntegerSupport.add(balanceOf(to), BigInteger.ONE));
 		owners.put(tokenId, to);
 
-		if (to instanceof IERC721Receiver)
-			((IERC721Receiver) to).onReceive(this, null, to, tokenId);
+		if (to instanceof IERC721Receiver ierc721)
+			ierc721.onReceive(this, null, to, tokenId);
 
 		updateSnapshot();
 
@@ -420,7 +421,7 @@ public class ERC721 extends Contract implements IERC721 {
 		beforeTokenTransfer(owner, null, tokenId);
 		clearApproval(tokenId);
 
-		balances.put(owner, balanceOf(owner).subtract(BigInteger.ONE));
+		balances.put(owner, BigIntegerSupport.subtract(balanceOf(owner), BigInteger.ONE));
 		owners.remove(tokenId);
 		updateSnapshot();
 		if (generateEvents)
