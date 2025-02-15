@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StorageSupport;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
@@ -340,14 +341,6 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		return root == null;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <K> int compareTo(K key1, K key2) {
-		if (key1 instanceof Comparable<?>)
-			return ((Comparable<K>) key1).compareTo(key2);
-		else
-			return ((Storage) key1).compareByStorageReference((Storage) key2);
-	}
-
 	@Override
 	public @View V get(Object key) {
 		if (key == null) throw new IllegalArgumentException("key is null");
@@ -363,7 +356,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	 */
 	private static <K,V> V get(Node<K,V> x, Object key) {
 		while (x != null) {
-			int cmp = compareTo(key, x.key);
+			int cmp = StorageSupport.compare(key, x.key);
 			if      (cmp < 0) x = x.left;
 			else if (cmp > 0) x = x.right;
 			else              return x.value;
@@ -379,7 +372,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 
 	private static <K,V> V getOrDefault(Node<K,V> x, Object key, V _default) {
 		while (x != null) {
-			int cmp = compareTo(key, x.key);
+			int cmp = StorageSupport.compare(key, x.key);
 			if      (cmp < 0) x = x.left;
 			else if (cmp > 0) x = x.right;
 			else              return x.value;
@@ -396,7 +389,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	// value associated with the given key in subtree rooted at x; uses supplier if no such key is found
 	private static <K,V> V getOrDefault(Node<K,V> x, Object key, Supplier<? extends V> _default) {
 		while (x != null) {
-			int cmp = compareTo(key, x.key);
+			int cmp = StorageSupport.compare(key, x.key);
 			if      (cmp < 0) x = x.left;
 			else if (cmp > 0) x = x.right;
 			else              return x.value;
@@ -418,7 +411,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	 */
 	private static <K,V> boolean containsKey(Node<K,V> x, Object key) {
 		while (x != null) {
-			int cmp = compareTo(key, x.key);
+			int cmp = StorageSupport.compare(key, x.key);
 			if      (cmp < 0) x = x.left;
 			else if (cmp > 0) x = x.right;
 			else              return true;
@@ -437,7 +430,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	private static <K,V> Node<K,V> put(Node<K,V> h, K key, V value) { 
 		if (h == null) return Node.mkRed(key, value);
 
-		int cmp = compareTo(key, h.key);
+		int cmp = StorageSupport.compare(key, h.key);
 		if      (cmp < 0) h = h.setLeft(put(h.left, key, value)); 
 		else if (cmp > 0) h = h.setRight(put(h.right, key, value));
 		else              h = h.setValue(value);
@@ -516,7 +509,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	private static <K,V> Node<K,V> remove(Node<K,V> h, Object key) { 
 		// assert get(h, key) != null;
 
-		if (compareTo(key, h.key) < 0)  {
+		if (StorageSupport.compare(key, h.key) < 0)  {
 			if (isBlack(h.left) && isBlack(h.left.left))
 				h = h.moveRedLeft();
 
@@ -525,11 +518,11 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		else {
 			if (isRed(h.left))
 				h = h.rotateRight();
-			if (compareTo(key, h.key) == 0 && (h.right == null))
+			if (StorageSupport.compare(key, h.key) == 0 && (h.right == null))
 				return null;
 			if (isBlack(h.right) && isBlack(h.right.left))
 				h = h.moveRedRight();
-			if (compareTo(key, h.key) == 0) {
+			if (StorageSupport.compare(key, h.key) == 0) {
 				var x = min(h.right);
 				if (isRed(h))
 					h = Node.mkRed(x.key, x.value, h.size, h.left, removeMin(h.right));
@@ -580,7 +573,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	// the largest key in the subtree rooted at x less than or equal to the given key
 	private static <K,V> Node<K,V> floorKey(Node<K,V> x, K key) {
 		if (x == null) return null;
-		int cmp = compareTo(key, x.key);
+		int cmp = StorageSupport.compare(key, x.key);
 		if (cmp == 0) return x;
 		if (cmp < 0)  return floorKey(x.left, key);
 		var t = floorKey(x.right, key);
@@ -600,7 +593,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	// the smallest key in the subtree rooted at x greater than or equal to the given key
 	private static <K,V> Node<K,V> ceilingKey(Node<K,V> x, K key) {  
 		if (x == null) return null;
-		int cmp = compareTo(key, x.key);
+		int cmp = StorageSupport.compare(key, x.key);
 		if (cmp == 0) return x;
 		if (cmp > 0)  return ceilingKey(x.right, key);
 		var t = ceilingKey(x.left, key);
@@ -633,7 +626,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	// number of keys less than key in the subtree rooted at x
 	private static <K,V> int rank(K key, Node<K,V> x) {
 		if (x == null) return 0; 
-		int cmp = compareTo(key, x.key); 
+		int cmp = StorageSupport.compare(key, x.key); 
 		if      (cmp < 0) return rank(key, x.left); 
 		else if (cmp > 0) return 1 + size(x.left) + rank(key, x.right); 
 		else              return size(x.left);
@@ -649,7 +642,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	private static <K,V> Node<K,V> update(Node<K,V> h, K key, UnaryOperator<V> how) { 
 		if (h == null) return Node.mkRed(key, how.apply(null));
 
-		int cmp = compareTo(key, h.key);
+		int cmp = StorageSupport.compare(key, h.key);
 		if      (cmp < 0) h = h.setLeft(update(h.left,  key, how)); 
 		else if (cmp > 0) h = h.setRight(update(h.right, key, how)); 
 		else              h = h.setValue(how.apply(h.value));
@@ -672,7 +665,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	private static <K,V> Node<K,V> update(Node<K,V> h, K key, V _default, UnaryOperator<V> how) { 
 		if (h == null) return Node.mkRed(key, how.apply(_default));
 
-		int cmp = compareTo(key, h.key);
+		int cmp = StorageSupport.compare(key, h.key);
 		if      (cmp < 0) h = h.setLeft(update(h.left, key, _default, how)); 
 		else if (cmp > 0) h = h.setRight(update(h.right, key, _default, how));
 		else if (h.value == null)
@@ -698,7 +691,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	private static <K,V> Node<K,V> update(Node<K,V> h, K key, Supplier<? extends V> _default, UnaryOperator<V> how) { 
 		if (h == null) return Node.mkRed(key, how.apply(_default.get()));
 
-		int cmp = compareTo(key, h.key);
+		int cmp = StorageSupport.compare(key, h.key);
 		if      (cmp < 0) h = h.setLeft(update(h.left, key, _default, how)); 
 		else if (cmp > 0) h = h.setRight(update(h.right, key, _default, how));
 		else if (h.value == null)
@@ -727,7 +720,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					// not found
 					return Node.mkRed(key, value);
 
-				int cmp = compareTo(key, h.key);
+				int cmp = StorageSupport.compare(key, h.key);
 				if      (cmp < 0) h = h.setLeft(putIfAbsent(h.left));
 				else if (cmp > 0) h = h.setRight(putIfAbsent(h.right));
 				else if (h.value == null)
@@ -767,7 +760,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					// not found
 					return Node.mkRed(key, result = supplier.get());
 
-				int cmp = compareTo(key, h.key);
+				int cmp = StorageSupport.compare(key, h.key);
 				if      (cmp < 0) h = h.setLeft(computeIfAbsent(h.left));
 				else if (cmp > 0) h = h.setRight(computeIfAbsent(h.right));
 				else if (h.value == null) {
@@ -810,7 +803,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					// not found
 					return Node.mkRed(key, result = supplier.apply(key));
 
-				int cmp = compareTo(key, h.key);
+				int cmp = StorageSupport.compare(key, h.key);
 				if      (cmp < 0) h = h.setLeft(computeIfAbsent(h.left));
 				else if (cmp > 0) h = h.setRight(computeIfAbsent(h.right));
 				else if (h.value == null) {

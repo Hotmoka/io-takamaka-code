@@ -19,10 +19,12 @@ package io.takamaka.code.util;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StorageSupport;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
@@ -78,7 +80,8 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	 * @param parent the parent collection
 	 */
 	public StorageTreeSet(Collection<? extends V> parent) {
-		parent.forEach(this::add);
+		for (var element: parent)
+			add(element);
 	}
 
 	/**
@@ -316,12 +319,10 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		return root == null;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <K> int compareTo(K key1, K key2) {
-		if (key1 instanceof Comparable<?>)
-			return ((Comparable<K>) key1).compareTo(key2);
-		else
-			return ((Storage) key1).compareByStorageReference((Storage) key2);
+	@Override
+	public void forEach(Consumer<? super V> what) {
+		for (var element: this)
+			what.accept(element);
 	}
 
 	/**
@@ -333,7 +334,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	 */
 	private static <V> boolean contains(Node<V> x, Object value) {
 		while (x != null) {
-			int cmp = compareTo(value, x.value);
+			int cmp = StorageSupport.compare(value, x.value);
 			if      (cmp < 0) x = x.left;
 			else if (cmp > 0) x = x.right;
 			else              return true;
@@ -359,7 +360,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	private static <V> Node<V> put(Node<V> h, V value) { 
 		if (h == null) return Node.mkRed(value);
 
-		int cmp = compareTo(value, h.value);
+		int cmp = StorageSupport.compare(value, h.value);
 		if      (cmp < 0) h = h.setLeft(put(h.left, value)); 
 		else if (cmp > 0) h = h.setRight(put(h.right, value));
 		else              h = h.setValue(value);
@@ -433,7 +434,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 
 	// delete the given value from the tree rooted at h
 	private static <V> Node<V> remove(Node<V> h, Object value) {
-		if (compareTo(value, h.value) < 0)  {
+		if (StorageSupport.compare(value, h.value) < 0)  {
 			if (isBlack(h.left) && isBlack(h.left.left))
 				h = h.moveRedLeft();
 
@@ -442,11 +443,11 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		else {
 			if (isRed(h.left))
 				h = h.rotateRight();
-			if (compareTo(value, h.value) == 0 && (h.right == null))
+			if (StorageSupport.compare(value, h.value) == 0 && (h.right == null))
 				return null;
 			if (isBlack(h.right) && isBlack(h.right.left))
 				h = h.moveRedRight();
-			if (compareTo(value, h.value) == 0) {
+			if (StorageSupport.compare(value, h.value) == 0) {
 				Node<V> x = min(h.right);
 				if (isRed(h))
 					h = Node.mkRed(x.value, h.size, h.left, removeMin(h.right));
@@ -495,7 +496,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	// the largest value in the subtree rooted at x less than or equal to the given value
 	private static <V> Node<V> floorKey(Node<V> x, Object value) {
 		if (x == null) return null;
-		int cmp = compareTo(value, x.value);
+		int cmp = StorageSupport.compare(value, x.value);
 		if (cmp == 0) return x;
 		if (cmp < 0)  return floorKey(x.left, value);
 		Node<V> t = floorKey(x.right, value);
@@ -515,7 +516,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	// the smallest value in the subtree rooted at x greater than or equal to the given value
 	private static <V> Node<V> ceilingKey(Node<V> x, Object value) {  
 		if (x == null) return null;
-		int cmp = compareTo(value, x.value);
+		int cmp = StorageSupport.compare(value, x.value);
 		if (cmp == 0) return x;
 		if (cmp > 0)  return ceilingKey(x.right, value);
 		Node<V> t = ceilingKey(x.left, value);
@@ -546,7 +547,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	// number of values less than value in the subtree rooted at x
 	private static <V> int rank(Object value, Node<V> x) {
 		if (x == null) return 0; 
-		int cmp = compareTo(value, x.value); 
+		int cmp = StorageSupport.compare(value, x.value); 
 		if      (cmp < 0) return rank(value, x.left); 
 		else if (cmp > 0) return 1 + size(x.left) + rank(value, x.right); 
 		else              return size(x.left); 

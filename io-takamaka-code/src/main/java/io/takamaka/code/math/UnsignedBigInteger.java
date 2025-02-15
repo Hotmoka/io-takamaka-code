@@ -43,7 +43,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @param value {@link java.math.BigInteger}
      */
     public UnsignedBigInteger(BigInteger value) {
-        require(value.signum() >= 0, "Illegal value: negative value"); // valio.takamaka.code.lang.RequirementViolationException >= 0
+        require(value.signum() >= 0, "Illegal value: negative value");
         this.value = value;
     }
 

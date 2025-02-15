@@ -17,6 +17,7 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 /**
  * A list of elements. It is possible to access elements at both sides of the list.
@@ -83,4 +84,11 @@ public interface StorageList<E> extends StorageListView<E> {
 	 * @return a view of this list
 	 */
 	StorageListView<E> view();
+
+	/**
+	 * Runs the given action for each element of this list, in their order.
+	 * 
+	 * @param action the action to run
+	 */
+	void forEach(Consumer<? super E> action);
 }

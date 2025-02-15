@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StorageSupport;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
@@ -102,7 +103,8 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	 * @param parent the parent collection
 	 */
 	public StorageLinkedList(Collection<? extends E> parent) {
-		parent.forEach(this::add);
+		for (var element: parent)
+			add(element);
 	}
 
 	@Override
@@ -153,19 +155,11 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <K> boolean equals(K e1, K e2) {
-		if (e1 instanceof Comparable<?>)
-			return ((Comparable<K>) e1).compareTo(e2) == 0;
-		else
-			return ((Storage) e1).compareByStorageReference((Storage) e2) == 0;
-	}
-
 	@Override
 	public boolean remove(Object e) {
 		for (Node<E> cursor = first, previous = null; cursor != null; previous = cursor, cursor = cursor.next) {
 			E element = cursor.element;
-			if (e == null ? element == null : (element != null && equals(e, element))) {
+			if (e == null ? element == null : (element != null && StorageSupport.equals(e, element))) {
 				if (last == cursor)
 					last = previous;
 
@@ -188,7 +182,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	public @View boolean contains(Object e) {
 		for (Node<E> cursor = first; cursor != null; cursor = cursor.next) {
 			E element = cursor.element;
-			if (e == null ? element == null : (element != null && equals(e, element)))
+			if (e == null ? element == null : (element != null && StorageSupport.equals(e, element)))
 				return true;
 		}
 
