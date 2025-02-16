@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Immutable;
@@ -706,14 +705,6 @@ public final class Bytes64Snapshot extends AbstractStorageByteArrayView {
 				(byte61 << 13) ^
 				(byte62 << 14) ^
 				(byte63 << 15);
-	}
-
-	@Override
-	public IntStream stream() {
-		return IntStream.of(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15,
-							byte16, byte17, byte18, byte19, byte20, byte21, byte22, byte23, byte24, byte25, byte26, byte27, byte28, byte29, byte30, byte31,
-							byte32, byte33, byte34, byte35, byte36, byte37, byte38, byte39, byte40, byte41, byte42, byte43, byte44, byte45, byte46, byte47,
-							byte48, byte49, byte50, byte51, byte52, byte53, byte54, byte55, byte56, byte57, byte58, byte59, byte60, byte61, byte62, byte63);
 	}
 
 	@Override

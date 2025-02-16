@@ -16,12 +16,10 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.stream.IntStream;
-
 import io.takamaka.code.lang.View;
 
 /**
- * An array of byte values. Unset elements default to 0.
+ * An array of byte values. Non-sset elements default to 0.
  * By iterating on this object, one gets the values of the array, in increasing index order.
  */
 public interface StorageByteArrayView extends Iterable<Byte> {
@@ -41,15 +39,6 @@ public interface StorageByteArrayView extends Iterable<Byte> {
 	 * @throws ArrayIndexOutOfBoundsException if {@code index} is outside the bounds of the array
 	 */
 	@View byte get(int index);
-
-	/**
-	 * Yields an ordered stream of the bytes in this array in increasing order of index.
-	 * There is no specialized {@code ByteStream} class in the Java library, hence
-	 * {@link java.util.stream.IntStream} is used instead, as best match.
-	 * 
-	 * @return the stream
-	 */
-	IntStream stream();
 
 	/**
 	 * Yields an array containing the elements of this byte array.

@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
@@ -86,8 +85,9 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	 */
 	public StorageTreeArray(int length, V initialValue) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, initialValue));
+
+		for (int index = 0; index < length; index++)
+			set(index, initialValue);
 	}
 
 	/**
@@ -101,8 +101,9 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	 */
 	public StorageTreeArray(int length, Supplier<? extends V> supplier) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, supplier.get()));
+
+		for (int index = 0; index < length; index++)
+			set(index, supplier.get());
 	}
 
 	/**
@@ -118,8 +119,9 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	 */
 	public StorageTreeArray(int length, IntFunction<? extends V> supplier) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, supplier.apply(index)));
+
+		for (int index = 0; index < length; index++)
+			set(index, supplier.apply(index));
 	}
 
 	/**

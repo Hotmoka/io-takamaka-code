@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Immutable;
@@ -215,11 +214,6 @@ public final class Bytes8Snapshot extends AbstractStorageByteArrayView {
 			(byte5 << 5) ^
 			(byte6 << 6) ^
 			(byte7 << 7);
-	}
-
-	@Override
-	public IntStream stream() {
-		return IntStream.of(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7);
 	}
 
 	@Override

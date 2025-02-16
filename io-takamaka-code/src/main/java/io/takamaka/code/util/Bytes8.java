@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.StringSupport;
@@ -114,7 +113,8 @@ public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteA
 	 *                 is cast to {@code byte}
 	 */
 	public Bytes8(IntSupplier supplier) {
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.getAsInt()));
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.getAsInt());
 	}
 
 	/**
@@ -127,7 +127,8 @@ public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteA
 	 *                 {@code (byte) supplier.applyAsInt(i)}
 	 */
 	public Bytes8(IntUnaryOperator supplier) {
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.applyAsInt(index)));
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.applyAsInt(index));
 	}
 
 	@Override
@@ -242,11 +243,6 @@ public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteA
 	}
 
 	@Override
-	public IntStream stream() {
-		return IntStream.of(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7);
-	}
-
-	@Override
 	public byte[] toArray() {
 		return new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7 };
 	}
@@ -270,11 +266,6 @@ public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteA
 			@Override
 			public byte get(int index) {
 				return Bytes8.this.get(index);
-			}
-
-			@Override
-			public IntStream stream() {
-				return Bytes8.this.stream();
 			}
 
 			@Override

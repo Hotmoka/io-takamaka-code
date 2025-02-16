@@ -20,8 +20,12 @@ import java.math.BigInteger;
 
 import io.takamaka.code.math.BigIntegerSupport;
 
+/**
+ * A support class for operations on storage objects.
+ */
 @WhiteListedDuringInitialization
-public class StorageSupport {
+public final class StorageSupport {
+	private StorageSupport() {}
 
 	/**
 	 * Compares two storage values. If they are comparable, it calls

@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.StringSupport;
@@ -193,7 +192,8 @@ public class Bytes32 extends AbstractStorageByteArrayView implements StorageByte
 	 *                 is cast to {@code byte}
 	 */
 	public Bytes32(IntSupplier supplier) {
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.getAsInt()));
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.getAsInt());
 	}
 
 	/**
@@ -206,7 +206,8 @@ public class Bytes32 extends AbstractStorageByteArrayView implements StorageByte
 	 *                 {@code (byte) supplier.applyAsInt(i)}
 	 */
 	public Bytes32(IntUnaryOperator supplier) {
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.applyAsInt(index)));
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.applyAsInt(index));
 	}
 
 	@Override
@@ -465,12 +466,6 @@ public class Bytes32 extends AbstractStorageByteArrayView implements StorageByte
 	}
 
 	@Override
-	public IntStream stream() {
-		return IntStream.of(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15,
-							byte16, byte17, byte18, byte19, byte20, byte21, byte22, byte23, byte24, byte25, byte26, byte27, byte28, byte29, byte30, byte31);
-	}
-
-	@Override
 	public byte[] toArray() {
 		return new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15,
 							byte16, byte17, byte18, byte19, byte20, byte21, byte22, byte23, byte24, byte25, byte26, byte27, byte28, byte29, byte30, byte31 };
@@ -495,11 +490,6 @@ public class Bytes32 extends AbstractStorageByteArrayView implements StorageByte
 			@Override
 			public byte get(int index) {
 				return Bytes32.this.get(index);
-			}
-
-			@Override
-			public IntStream stream() {
-				return Bytes32.this.stream();
 			}
 
 			@Override

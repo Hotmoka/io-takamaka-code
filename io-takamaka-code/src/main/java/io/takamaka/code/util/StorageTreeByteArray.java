@@ -19,8 +19,6 @@ package io.takamaka.code.util;
 import java.util.Iterator;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -85,8 +83,9 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 */
 	public StorageTreeByteArray(int length, byte initialValue) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, initialValue));
+
+		for (int index = 0; index < length; index++)
+			set(index, initialValue);
 	}
 
 	/**
@@ -101,8 +100,9 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 */
 	public StorageTreeByteArray(int length, IntSupplier supplier) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.getAsInt()));
+
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.getAsInt());
 	}
 
 	/**
@@ -118,8 +118,9 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 */
 	public StorageTreeByteArray(int length, IntUnaryOperator supplier) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.applyAsInt(index)));
+
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.applyAsInt(index));
 	}
 
 	/**
@@ -437,14 +438,6 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	}
 
 	@Override
-	public IntStream stream() {
-		var it = iterator();
-		return Stream.generate(() -> null)
-				.takeWhile(__ -> it.hasNext())
-				.mapToInt(__ -> it.next().intValue());
-	}
-
-	@Override
 	public byte[] toArray() {
 		var result = new byte[length];
 		int pos = 0;
@@ -473,11 +466,6 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 			@Override
 			public byte get(int index) {
 				return StorageTreeByteArray.this.get(index);
-			}
-
-			@Override
-			public IntStream stream() {
-				return StorageTreeByteArray.this.stream();
 			}
 
 			@Override
