@@ -456,16 +456,25 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	private void rewardBehavingValidators(String[] behavingIDs) {
 		if (behavingIDs.length > 0) {
 			// compute the total power of the well behaving validators; this is always positive
-			BigInteger totalPower = getShareholders()
-				.filter(validator -> contains(behavingIDs, validator.id()))
-				.map(this::sharesOf)
-				.reduce(ZERO, BigIntegerSupport::add);
+			class WrappedBigInteger {
+				private BigInteger bi = ZERO;
+			}
+
+			var wbi = new WrappedBigInteger();
+
+			getShares().forEachKey(validator -> {
+				if (contains(behavingIDs, validator.id())) {
+					wbi.bi = BigIntegerSupport.add(wbi.bi, sharesOf(validator));
+				}
+			});
 
 			for (String id: behavingIDs)
 				alreadyNotBehaving.remove(id);
 
 			// compute the total amount of staked coins
-			BigInteger totalStaked = stakes.values().reduce(BigInteger.ZERO, BigIntegerSupport::add);
+			var wbi2 = new WrappedBigInteger();
+	    	stakes.forEachValue(value -> wbi2.bi = BigIntegerSupport.add(wbi2.bi, value));
+			BigInteger totalStaked = wbi2.bi;
 
 			// compute the balance that is not staked and must be distributed
 			BigInteger toDistribute = BigIntegerSupport.subtract(balance(), totalStaked);
@@ -473,23 +482,23 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 			if (toDistribute.signum() > 0) {
 				// percentStaked of the distribution gets staked for the well-behaving validators, in proportion to their power
 				final BigInteger addedToStakes = BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, BigInteger.valueOf(percentStaked)), _100_000_000);
-				getShareholders()
-					.filter(validator -> contains(behavingIDs, validator.id()))
-					//.forEachOrdered(validator -> stakes.update(validator, BigInteger.ZERO, old -> old.add(addedToStakes.multiply(sharesOf(validator)).divide(totalPower))));
-					.forEachOrdered(validator -> {
-						BigInteger toAdd = BigIntegerSupport.divide(BigIntegerSupport.multiply(addedToStakes, sharesOf(validator)), totalPower);
+				getShares().forEachKey(validator -> {
+					if (contains(behavingIDs, validator.id())) {
+						BigInteger toAdd = BigIntegerSupport.divide(BigIntegerSupport.multiply(addedToStakes, sharesOf(validator)), wbi.bi);
 						BigInteger old = stakes.get(validator);
 						if (old == null)
 							stakes.put(validator, toAdd);
 						else if (toAdd.signum() != 0) // adding 0 modifies the state for nothing
 							stakes.update(validator, bi -> BigIntegerSupport.add(bi, toAdd));
-					});
+					}
+				});
 
 				// distribute immediately the rest to the well-behaving validators, in proportion to their power
 				final BigInteger paid = BigIntegerSupport.subtract(toDistribute, addedToStakes);
-				getShareholders()
-					.filter(validator -> contains(behavingIDs, validator.id()))
-					.forEachOrdered(validator -> validator.receive(BigIntegerSupport.divide(BigIntegerSupport.multiply(paid, sharesOf(validator)), totalPower)));
+				getShares().forEachKey(validator -> {
+					if (contains(behavingIDs, validator.id()))
+						validator.receive(BigIntegerSupport.divide(BigIntegerSupport.multiply(paid, sharesOf(validator)), wbi.bi));
+				});
 			}
 		}
 	}
@@ -500,16 +509,18 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	}
 
 	private void slashNotBehavingValidators(String[] behavingIDs, String[] misbehavingIDs) {
-		getShareholders()
-			.filter(validator -> !contains(behavingIDs, validator.id()) && !contains(misbehavingIDs, validator.id()))
-			.forEachOrdered(this::slashForNotBehaving);
+		getShares().forEachKey(validator -> {
+			if (!contains(behavingIDs, validator.id()) && !contains(misbehavingIDs, validator.id()))
+				slashForNotBehaving(validator);
+		});
 	}
 
 	private void slashMisbehavingValidators(String[] misbehavingIDs) {
 		if (misbehavingIDs.length > 0) {
-			getShareholders()
-				.filter(validator -> contains(misbehavingIDs, validator.id()))
-				.forEachOrdered(this::slashForMisbehaving);
+			getShares().forEachKey(validator -> {
+				if (contains(misbehavingIDs, validator.id()))
+					slashForMisbehaving(validator);
+			});
 		}
 	}
 

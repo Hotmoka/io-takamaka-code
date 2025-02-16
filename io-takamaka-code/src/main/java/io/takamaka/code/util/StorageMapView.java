@@ -17,8 +17,8 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.View;
 
@@ -169,26 +169,25 @@ public interface StorageMapView<K,V> extends Iterable<StorageMapView.Entry<K,V>>
 	@View int rank(K key);
 
 	/**
-	 * Yields an ordered stream of the entries (key/value) in this map, in
-	 * increasing order of keys.
+	 * Performs the given action for each entry in this map.
 	 * 
-	 * @return the stream
+	 * @param action the action to perform
 	 */
-	Stream<Entry<K,V>> stream();
+	void forEach(Consumer<? super Entry<K, V>> action);
 
 	/**
-	 * Yields the ordered stream of the keys of this map, in increasing order.
+	 * Performs the given action for each key in this map.
 	 * 
-	 * @return the stream
+	 * @param action the action to perform
 	 */
-	Stream<K> keys();
+	void forEachKey(Consumer<? super K> action);
 
 	/**
-	 * Yields the ordered stream of the values of this map, in increasing order of corresponding key.
+	 * Performs the given action for each value in this map.
 	 * 
-	 * @return the stream
+	 * @param action the action to perform
 	 */
-	Stream<V> values();
+	void forEachValue(Consumer<? super V> action);
 
 	/**
 	 * Yields a snapshot of this map. The snapshot contains the elements in this map

@@ -17,7 +17,6 @@ limitations under the License.
 package io.takamaka.code.dao;
 
 import static io.takamaka.code.lang.Takamaka.require;
-import static java.math.BigInteger.ZERO;
 
 import java.math.BigInteger;
 
@@ -58,10 +57,19 @@ public class SharedEntityWithCappedShares<S extends PayableContract, O extends O
 
 		this.percentLimit = percentLimit;
 		require(percentLimit <= 100 && percentLimit > 0, "invalid share limit: it must be between 1 and 100 inclusive");
-        BigInteger totalShares = getShares().values().reduce(ZERO, BigIntegerSupport::add);
+        BigInteger totalShares = getTotalShares();
         this.limit = BigIntegerSupport.divide(BigIntegerSupport.multiply(totalShares, BigInteger.valueOf(percentLimit)), BigInteger.valueOf(100));
-        boolean sharesAreNotOverLimit = getShares().values().allMatch(_shares -> BigIntegerSupport.compareTo(_shares, limit) <= 0);
-		require(sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
+
+        class WrappedBoolean {
+        	private boolean sharesAreNotOverLimit = true;
+        }
+        var wb = new WrappedBoolean();
+        getShares().forEachValue(_shares -> {
+        	if (wb.sharesAreNotOverLimit)
+        		wb.sharesAreNotOverLimit = BigIntegerSupport.compareTo(_shares, limit) <= 0;
+        });
+
+        require(wb.sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
 	}
 
     /**
@@ -76,10 +84,19 @@ public class SharedEntityWithCappedShares<S extends PayableContract, O extends O
 
 		this.percentLimit = percentLimit;
 		require(percentLimit <= 100 && percentLimit > 0, "invalid share limit: it must be between 1 and 100 inclusive");
-        BigInteger totalShares = getShares().values().reduce(ZERO, BigIntegerSupport::add);
+        BigInteger totalShares = getTotalShares();
         this.limit = BigIntegerSupport.divide(BigIntegerSupport.multiply(totalShares, BigInteger.valueOf(percentLimit)), BigInteger.valueOf(100));
-        boolean sharesAreNotOverLimit = getShares().values().allMatch(_shares -> BigIntegerSupport.compareTo(_shares, limit) <= 0);
-		require(sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
+
+        class WrappedBoolean {
+        	private boolean sharesAreNotOverLimit = true;
+        }
+        var wb = new WrappedBoolean();
+        getShares().forEachValue(_shares -> {
+        	if (wb.sharesAreNotOverLimit)
+        		wb.sharesAreNotOverLimit = BigIntegerSupport.compareTo(_shares, limit) <= 0;
+        });
+
+		require(wb.sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
     }
 
     /**
@@ -96,10 +113,19 @@ public class SharedEntityWithCappedShares<S extends PayableContract, O extends O
 
 		this.percentLimit = percentLimit;
 		require(percentLimit <= 100 && percentLimit > 0, "invalid share limit: it must be between 1 and 100 inclusive");
-        BigInteger totalShares = getShares().values().reduce(ZERO, BigIntegerSupport::add);
+        BigInteger totalShares = getTotalShares();
         this.limit = BigIntegerSupport.divide(BigIntegerSupport.multiply(totalShares, BigInteger.valueOf(percentLimit)), BigInteger.valueOf(100));
-        boolean sharesAreNotOverLimit = getShares().values().allMatch(_shares -> BigIntegerSupport.compareTo(_shares, limit) <= 0);
-		require(sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
+
+        class WrappedBoolean {
+        	private boolean sharesAreNotOverLimit = true;
+        }
+        var wb = new WrappedBoolean();
+        getShares().forEachValue(_shares -> {
+        	if (wb.sharesAreNotOverLimit)
+        		wb.sharesAreNotOverLimit = BigIntegerSupport.compareTo(_shares, limit) <= 0;
+        });
+
+		require(wb.sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
     }
 
     /**
@@ -118,10 +144,19 @@ public class SharedEntityWithCappedShares<S extends PayableContract, O extends O
 
 		this.percentLimit = percentLimit;
 		require(percentLimit <= 100 && percentLimit > 0, "invalid share limit: it must be between 1 and 100 inclusive");
-        BigInteger totalShares = getShares().values().reduce(ZERO, BigIntegerSupport::add);
+        BigInteger totalShares = getTotalShares();
         this.limit = BigIntegerSupport.divide(BigIntegerSupport.multiply(totalShares, BigInteger.valueOf(percentLimit)), BigInteger.valueOf(100));
-        boolean sharesAreNotOverLimit = getShares().values().allMatch(_shares -> BigIntegerSupport.compareTo(_shares, limit) <= 0);
-		require(sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
+
+        class WrappedBoolean {
+        	private boolean sharesAreNotOverLimit = true;
+        }
+        var wb = new WrappedBoolean();
+        getShares().forEachValue(_shares -> {
+        	if (wb.sharesAreNotOverLimit)
+        		wb.sharesAreNotOverLimit = BigIntegerSupport.compareTo(_shares, limit) <= 0;
+        });
+
+		require(wb.sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
     }
 
     /**
@@ -142,10 +177,19 @@ public class SharedEntityWithCappedShares<S extends PayableContract, O extends O
 
 		this.percentLimit = percentLimit;
 		require(percentLimit <= 100 && percentLimit > 0, "invalid share limit: it must be between 1 and 100 inclusive");
-        BigInteger totalShares = getShares().values().reduce(ZERO, BigIntegerSupport::add);
+        BigInteger totalShares = getTotalShares();
         this.limit = BigIntegerSupport.divide(BigIntegerSupport.multiply(totalShares, BigInteger.valueOf(percentLimit)), BigInteger.valueOf(100));
-        boolean sharesAreNotOverLimit = getShares().values().allMatch(_shares -> BigIntegerSupport.compareTo(_shares, limit) <= 0);
-		require(sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
+
+        class WrappedBoolean {
+        	private boolean sharesAreNotOverLimit = true;
+        }
+        var wb = new WrappedBoolean();
+        getShares().forEachValue(_shares -> {
+        	if (wb.sharesAreNotOverLimit)
+        		wb.sharesAreNotOverLimit = BigIntegerSupport.compareTo(_shares, limit) <= 0;
+        });
+
+		require(wb.sharesAreNotOverLimit, () -> StringSupport.concat("a shareholder cannot hold more than ", percentLimit, "% of shares"));
     }
 
     @Override

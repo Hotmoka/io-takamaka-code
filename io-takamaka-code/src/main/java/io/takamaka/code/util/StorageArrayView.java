@@ -16,9 +16,9 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.View;
 
@@ -74,14 +74,6 @@ public interface StorageArrayView<V> extends Iterable<V> {
 	V getOrDefault(int index, Supplier<? extends V> _default);
 
 	/**
-	 * Yields an ordered stream of the values in this array (including {@code null}s),
-	 * in increasing order of index.
-	 * 
-	 * @return the stream
-	 */
-	Stream<V> stream();
-
-	/**
 	 * Yields an array containing the elements of this storage array, in their order,
 	 * using the provided generator function to allocate the returned array.
 	 * 
@@ -99,4 +91,11 @@ public interface StorageArrayView<V> extends Iterable<V> {
 	 * @return a snapshot of this array
 	 */
 	StorageArrayView<V> snapshot();
+
+	/**
+	 * Executes the given action for each element in this array (also its {@code null} elements).
+	 * 
+	 * @param action the action to execute
+	 */
+	void forEach(Consumer<? super V> action);
 }

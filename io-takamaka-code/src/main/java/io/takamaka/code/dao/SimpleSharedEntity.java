@@ -21,7 +21,6 @@ import static io.takamaka.code.lang.Takamaka.require;
 import static java.math.BigInteger.ZERO;
 
 import java.math.BigInteger;
-import java.util.stream.Stream;
 
 import io.takamaka.code.dao.SharedEntity.Offer;
 import io.takamaka.code.lang.Exported;
@@ -184,8 +183,13 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	}
 
     @Override
-    public @View BigInteger getTotalShares() {
-    	return shares.values().reduce(BigInteger.ZERO, BigIntegerSupport::add);
+    public @View final BigInteger getTotalShares() {
+    	class WrappedBigInteger {
+    		private BigInteger sum = ZERO;
+    	}
+    	var wbi = new WrappedBigInteger();
+    	shares.forEachValue(value -> wbi.sum = BigIntegerSupport.add(wbi.sum, value));
+    	return wbi.sum;
     }
 
     @Override
@@ -194,21 +198,19 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
     }
 
     @Override
-	public final Stream<S> getShareholders() {
-		return snapshotOfShares.keys();
-	}
-
-    @Override
 	public final @View BigInteger sharesOf(S shareholder) {
 		return shares.getOrDefault(shareholder, ZERO);
 	}
 
     @Override
 	public final @View BigInteger sharesOnSaleOf(S shareholder) {
-		return offers.stream()
-			.filter(offer -> offer.seller == shareholder && offer.isOngoing())
-			.map(offer -> offer.sharesOnSale)
-			.reduce(ZERO, BigIntegerSupport::add);
+    	BigInteger sum = ZERO;
+
+    	for (O offer: offers)
+    		if (offer.seller == shareholder && offer.isOngoing())
+    			sum = BigIntegerSupport.add(sum, offer.sharesOnSale);
+
+    	return sum;
 	}
 
     @Override
@@ -247,11 +249,6 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 			@Override @View
 			public StorageMapView<S, BigInteger> getShares() {
 				return SimpleSharedEntity.this.getShares();
-			}
-
-			@Override
-			public Stream<S> getShareholders() {
-				return SimpleSharedEntity.this.getShareholders();
 			}
 
 			@Override @View
@@ -294,11 +291,6 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 				return snapshotOfShares;
 			}
 
-			@Override
-			public Stream<S> getShareholders() {
-				return snapshotOfShares.keys();
-			}
-
 			@Override @View
 			public boolean isShareholder(Object who) {
 				return snapshotOfShares.containsKey(who);
@@ -311,7 +303,12 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 
 			@Override @View
 			public BigInteger getTotalShares() {
-				return snapshotOfShares.values().reduce(BigInteger.ZERO, BigIntegerSupport::add);
+				class WrappedBigInteger {
+		    		private BigInteger sum = ZERO;
+		    	}
+		    	var wbi = new WrappedBigInteger();
+		    	snapshotOfShares.forEachValue(value -> wbi.sum = BigIntegerSupport.add(wbi.sum, value));
+		    	return wbi.sum;
 			}
 
 			@Override @View
@@ -332,10 +329,10 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		BigInteger toDistribute = sharesOf(toRemove);
 		shares.remove(toRemove);
 		event(new ShareholderRemoved<>(toRemove));
-		BigInteger total = shares.values().reduce(ZERO, BigIntegerSupport::add);
+		BigInteger total = getTotalShares();
 		if (total.signum() > 0)
 			// TODO: avoid approximation: the last should get all the remaining shares
-			shares.keys().forEachOrdered(shareholder -> shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total))));
+			shares.forEachKey(shareholder -> shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total))));
 	
 		snapshotOfShares = shares.snapshot();
 	}
@@ -360,9 +357,9 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	 * @param offerToRemove an offer whose first occurrence must be removed
 	 */
 	private void cleanUpOffers(O offerToRemove) {
-		offers.stream()
-			.filter(offer -> offer == offerToRemove || !offer.isOngoing())
-			.forEachOrdered(offers::remove);
+		for (O offer: offers)
+			if (offer == offerToRemove || !offer.isOngoing())
+				offers.remove(offer);
 	}
 
 	private void addShares(S shareholder, BigInteger share) {

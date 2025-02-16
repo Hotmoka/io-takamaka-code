@@ -20,7 +20,7 @@ import static io.takamaka.code.lang.Takamaka.require;
 
 import java.math.BigInteger;
 import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageIntMap;
@@ -54,7 +54,10 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		require(publicKeys != null, "the public keys cannot be null");
 		int length = balances.length;
 		require(length == publicKeys.length, "the balances must be as many as the public keys");
-		require(BigIntegerSupport.equals(amount, Stream.of(balances).reduce(BigInteger.ZERO, BigIntegerSupport::add)),
+		BigInteger sum = BigInteger.ZERO;
+		for (var balance: balances)
+			sum = BigIntegerSupport.add(sum, balance);
+		require(BigIntegerSupport.equals(amount, sum),
 			"the amount paid for creating this collector must be equal to the sum of the balances of the accounts being created");
 
 		this.accounts = new StorageTreeIntMap<>();
@@ -74,7 +77,10 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		require(redBalances != null, "balances cannot be null");
 		int length = accounts.size();
 		require(length == redBalances.length, "the red balances must be as many as the accounts");
-		require(BigIntegerSupport.equals(amount, Stream.of(redBalances).reduce(BigInteger.ZERO, BigIntegerSupport::add)),
+		BigInteger sum = BigInteger.ZERO;
+		for (var balance: redBalances)
+			sum = BigIntegerSupport.add(sum, balance);
+		require(BigIntegerSupport.equals(amount, sum),
 			"the amount paid for this method must be equal to the sum of the red balances of the accounts being created");
 
 		for (int pos = 0; pos < length; pos++)
@@ -175,12 +181,12 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	}
 
 	/**
-	 * Yields the accounts in this collector.
+	 * Performs the given action for each account in this container.
 	 * 
-	 * @return the accounts
+	 * @param action the action the action to perform
 	 */
-	public final Stream<A> stream() {
-		return accounts.values();
+	public final void forEach(Consumer<? super A> action) {
+		accounts.forEachValue(action);
 	}
 
 	/**

@@ -17,10 +17,10 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -652,14 +652,6 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	}
 
 	@Override
-	public Stream<V> stream() {
-		var it = iterator();
-		return Stream.generate(() -> null)
-				.takeWhile(__ -> it.hasNext())
-				.map(__ -> it.next());
-	}
-
-	@Override
 	public V[] toArray(IntFunction<V[]> generator) {
 		V[] result = generator.apply(length);
 		int pos = 0;
@@ -704,11 +696,6 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 			}
 
 			@Override
-			public Stream<V> stream() {
-				return StorageTreeArray.this.stream();
-			}
-
-			@Override
 			public V[] toArray(IntFunction<V[]> generator) {
 				return StorageTreeArray.this.toArray(generator);
 			}
@@ -726,6 +713,11 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 			@Override
 			public StorageArrayView<V> snapshot() {
 				return StorageTreeArray.this.snapshot();
+			}
+
+			@Override
+			public void forEach(Consumer<? super V> action) {
+				StorageTreeArray.this.forEach(action);
 			}
 		}
 
@@ -750,5 +742,11 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 				result = StringSupport.concat(result, ",", element);
 
 		return StringSupport.concat(result, "]");
+	}
+
+	@Override
+	public void forEach(Consumer<? super V> action) {
+		for (V element: this)
+			action.accept(element);
 	}
 }

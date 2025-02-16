@@ -18,10 +18,10 @@ package io.takamaka.code.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -884,21 +884,19 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	}
 
 	@Override
-	public Stream<Entry<K,V>> stream() {
-		var it = iterator();
-		return Stream.generate(() -> null)
-				.takeWhile(__ -> it.hasNext())
-				.map(__ -> it.next());
+	public void forEach(Consumer<? super Entry<K, V>> action) {
+		for (var entry: this)
+			action.accept(entry);
 	}
 
 	@Override
-	public Stream<K> keys() {
-		return stream().map(Entry::getKey);
+	public void forEachKey(Consumer<? super K> action) {
+		forEach(entry -> action.accept(entry.getKey()));
 	}
 
 	@Override
-	public Stream<V> values() {
-		return stream().map(Entry::getValue);
+	public void forEachValue(Consumer<? super V> action) {
+		forEach(entry -> action.accept(entry.getValue()));
 	}
 
 	@Override
@@ -980,23 +978,23 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 			}
 
 			@Override
-			public Stream<Entry<K, V>> stream() {
-				return StorageTreeMap.this.stream();
+			public void forEach(Consumer<? super Entry<K, V>> action) {
+				StorageTreeMap.this.forEach(action);
 			}
 
 			@Override
-			public Stream<K> keys() {
-				return StorageTreeMap.this.keys();
+			public void forEachKey(Consumer<? super K> action) {
+				StorageTreeMap.this.forEachKey(action);
+			}
+
+			@Override
+			public void forEachValue(Consumer<? super V> action) {
+				StorageTreeMap.this.forEachValue(action);
 			}
 
 			@Override
 			public StorageMapView<K, V> snapshot() {
 				return StorageTreeMap.this.snapshot();
-			}
-
-			@Override
-			public Stream<V> values() {
-				return StorageTreeMap.this.values();
 			}
 		}
 

@@ -31,7 +31,6 @@ import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
-import io.takamaka.code.util.StorageMapView.Entry;
 import io.takamaka.code.util.StorageTreeMap;
 
 /**
@@ -113,7 +112,12 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 		require(action != null, "the action cannot be null");
 
 		this.eligibleVoters = eligibleVoters.getShares();
-		this.totalVotesCastable = this.eligibleVoters.stream().map(Entry::getValue).reduce(ZERO, BigIntegerSupport::add);
+		class WrappedBigInteger {
+			private BigInteger sum = ZERO;
+		}
+		var wbi = new WrappedBigInteger();
+		this.eligibleVoters.forEachValue(voter -> wbi.sum = BigIntegerSupport.add(wbi.sum, voter));
+		this.totalVotesCastable = wbi.sum;
 		this.action = action;
 		this.snapshotOfVotersUpToNow = votersUpToNow.snapshot();
 		this.votesCastUpToNow = ZERO;

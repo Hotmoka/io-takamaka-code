@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -598,14 +597,6 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	}
 
 	@Override
-	public Stream<V> stream() {
-		var it = iterator();
-		return Stream.generate(() -> null)
-				.takeWhile(__ -> it.hasNext())
-				.map(__ -> it.next());
-	}
-
-	@Override
 	public String toString() {
 		String result = "[";
 		boolean first = true;
@@ -690,13 +681,13 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 			}
 
 			@Override
-			public Stream<V> stream() {
-				return StorageTreeSet.this.stream();
+			public StorageSetView<V> snapshot() {
+				return StorageTreeSet.this.snapshot();
 			}
 
 			@Override
-			public StorageSetView<V> snapshot() {
-				return StorageTreeSet.this.snapshot();
+			public void forEach(Consumer<? super V> action) {
+				StorageTreeSet.this.forEach(action);
 			}
 		}
 

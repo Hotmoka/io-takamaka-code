@@ -17,7 +17,6 @@ limitations under the License.
 package io.takamaka.code.dao;
 
 import java.math.BigInteger;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.View;
@@ -36,13 +35,6 @@ public interface SharedEntityView<S extends Contract> {
 	 * @return the shares
 	 */
 	@View StorageMapView<S, BigInteger> getShares();
-
-	/**
-	 * Yields the shareholders.
-	 * 
-	 * @return the shareholders
-	 */
-	Stream<S> getShareholders();
 
 	/**
 	 * Determine if the given object is a shareholder of this entity.

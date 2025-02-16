@@ -18,11 +18,11 @@ package io.takamaka.code.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -856,24 +856,6 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 	}
 
 	@Override
-	public Stream<Entry<V>> stream() {
-		var it = iterator();
-		return Stream.generate(() -> null)
-				.takeWhile(__ -> it.hasNext())
-				.map(__ -> it.next());
-	}
-
-	@Override
-	public IntStream keys() {
-		return stream().mapToInt(Entry::getKey);
-	}
-
-	@Override
-	public Stream<V> values() {
-		return stream().map(Entry::getValue);
-	}
-
-	@Override
 	public StorageIntMapView<V> view() {
 
 		/**
@@ -957,23 +939,23 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 			}
 
 			@Override
-			public Stream<Entry<V>> stream() {
-				return StorageTreeIntMap.this.stream();
-			}
-
-			@Override
-			public IntStream keys() {
-				return StorageTreeIntMap.this.keys();
-			}
-
-			@Override
 			public StorageIntMapView<V> snapshot() {
 				return StorageTreeIntMap.this.snapshot();
 			}
 
 			@Override
-			public Stream<V> values() {
-				return StorageTreeIntMap.this.values();
+			public void forEach(Consumer<? super Entry<V>> action) {
+				StorageTreeIntMap.this.forEach(action);
+			}
+
+			@Override
+			public void forEachKey(IntConsumer action) {
+				StorageTreeIntMap.this.forEachKey(action);
+			}
+
+			@Override
+			public void forEachValue(Consumer<? super V> action) {
+				StorageTreeIntMap.this.forEachValue(action);
 			}
 		}
 
@@ -983,5 +965,21 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 	@Override
 	public StorageIntMapView<V> snapshot() {
 		return new StorageTreeIntMap<>(this).view();
+	}
+
+	@Override
+	public void forEach(Consumer<? super Entry<V>> action) {
+		for (var entry: this)
+			action.accept(entry);
+	}
+
+	@Override
+	public void forEachKey(IntConsumer action) {
+		forEach(entry -> action.accept(entry.getKey()));
+	}
+
+	@Override
+	public void forEachValue(Consumer<? super V> action) {
+		forEach(entry -> action.accept(entry.getValue()));
 	}
 }

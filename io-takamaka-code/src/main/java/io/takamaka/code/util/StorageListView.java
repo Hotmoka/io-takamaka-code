@@ -17,8 +17,8 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.View;
 
@@ -76,13 +76,6 @@ public interface StorageListView<E> extends Iterable<E> {
 	@View int size();
 
 	/**
-	 * Yields an ordered (first to last) stream of the elements of this list.
-	 * 
-	 * @return the stream
-	 */
-	Stream<E> stream();
-
-	/**
 	 * Yields an array containing the elements of this list, in their order in the list,
 	 * using the provided generator function to allocate the returned array.
 	 * 
@@ -100,4 +93,11 @@ public interface StorageListView<E> extends Iterable<E> {
 	 * @return a snapshot of this list
 	 */
 	StorageListView<E> snapshot();
+
+	/**
+	 * Runs the given action for each element of this list, in their order.
+	 * 
+	 * @param action the action to run
+	 */
+	void forEach(Consumer<? super E> action);
 }

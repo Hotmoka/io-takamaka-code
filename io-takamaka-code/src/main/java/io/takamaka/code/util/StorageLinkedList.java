@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
@@ -264,14 +263,6 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	}
 
 	@Override
-	public Stream<E> stream() {
-		var it = iterator();
-		return Stream.generate(() -> null)
-			.takeWhile(__ -> it.hasNext())
-			.map(__ -> it.next());
-	}
-
-	@Override
 	public E[] toArray(IntFunction<E[]> generator) {
 		E[] result = generator.apply(size);
 		int pos = 0;
@@ -311,11 +302,6 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			}
 
 			@Override
-			public Stream<E> stream() {
-				return StorageLinkedList.this.stream();
-			}
-
-			@Override
 			public E first() {
 				return StorageLinkedList.this.first();
 			}
@@ -344,6 +330,11 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			public StorageListView<E> snapshot() {
 				return StorageLinkedList.this.snapshot();
 			}
+
+			@Override
+			public void forEach(Consumer<? super E> action) {
+				StorageLinkedList.this.forEach(action);
+			}
 		}
 
 		return new StorageListViewImpl();
@@ -351,8 +342,8 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 
 	@Override
 	public StorageListView<E> snapshot() {
-		StorageLinkedList<E> copy = new StorageLinkedList<>();
-		stream().forEachOrdered(copy::addLast);
+		var copy = new StorageLinkedList<E>();
+		forEach(copy::addLast);
 		return copy.view();
 	}
 }
