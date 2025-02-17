@@ -20,6 +20,7 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import io.takamaka.code.lang.Takamaka;
 import io.takamaka.code.lang.WhiteListedDuringInitialization;
 
 /**
@@ -40,6 +41,7 @@ public final class SHA256Digest {
 	 * @throws NoSuchAlgorithmException if the sha256 algorithm is not installed
 	 */
 	public SHA256Digest() throws NoSuchAlgorithmException {
+		Takamaka.chargeForRAM(100L);
 		this.digest = MessageDigest.getInstance("SHA-256");
 	}
 
@@ -50,6 +52,7 @@ public final class SHA256Digest {
      * @return the array of bytes for the resulting hash value.
      */
 	public byte[] digest() {
+		Takamaka.chargeForRAM(64*8L);
 		return digest.digest();
 	}
 
@@ -64,6 +67,8 @@ public final class SHA256Digest {
      * @return the array of bytes for the resulting hash value.
      */
 	public byte[] digest(byte[] input) {
+		Takamaka.chargeForRAM(64*8L);
+		Takamaka.charge(input.length);
 		return digest.digest(input);
 	}
 
@@ -78,6 +83,7 @@ public final class SHA256Digest {
      * @throws DigestException if an error occurs.
      */
 	public int digest(byte[] buf, int offset, int len) throws DigestException {
+		Takamaka.charge(buf.length);
 		return digest.digest(buf, offset, len);
 	}
 
@@ -96,6 +102,7 @@ public final class SHA256Digest {
      * @param input the array of bytes.
      */
 	public void update(byte[] input) {
+		Takamaka.charge(input.length);
 		digest.update(input);
 	}
 
@@ -108,6 +115,7 @@ public final class SHA256Digest {
      * @param len the number of bytes to use, starting at {@code offset}.
      */
 	public void update(byte[] input, int offset, int len) {
+		Takamaka.charge(input.length);
 		digest.update(input, offset, len);
 	}
 }

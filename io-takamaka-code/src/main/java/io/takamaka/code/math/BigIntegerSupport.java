@@ -18,6 +18,7 @@ package io.takamaka.code.math;
 
 import java.math.BigInteger;
 
+import io.takamaka.code.lang.Takamaka;
 import io.takamaka.code.lang.WhiteListedDuringInitialization;
 
 /**
@@ -35,6 +36,8 @@ public abstract class BigIntegerSupport {
 	 * @return the resulting big integer
 	 */
 	public static BigInteger from(String val) {
+		Takamaka.charge(val.length());
+		Takamaka.chargeForRAM(val.length());
 		return new BigInteger(val);
 	}
 
@@ -46,6 +49,7 @@ public abstract class BigIntegerSupport {
 	 * @return true if and only if that condition holds
 	 */
 	public static boolean equals(BigInteger bi, BigInteger other) {
+		Takamaka.charge(bi.bitLength() + other.bitLength());
 		return bi.equals(other);
 	}
 
@@ -56,6 +60,8 @@ public abstract class BigIntegerSupport {
 	 * @return the string representation
 	 */
 	public static String toString(BigInteger bi) {
+		Takamaka.charge(bi.bitLength());
+		Takamaka.chargeForRAM(bi.bitLength());
 		return bi.toString();
 	}
 
@@ -66,6 +72,8 @@ public abstract class BigIntegerSupport {
 	 * @return the representation
 	 */
 	public static byte[] toByteArray(BigInteger bi) {
+		Takamaka.charge(bi.bitLength());
+		Takamaka.chargeForRAM(bi.bitLength());
 		return bi.toByteArray();
 	}
 
@@ -77,6 +85,7 @@ public abstract class BigIntegerSupport {
 	 * @return negative if {@code first} is smaller; positive if {@code second}
 	 */
 	public static int compareTo(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
 		return first.compareTo(second);
 	}
 
@@ -88,6 +97,8 @@ public abstract class BigIntegerSupport {
 	 * @return the addition of the two
 	 */
 	public static BigInteger add(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
+		Takamaka.chargeForRAM(first.bitLength() + second.bitLength());
 		return first.add(second);
 	}
 
@@ -99,6 +110,8 @@ public abstract class BigIntegerSupport {
 	 * @return the subtraction of the two
 	 */
 	public static BigInteger subtract(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
+		Takamaka.chargeForRAM(first.bitLength() + second.bitLength());
 		return first.subtract(second);
 	}
 
@@ -110,6 +123,8 @@ public abstract class BigIntegerSupport {
 	 * @return the multiplication of the two
 	 */
 	public static BigInteger multiply(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
+		Takamaka.chargeForRAM(first.bitLength() + second.bitLength());
 		return first.multiply(second);
 	}
 
@@ -121,6 +136,8 @@ public abstract class BigIntegerSupport {
 	 * @return the quotient of the two
 	 */
 	public static BigInteger divide(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
+		Takamaka.chargeForRAM(first.bitLength() + second.bitLength());
 		return first.divide(second);
 	}
 
@@ -132,6 +149,8 @@ public abstract class BigIntegerSupport {
 	 * @return the quotient and the remainder
 	 */
 	public static BigInteger[] divideAndRemainder(BigInteger bi, BigInteger divisor) {
+		Takamaka.charge(bi.bitLength() + divisor.bitLength());
+		Takamaka.chargeForRAM(bi.bitLength() + divisor.bitLength());
 		return bi.divideAndRemainder(divisor);
 	}
 
@@ -143,6 +162,8 @@ public abstract class BigIntegerSupport {
 	 * @return the remainder
 	 */
 	public static BigInteger mod(BigInteger bi, BigInteger divisor) {
+		Takamaka.charge(bi.bitLength() + divisor.bitLength());
+		Takamaka.chargeForRAM(bi.bitLength() + divisor.bitLength());
 		return bi.mod(divisor);
 	}
 
@@ -154,6 +175,8 @@ public abstract class BigIntegerSupport {
 	 * @return the result of the power
 	 */
 	public static BigInteger pow(BigInteger bi, int exponent) {
+		Takamaka.charge(bi.bitLength());
+		Takamaka.chargeForRAM(bi.bitLength() * (Math.abs(exponent) + 1));
 		return bi.pow(exponent);
 	}
 
@@ -165,6 +188,8 @@ public abstract class BigIntegerSupport {
 	 * @return the maximum of the two
 	 */
 	public static BigInteger max(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
+		Takamaka.chargeForRAM(Math.max(first.bitLength(), second.bitLength()));
 		return first.max(second);
 	}
 
@@ -176,6 +201,8 @@ public abstract class BigIntegerSupport {
 	 * @return the minimum of the two
 	 */
 	public static BigInteger min(BigInteger first, BigInteger second) {
+		Takamaka.charge(first.bitLength() + second.bitLength());
+		Takamaka.chargeForRAM(Math.min(first.bitLength(), second.bitLength()));
 		return first.min(second);
 	}
 }

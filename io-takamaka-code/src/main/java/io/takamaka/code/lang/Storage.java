@@ -63,8 +63,6 @@ public abstract class Storage {
 		//this.storageReference = Runtime.getNextStorageReference();
 	}
 
-	
-
 	// the following constructor gets added by instrumentation
 	/*protected Storage(StorageReference storageReference) {
 		// this object reflects something already in store

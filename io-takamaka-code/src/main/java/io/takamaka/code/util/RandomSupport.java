@@ -18,6 +18,7 @@ package io.takamaka.code.util;
 
 import java.util.Random;
 
+import io.takamaka.code.lang.Takamaka;
 import io.takamaka.code.lang.WhiteListedDuringInitialization;
 
 /**
@@ -35,6 +36,7 @@ public abstract class RandomSupport {
 	 * @param bytes the array to fill
 	 */
 	public static void nextBytes(Random random, byte[] bytes) {
+		Takamaka.charge(bytes.length);
 		random.nextBytes(bytes);
 	}
 }

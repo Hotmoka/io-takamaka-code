@@ -34,6 +34,8 @@ public final class StringSupport {
 	 * @return the resulting copy
 	 */
 	public static String clone(String s) {
+		Takamaka.charge(s.length());
+		Takamaka.chargeForRAM(s.length());
 		return new String(s);
 	}
 
@@ -44,6 +46,8 @@ public final class StringSupport {
 	 * @return the resulting string
 	 */
 	public static String fromUTF8(byte[] bytes) {
+		Takamaka.charge(bytes.length);
+		Takamaka.chargeForRAM(bytes.length);
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
@@ -55,6 +59,7 @@ public final class StringSupport {
 	 * @return true if and only if that condition holds
 	 */
 	public static boolean equals(String s1, String s2) {
+		Takamaka.charge(s1.length() + s2.length());
 		return s1.equals(s2);
 	}
 
@@ -66,6 +71,7 @@ public final class StringSupport {
 	 * @return negative if {@code s1} comes first, positive if {@code s2} comes first, zero if they are equal
 	 */
 	public static int compareTo(String s1, String s2) {
+		Takamaka.charge(s1.length() + s2.length());
 		return s1.compareTo(s2);
 	}
 
@@ -82,6 +88,7 @@ public final class StringSupport {
 	 * @return the first position, or -1 if {@code c} does not occur in {@code s}
 	 */
 	public static int indexOf(String s, int c) {
+		Takamaka.charge(s.length());
 		return s.indexOf(c);
 	}
 
@@ -94,6 +101,8 @@ public final class StringSupport {
 	 * @return the resulting substring, from {@code begin} to {@code end}
 	 */
 	public static String substring(String s, int begin, int end) {
+		Takamaka.charge(s.length());
+		Takamaka.chargeForRAM(s.length());
 		return s.substring(begin, end);
 	}
 
@@ -105,6 +114,8 @@ public final class StringSupport {
 	 * @return the resulting substring from {@code begin} till the end of {@code s}
 	 */
 	public static String substring(String s, int begin) {
+		Takamaka.charge(s.length());
+		Takamaka.chargeForRAM(s.length());
 		return s.substring(begin);
 	}
 
@@ -115,10 +126,12 @@ public final class StringSupport {
 	 * @return the resulting string
 	 */
 	public static String concat(Object... objects) {
-		StringBuilder result = new StringBuilder();
+		var result = new StringBuilder();
 		for (Object object: objects)
-			if (isSafeToConcatenate(object))
+			if (isSafeToConcatenate(object)) {
+				chargeGas(object);
 				result.append(String.valueOf(object));
+			}
 			else
 				throw new IllegalArgumentException("Illegal object in string concatenation: try to call toString() before concatenation");
 
@@ -133,5 +146,32 @@ public final class StringSupport {
 				object instanceof Boolean || object instanceof Character || object instanceof Short ||
 				object instanceof Integer || object instanceof Long || object instanceof Float ||
 				object instanceof Double;
+	}
+
+	private static void chargeGas(Object object) {
+		if (object == null) {
+			Takamaka.charge(10L);
+			Takamaka.chargeForRAM(10L);
+		}
+		else if (object instanceof String) {
+			Takamaka.charge(10L);
+		}
+		else if (object instanceof BigInteger bi) {
+			Takamaka.charge(bi.bitLength());
+			Takamaka.chargeForRAM(bi.bitLength());
+		}
+		else if (object instanceof Storage) {
+			// the storage code will be charged as usually
+		}
+		else if (object instanceof Byte ||
+				object instanceof Boolean || object instanceof Character || object instanceof Short ||
+				object instanceof Integer || object instanceof Long || object instanceof Float ||
+				object instanceof Double) {
+			
+			Takamaka.charge(30L);
+			Takamaka.chargeForRAM(20L);
+		}
+		else
+			throw new IllegalArgumentException("Illegal object in string concatenation: try to call toString() before concatenation");
 	}
 }

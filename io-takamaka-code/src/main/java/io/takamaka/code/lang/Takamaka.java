@@ -131,6 +131,26 @@ public abstract class Takamaka {
 	}
 
 	/**
+	 * Charges the given amount of gas for CPU usage for the current transaction.
+	 * 
+	 * @param cpu the amount of gas to consume
+	 */
+	public static void charge(long cpu) {
+		// code provided by instrumentation as
+		// Runtime.charge(cpu);
+	}
+
+	/**
+	 * Charges the given amount of gas for RAM usage for the current transaction.
+	 * 
+	 * @param ram the amount of gas to consume for RAM consumption
+	 */
+	public static void chargeForRAM(long ram) {
+		// code provided by instrumentation as
+		// Runtime.charge(ram);
+	}
+
+	/**
 	 * Yields the current time, in milliseconds from midnight, January 1, 1970 UTC.
 	 * 
 	 * @return the current time
