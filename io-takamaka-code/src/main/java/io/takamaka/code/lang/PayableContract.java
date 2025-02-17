@@ -55,28 +55,4 @@ public abstract class PayableContract extends Contract {
 	 */
 	@Payable @FromContract
 	public final void receive(BigInteger amount) {}
-
-	/**
-	 * Receives the given amount of red coins from the caller of the method.
-	 * 
-	 * @param amount the amount of red coins
-	 */
-	@RedPayable @FromContract
-	public final void receiveRed(int amount) {}
-
-	/**
-	 * Receives the given amount of red coins from the caller of the method.
-	 * 
-	 * @param amount the amount of red coins
-	 */
-	@RedPayable @FromContract
-	public final void receiveRed(long amount) {}
-
-	/**
-	 * Receives the given amount of red coins from the caller of the method.
-	 * 
-	 * @param amount the amount of red coins
-	 */
-	@RedPayable @FromContract
-	public final void receiveRed(BigInteger amount) {}
 }

@@ -39,13 +39,11 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	private final StorageIntMap<A> accounts;
 
 	/**
-	 * Creates the container. If red/green accounts are being created, ths constructor
-	 * does not initialize their red balance, for which {{@link #setRedBalances(BigInteger, BigInteger[])}
-	 * must be called after construction.
+	 * Creates the container.
 	 * 
 	 * @param amount the total amount of coins distributed to the accounts that get created;
 	 *               this must be the sum of all {@code balances}
-	 * @param balances the initial, green balances of the accounts; they must be as many as the {@code publicKeys}
+	 * @param balances the initial balances of the accounts; they must be as many as the {@code publicKeys}
 	 *                 and their sum must be {@code amount}
 	 * @param publicKeys the Base64-encoded public keys of the accounts
 	 */
@@ -63,40 +61,6 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		this.accounts = new StorageTreeIntMap<>();
 		for (int pos = 0; pos < length; pos++)
 			accounts.put(pos, mkAccount(balances[pos], publicKeys[pos]));
-	}
-
-	/**
-	 * Sets the red balances of the accounts, if they are red/green accounts.
-	 * 
-	 * @param amount the total amount of red coins distributed to the accounts that get created;
-	 *               this must be the sum of all {@code redBalances}
-	 * @param redBalances the initial, red balances of the accounts; they must be as many as the accounts
-	 *                    and their sum must be {@code amount}
-	 */
-	protected @FromContract @RedPayable void setRedBalances(BigInteger amount, BigInteger[] redBalances) {
-		require(redBalances != null, "balances cannot be null");
-		int length = accounts.size();
-		require(length == redBalances.length, "the red balances must be as many as the accounts");
-		BigInteger sum = BigInteger.ZERO;
-		for (var balance: redBalances)
-			sum = BigIntegerSupport.add(sum, balance);
-		require(BigIntegerSupport.equals(amount, sum),
-			"the amount paid for this method must be equal to the sum of the red balances of the accounts being created");
-
-		for (int pos = 0; pos < length; pos++)
-			get(pos).receiveRed(redBalances[pos]);
-	}
-
-	/**
-	 * Sets the red balances of the accounts, if they are red/green accounts.
-	 * 
-	 * @param amount the total amount of red coins distributed to the accounts that get created;
-	 *               this must be the sum of all {@code redBalances}
-	 * @param redBalances the initial, red balances of the accounts, as a space-separated sequence of big integers;
-	 *                    they must be as many as the accounts and their sum must be {@code amount}
-	 */
-	public @FromContract @RedPayable void addRedBalances(BigInteger amount, String redBalances) {
-		setRedBalances(amount, buildBalances(redBalances));
 	}
 
 	/**

@@ -122,14 +122,6 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	@View BigInteger getFinalSupply();
 
 	/**
-	 * Yields the initial circulating supply of red coins in the node.
-	 * This does not change with the time.
-	 * 
-	 * @return the initial circulating supply of red coins
-	 */
-	@View BigInteger getInitialRedSupply();
-
-	/**
 	 * Yields the initial inflation applied to the gas consumed by transactions before it gets sent
 	 * as reward to the validators. 1,000,000 means 1%.
 	 * Inflation can be negative. For instance, -300,000 means -0.3%.

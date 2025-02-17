@@ -109,12 +109,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	private final BigInteger finalSupply;
 
 	/**
-	 * The initial circulating supply of red coins in the node.
-	 * This does not change with the time.
-	 */
-	private final BigInteger initialRedSupply;
-
-	/**
 	 * The initial inflation applied to the gas consumed by transactions before it gets sent
 	 * as reward to the validators. 1,000,000 means 1%.
 	 * Inflation can be negative. For instance, -300,000 means -0.3%.
@@ -197,7 +191,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		this.currentSupply = gamete.balance(); // initially, all coins are inside the gamete
 		this.initialSupply = currentSupply;
 		this.finalSupply = finalSupply;
-		this.initialRedSupply = gamete.balanceRed();
 		this.initialInflation = initialInflation;
 		this.currentInflation = initialInflation;
 		this.ticketForNewPoll = ticketForNewPoll;
@@ -230,11 +223,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@Override
 	public final BigInteger getFinalSupply() {
 		return finalSupply;
-	}
-
-	@Override
-	public final BigInteger getInitialRedSupply() {
-		return initialRedSupply;
 	}
 
 	@Override
