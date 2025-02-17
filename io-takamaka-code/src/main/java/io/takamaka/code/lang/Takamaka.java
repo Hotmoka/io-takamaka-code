@@ -16,8 +16,6 @@ limitations under the License.
 
 package io.takamaka.code.lang;
 
-import java.math.BigInteger;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
@@ -101,23 +99,6 @@ public abstract class Takamaka {
 	public static void assertThat(boolean condition, Supplier<String> message) {
 		if (!condition)
 			throw new AssertionViolationException(message.get());
-	}
-
-	/**
-	 * Runs a given piece of code with a subset of the available gas.
-	 * It first charges the given amount of gas. Then runs the code
-	 * with the charged gas only. At its end, the remaining gas is added
-	 * to the available gas to continue the computation.
-	 * 
-	 * @param <T> the type of the result of the call
-	 * @param amount the amount of gas provided to the code
-	 * @param what the code to run
-	 * @return the result of the execution of the code
-     */
-	public static <T> T withGas(BigInteger amount, Callable<T> what) {
-		// code provided by instrumentation as
-		// return Runtime.withGas(amount, what);
-		return null;
 	}
 
 	/**
