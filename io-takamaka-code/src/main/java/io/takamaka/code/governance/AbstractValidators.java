@@ -297,7 +297,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	}
 
 	@Override
-	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
+	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) { // TODO: rename into rewardTendermint
 		require(isSystemCall(), "the validators can only be rewarded with a system request");
 
 		String[] behavingIDs = splitAtSpaces(behaving);
@@ -325,6 +325,8 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 
 		manifest.accountsLedger.add(amount, publicKeyOfMinerBase64);
 	}
+
+	// TODO: add specific reward method for the disk node, possibly create distinct subclasses for Mokamint and for Disk
 
 	@Override
 	@Payable @FromContract
