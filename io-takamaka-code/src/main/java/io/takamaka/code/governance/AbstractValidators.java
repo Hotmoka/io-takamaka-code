@@ -23,8 +23,6 @@ import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.ZERO;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 import io.takamaka.code.dao.Poll;
 import io.takamaka.code.dao.PollWithTimeWindow;
@@ -36,7 +34,9 @@ import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageSet;
 import io.takamaka.code.util.StorageSetView;
@@ -107,12 +107,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * eventually, if inflation is not zero.
 	 */
 	private final BigInteger finalSupply;
-
-	/**
-	 * The initial circulating supply of red coins in the node.
-	 * This does not change with the time.
-	 */
-	private final BigInteger initialRedSupply;
 
 	/**
 	 * The initial inflation applied to the gas consumed by transactions before it gets sent
@@ -197,7 +191,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		this.currentSupply = gamete.balance(); // initially, all coins are inside the gamete
 		this.initialSupply = currentSupply;
 		this.finalSupply = finalSupply;
-		this.initialRedSupply = gamete.balanceRed();
 		this.initialInflation = initialInflation;
 		this.currentInflation = initialInflation;
 		this.ticketForNewPoll = ticketForNewPoll;
@@ -230,11 +223,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@Override
 	public final BigInteger getFinalSupply() {
 		return finalSupply;
-	}
-
-	@Override
-	public final BigInteger getInitialRedSupply() {
-		return initialRedSupply;
 	}
 
 	@Override
@@ -294,8 +282,8 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		// that casts the argument to Validator and calls this method. In this way
 		// only instances of Validator can become shareholders (ie, actual validators)
 
-		BigInteger costWithSurchage = offer.cost.multiply(BigInteger.valueOf(buyerSurcharge + 100_000_000L)).divide(_100_000_000);
-		require(costWithSurchage.compareTo(amount) <= 0, "not enough money to accept the offer: you need " + costWithSurchage);
+		BigInteger costWithSurchage = BigIntegerSupport.divide(BigIntegerSupport.multiply(offer.cost, BigInteger.valueOf(buyerSurcharge + 100_000_000L)), _100_000_000);
+		require(BigIntegerSupport.compareTo(costWithSurchage, amount) <= 0, StringSupport.concat("not enough money to accept the offer: you need ", costWithSurchage));
 		super.accept(amount, buyer, offer);
 
 		// if the seller is not a validator anymore, we send to it its staked coins
@@ -309,11 +297,11 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	}
 
 	@Override
-	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
+	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) { // TODO: rename into rewardTendermint
 		require(isSystemCall(), "the validators can only be rewarded with a system request");
 
-		List<String> behavingIDs = splitAtSpaces(behaving);
-		List<String> misbehavingIDs = splitAtSpaces(misbehaving);
+		String[] behavingIDs = splitAtSpaces(behaving);
+		String[] misbehavingIDs = splitAtSpaces(misbehaving);
 		rewardBehavingValidators(behavingIDs);
 		slashMisbehavingValidators(misbehavingIDs);
 		slashNotBehavingValidators(behavingIDs, misbehavingIDs);
@@ -338,13 +326,15 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		manifest.accountsLedger.add(amount, publicKeyOfMinerBase64);
 	}
 
+	// TODO: add specific reward method for the disk node, possibly create distinct subclasses for Mokamint and for Disk
+
 	@Override
 	@Payable @FromContract
 	public final SimplePoll<V> newPoll(BigInteger amount, SimplePoll.Action action) {
-		require(amount.compareTo(ticketForNewPoll) >= 0, () -> "a new poll costs " + ticketForNewPoll + " coins");
+		require(BigIntegerSupport.compareTo(amount, ticketForNewPoll) >= 0, () -> StringSupport.concat("a new poll costs ", ticketForNewPoll, " coins"));
 		checkThatItCanStartPoll(caller());
 	
-		SimplePoll<V> poll = new SimplePoll<>(this, action) {
+		var poll = new SimplePoll<V>(this, action) {
 	
 			@Override
 			public void close() {
@@ -361,10 +351,10 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@Override
 	@Payable @FromContract
 	public final PollWithTimeWindow<V> newPoll(BigInteger amount, SimplePoll.Action action, long start, long duration) {
-		require(amount.compareTo(ticketForNewPoll) >= 0, () -> "a new poll costs " + ticketForNewPoll + " coins");
+		require(BigIntegerSupport.compareTo(amount, ticketForNewPoll) >= 0, () -> StringSupport.concat("a new poll costs ", ticketForNewPoll, " coins"));
 		checkThatItCanStartPoll(caller());
 	
-		PollWithTimeWindow<V> poll = new PollWithTimeWindow<>(this, action, start, duration) {
+		var poll = new PollWithTimeWindow<V>(this, action, start, duration) {
 	
 			@Override
 			public void close() {
@@ -385,48 +375,58 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * @return the array
 	 */
 	protected static BigInteger[] buildPowers(String powersAsStringSequence) {
-		return splitAtSpaces(powersAsStringSequence).stream()
-			.map(BigInteger::new)
-			.toArray(BigInteger[]::new);
+		String[] array = splitAtSpaces(powersAsStringSequence);
+		var result = new BigInteger[array.length];
+		int pos = 0;
+		for (String s: array)
+			result[pos++] = BigIntegerSupport.from(s);
+
+		return result;
 	}
 
 	/**
 	 * Slits the given string at spaces.
 	 * 
 	 * @param s the string
-	 * @return the list of parts
+	 * @return the array of parts
 	 */
-	protected static List<String> splitAtSpaces(String s) {
-		List<String> list = new ArrayList<>();
+	protected static String[] splitAtSpaces(String s) {
+		int counter = s.isEmpty() ? 0 : 1;
+		for (int i = 0; i < s.length() - 1; i++)
+			if (s.charAt(i) == ' ')
+				counter++;
+
+		var result = new String[counter];
 		int pos;
-		while ((pos = s.indexOf(' ')) >= 0) {
-			list.add(s.substring(0, pos));
-			s = s.substring(pos + 1);
+		int i = 0;
+		while ((pos = StringSupport.indexOf(s, ' ')) >= 0) {
+			result[i++] = StringSupport.substring(s, 0, pos);
+			s = StringSupport.substring(s, pos + 1);
 		}
-	
+
 		if (!s.isEmpty())
-			list.add(s);
-	
-		return list;
+			result[i++] = s;
+
+		return result;
 	}
 
 	private void updateParameters(BigInteger minted, BigInteger numberOfTransactionsSinceLastReward) {
 		// we increase the number of rewards (ie, the height of the blockchain, if the node is part of a blockchain)
 		// but only if there are transactions, which gives to the underlying blockchain engine the possibility to stop generating empty blocks
 		if (numberOfTransactionsSinceLastReward.signum() > 0) {
-			height = height.add(ONE);
+			height = BigIntegerSupport.add(height, ONE);
 
 			// we add to the cumulative number of transactions validated up to now
-			numberOfTransactions = numberOfTransactions.add(numberOfTransactionsSinceLastReward);
+			numberOfTransactions = BigIntegerSupport.add(numberOfTransactions, numberOfTransactionsSinceLastReward);
 
 			// the total supply is increased by the coins minted since the previous reward
-			currentSupply = currentSupply.add(minted);
+			currentSupply = BigIntegerSupport.add(currentSupply, minted);
 
 			// we compute the current inflation, so that it approaches zero while
 			// the current supply is reaching the final supply
-			BigInteger delta = finalSupply.subtract(initialSupply);
+			BigInteger delta = BigIntegerSupport.subtract(finalSupply, initialSupply);
 			if (delta.signum() != 0) {
-				BigInteger currentDelta = finalSupply.subtract(currentSupply);
+				BigInteger currentDelta = BigIntegerSupport.subtract(finalSupply, currentSupply);
 				long oldCurrentInflation = currentInflation;
 
 				// if the current supply reached the total supply, inflation is forced to zero
@@ -435,7 +435,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 				else if (delta.signum() >= 0 && currentDelta.signum() <= 0)
 					currentInflation = 0L;
 				else
-					currentInflation = BigInteger.valueOf(initialInflation).multiply(currentDelta).divide(delta).longValue();
+					currentInflation = BigIntegerSupport.divide(BigIntegerSupport.multiply(BigInteger.valueOf(initialInflation), currentDelta), delta).longValue();
 
 				if (currentInflation != oldCurrentInflation)
 					event(new InflationUpdate(currentInflation));
@@ -443,42 +443,52 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		}
 	}
 
-	private void rewardBehavingValidators(List<String> behavingIDs) {
-		if (!behavingIDs.isEmpty()) {
+	private void rewardBehavingValidators(String[] behavingIDs) {
+		if (behavingIDs.length > 0) {
 			// compute the total power of the well behaving validators; this is always positive
-			BigInteger totalPower = getShareholders()
-				.filter(validator -> behavingIDs.contains(validator.id()))
-				.map(this::sharesOf)
-				.reduce(ZERO, BigInteger::add);
+			class WrappedBigInteger {
+				private BigInteger bi = ZERO;
+			}
 
-			behavingIDs.forEach(alreadyNotBehaving::remove);
+			var wbi = new WrappedBigInteger();
+
+			getShares().forEachKey(validator -> {
+				if (contains(behavingIDs, validator.id())) {
+					wbi.bi = BigIntegerSupport.add(wbi.bi, sharesOf(validator));
+				}
+			});
+
+			for (String id: behavingIDs)
+				alreadyNotBehaving.remove(id);
 
 			// compute the total amount of staked coins
-			BigInteger totalStaked = stakes.values().reduce(BigInteger.ZERO, BigInteger::add);
+			var wbi2 = new WrappedBigInteger();
+	    	stakes.forEachValue(value -> wbi2.bi = BigIntegerSupport.add(wbi2.bi, value));
+			BigInteger totalStaked = wbi2.bi;
 
 			// compute the balance that is not staked and must be distributed
-			BigInteger toDistribute = balance().subtract(totalStaked);
+			BigInteger toDistribute = BigIntegerSupport.subtract(balance(), totalStaked);
 
 			if (toDistribute.signum() > 0) {
 				// percentStaked of the distribution gets staked for the well-behaving validators, in proportion to their power
-				final BigInteger addedToStakes = toDistribute.multiply(BigInteger.valueOf(percentStaked)).divide(_100_000_000);
-				getShareholders()
-					.filter(validator -> behavingIDs.contains(validator.id()))
-					//.forEachOrdered(validator -> stakes.update(validator, BigInteger.ZERO, old -> old.add(addedToStakes.multiply(sharesOf(validator)).divide(totalPower))));
-					.forEachOrdered(validator -> {
-						BigInteger toAdd = addedToStakes.multiply(sharesOf(validator)).divide(totalPower);
+				final BigInteger addedToStakes = BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, BigInteger.valueOf(percentStaked)), _100_000_000);
+				getShares().forEachKey(validator -> {
+					if (contains(behavingIDs, validator.id())) {
+						BigInteger toAdd = BigIntegerSupport.divide(BigIntegerSupport.multiply(addedToStakes, sharesOf(validator)), wbi.bi);
 						BigInteger old = stakes.get(validator);
 						if (old == null)
 							stakes.put(validator, toAdd);
 						else if (toAdd.signum() != 0) // adding 0 modifies the state for nothing
-							stakes.update(validator, toAdd::add);
-					});
+							stakes.update(validator, bi -> BigIntegerSupport.add(bi, toAdd));
+					}
+				});
 
 				// distribute immediately the rest to the well-behaving validators, in proportion to their power
-				final BigInteger paid = toDistribute.subtract(addedToStakes);
-				getShareholders()
-					.filter(validator -> behavingIDs.contains(validator.id()))
-					.forEachOrdered(validator -> validator.receive(paid.multiply(sharesOf(validator)).divide(totalPower)));
+				final BigInteger paid = BigIntegerSupport.subtract(toDistribute, addedToStakes);
+				getShares().forEachKey(validator -> {
+					if (contains(behavingIDs, validator.id()))
+						validator.receive(BigIntegerSupport.divide(BigIntegerSupport.multiply(paid, sharesOf(validator)), wbi.bi));
+				});
 			}
 		}
 	}
@@ -488,18 +498,28 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		manifest.gasStation.takeNoteOfGasConsumedDuringLastReward(gasConsumed);
 	}
 
-	private void slashNotBehavingValidators(List<String> behavingIDs, List<String> misbehavingIDs) {
-		getShareholders()
-			.filter(validator -> !behavingIDs.contains(validator.id()) && !misbehavingIDs.contains(validator.id()))
-			.forEachOrdered(this::slashForNotBehaving);
+	private void slashNotBehavingValidators(String[] behavingIDs, String[] misbehavingIDs) {
+		getShares().forEachKey(validator -> {
+			if (!contains(behavingIDs, validator.id()) && !contains(misbehavingIDs, validator.id()))
+				slashForNotBehaving(validator);
+		});
 	}
 
-	private void slashMisbehavingValidators(List<String> misbehavingIDs) {
-		if (!misbehavingIDs.isEmpty()) {
-			getShareholders()
-				.filter(validator -> misbehavingIDs.contains(validator.id()))
-				.forEachOrdered(this::slashForMisbehaving);
+	private void slashMisbehavingValidators(String[] misbehavingIDs) {
+		if (misbehavingIDs.length > 0) {
+			getShares().forEachKey(validator -> {
+				if (contains(misbehavingIDs, validator.id()))
+					slashForMisbehaving(validator);
+			});
 		}
+	}
+
+	private static boolean contains(String[] array, String element) {
+		for (String a: array)
+			if (StringSupport.equals(a, element))
+				return true;
+
+		return false;
 	}
 
 	private void slashForMisbehaving(V validator) {
@@ -513,16 +533,16 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		// this is important for Tendermint nodes, because Tendermint
 		// does not change the set of validators immediately hence a couple
 		// of blocks are created without the vote of a new validator after it gets added
-		if (BigInteger.ZERO.equals(alreadyNotBehaving.get(id)))
+		if (BigIntegerSupport.equals(BigInteger.ZERO, alreadyNotBehaving.get(id)))
 			slash(validator, slashingForNotBehaving);
 		else
-			alreadyNotBehaving.update(id, BigInteger.valueOf(3L), old -> old.subtract(BigInteger.ONE));
+			alreadyNotBehaving.update(id, BigInteger.valueOf(3L), old -> BigIntegerSupport.subtract(old, BigInteger.ONE));
 	}
 
 	private void slash(V validator, int percent) {
 		BigInteger oldStakes = getStake(validator);
-		BigInteger newStakes = oldStakes.multiply(BigInteger.valueOf(100_000_000L - percent)).divide(_100_000_000);
-		event(new ValidatorSlashed<V>(validator, oldStakes.subtract(newStakes)));
+		BigInteger newStakes = BigIntegerSupport.divide(BigIntegerSupport.multiply(oldStakes, BigInteger.valueOf(100_000_000L - percent)), _100_000_000);
+		event(new ValidatorSlashed<V>(validator, BigIntegerSupport.subtract(oldStakes, newStakes)));
 
 		if (newStakes.signum() == 0) {
 			// if the staked coins reached zero, we remove the validator altogether

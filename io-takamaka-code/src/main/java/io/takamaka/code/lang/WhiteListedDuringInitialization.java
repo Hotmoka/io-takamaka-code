@@ -16,22 +16,22 @@ limitations under the License.
 
 package io.takamaka.code.lang;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An entry is red payable if the caller transfers red coins to the contract
- * of the entry at call time.
+ * An annotation stating that a class has the right to call
+ * all methods of the Java library, but only during the initialization of the blockchain.
+ * This annotation is typically used to insert some carefully designed classes
+ * in blockchain, that perform a safe bridge between Takamaka smart contracts
+ * and some Java library classes.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value={ METHOD, CONSTRUCTOR })
-@Inherited
+@Target(value={ TYPE })
 @Documented
-public @interface RedPayable {
+public @interface WhiteListedDuringInitialization {
 }

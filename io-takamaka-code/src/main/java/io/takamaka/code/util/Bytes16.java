@@ -20,9 +20,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -73,7 +73,7 @@ public class Bytes16 extends AbstractStorageByteArrayView implements StorageByte
 		if (elements == null)
 			throw new IllegalArgumentException("Expected a non-null array of elements");
 		if (elements.length != length)
-			throw new IllegalArgumentException("Expected " + length + " elements, but got " + elements.length);
+			throw new IllegalArgumentException(StringSupport.concat("Expected ", length, " elements, but got ", elements.length));
 
 		for (int pos = 0; pos < length; pos++)
 			set(pos, elements[pos]);
@@ -140,7 +140,8 @@ public class Bytes16 extends AbstractStorageByteArrayView implements StorageByte
 	 *                 is cast to {@code byte}
 	 */
 	public Bytes16(IntSupplier supplier) {
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.getAsInt()));
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.getAsInt());
 	}
 
 	/**
@@ -153,7 +154,8 @@ public class Bytes16 extends AbstractStorageByteArrayView implements StorageByte
 	 *                 {@code (byte) supplier.applyAsInt(i)}
 	 */
 	public Bytes16(IntUnaryOperator supplier) {
-		IntStream.range(0, length).forEachOrdered(index -> set(index, (byte) supplier.applyAsInt(index)));
+		for (int index = 0; index < length; index++)
+			set(index, (byte) supplier.applyAsInt(index));
 	}
 
 	@Override
@@ -316,11 +318,6 @@ public class Bytes16 extends AbstractStorageByteArrayView implements StorageByte
 	}
 
 	@Override
-	public IntStream stream() {
-		return IntStream.of(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15);
-	}
-
-	@Override
 	public byte[] toArray() {
 		return new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15 };
 	}
@@ -344,11 +341,6 @@ public class Bytes16 extends AbstractStorageByteArrayView implements StorageByte
 			@Override
 			public byte get(int index) {
 				return Bytes16.this.get(index);
-			}
-
-			@Override
-			public IntStream stream() {
-				return Bytes16.this.stream();
 			}
 
 			@Override

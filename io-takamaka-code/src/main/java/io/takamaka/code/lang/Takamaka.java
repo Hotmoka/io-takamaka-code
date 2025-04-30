@@ -16,8 +16,6 @@ limitations under the License.
 
 package io.takamaka.code.lang;
 
-import java.math.BigInteger;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
@@ -104,23 +102,6 @@ public abstract class Takamaka {
 	}
 
 	/**
-	 * Runs a given piece of code with a subset of the available gas.
-	 * It first charges the given amount of gas. Then runs the code
-	 * with the charged gas only. At its end, the remaining gas is added
-	 * to the available gas to continue the computation.
-	 * 
-	 * @param <T> the type of the result of the call
-	 * @param amount the amount of gas provided to the code
-	 * @param what the code to run
-	 * @return the result of the execution of the code
-     */
-	public static <T> T withGas(BigInteger amount, Callable<T> what) {
-		// code provided by instrumentation as
-		// return Runtime.withGas(amount, what);
-		return null;
-	}
-
-	/**
 	 * Takes note of the given event.
 	 * 
 	 * @param event the event
@@ -128,6 +109,26 @@ public abstract class Takamaka {
 	public static void event(Event event) {
 		// code provided by instrumentation as
 		// Runtime.event(event);
+	}
+
+	/**
+	 * Charges the given amount of gas for CPU usage for the current transaction.
+	 * 
+	 * @param cpu the amount of gas to consume
+	 */
+	public static void charge(long cpu) {
+		// code provided by instrumentation as
+		// Runtime.charge(cpu);
+	}
+
+	/**
+	 * Charges the given amount of gas for RAM usage for the current transaction.
+	 * 
+	 * @param ram the amount of gas to consume for RAM consumption
+	 */
+	public static void chargeForRAM(long ram) {
+		// code provided by instrumentation as
+		// Runtime.charge(ram);
 	}
 
 	/**

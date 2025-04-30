@@ -17,9 +17,9 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -30,13 +30,23 @@ abstract class AbstractStorageByteArrayView extends Storage implements StorageBy
 
 	@Override
 	public final String toString() {
-		return stream().mapToObj(String::valueOf).collect(Collectors.joining(",", "[", "]"));
+		String result = "[";
+		boolean first = true;
+		for (Byte b: this)
+			if (first) {
+				result = StringSupport.concat(result, b);
+				first = false;
+			}
+			else
+				result = StringSupport.concat(result, ",", b);
+
+		return StringSupport.concat(result, "]");
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof StorageByteArrayView && length() == ((StorageByteArrayView) other).length()) {
-			Iterator<Byte> otherIt = ((StorageByteArrayView) other).iterator();
+		if (other instanceof StorageByteArrayView sbaw && length() == sbaw.length()) {
+			Iterator<Byte> otherIt = sbaw.iterator();
 			for (byte b: this)
 				if (b != otherIt.next())
 					return false;

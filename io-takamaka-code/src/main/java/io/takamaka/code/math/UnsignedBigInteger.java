@@ -43,7 +43,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @param value {@link java.math.BigInteger}
      */
     public UnsignedBigInteger(BigInteger value) {
-        require(value.signum() >= 0, "Illegal value: negative value"); // valio.takamaka.code.lang.RequirementViolationException >= 0
+        require(value.signum() >= 0, "Illegal value: negative value");
         this.value = value;
     }
 
@@ -78,17 +78,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @param value the string, that must represent a non-negative integer
      */
     public UnsignedBigInteger(String value) {
-        this(new BigInteger(value));
-    }
-
-    /**
-     * Creates an unsigned big integer from a string and a radix.
-     *
-     * @param value the string, that must represent a non-negative integer in {@code radix} base
-     * @param radix the coding base of {@code val}, such as 2 for binary
-     */
-    public UnsignedBigInteger(String value, int radix) {
-        this(new BigInteger(value, radix));
+        this(BigIntegerSupport.from(value));
     }
 
     /**
@@ -108,7 +98,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the addition {@code this} + {@code other}
      */
     public UnsignedBigInteger add(UnsignedBigInteger other) {
-        return new UnsignedBigInteger(value.add(other.value), true);
+        return new UnsignedBigInteger(BigIntegerSupport.add(value, other.value), true);
     }
 
     /**
@@ -117,7 +107,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the addition {@code this} + 1
      */
     public UnsignedBigInteger next() {
-    	return new UnsignedBigInteger(value.add(BigInteger.ONE), true);
+    	return new UnsignedBigInteger(BigIntegerSupport.add(value, BigInteger.ONE), true);
     }
 
     /**
@@ -129,7 +119,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @throws io.takamaka.code.lang.RequirementViolationException if {@code other} is greater than {@code this}
      */
     public UnsignedBigInteger subtract(UnsignedBigInteger other, String errorMessage) {
-        BigInteger diff = value.subtract(other.value);
+        BigInteger diff = BigIntegerSupport.subtract(value, other.value);
         require(diff.signum() >= 0, errorMessage); // this.value >= other.value
         return new UnsignedBigInteger(diff, true);
     }
@@ -150,7 +140,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the subtraction {@code this} - 1
      */
     public UnsignedBigInteger previous(String errorMessage) {
-    	BigInteger diff = value.subtract(BigInteger.ONE);
+    	BigInteger diff = BigIntegerSupport.subtract(value, BigInteger.ONE);
         require(diff.signum() >= 0, errorMessage); // this.value >= 1
         return new UnsignedBigInteger(diff, true);
     }
@@ -173,7 +163,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the multiplication {@code this} * {@code other}
      */
     public UnsignedBigInteger multiply(UnsignedBigInteger other) {
-        return new UnsignedBigInteger(value.multiply(other.value), true);
+        return new UnsignedBigInteger(BigIntegerSupport.multiply(value, other.value), true);
     }
 
     /**
@@ -186,7 +176,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      */
     public UnsignedBigInteger divide(UnsignedBigInteger other, String errorMessage) {
         require(other.value.signum() != 0, errorMessage); // other.val > 0
-        return new UnsignedBigInteger(value.divide(other.value), true);
+        return new UnsignedBigInteger(BigIntegerSupport.divide(value, other.value), true);
     }
 
     /**
@@ -210,7 +200,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      */
     public UnsignedBigInteger mod(UnsignedBigInteger divisor, String errorMessage) {
         require(divisor.value.signum() != 0, errorMessage); // other.val > 0
-        return new UnsignedBigInteger(value.mod(divisor.value), true);
+        return new UnsignedBigInteger(BigIntegerSupport.mod(value, divisor.value), true);
     }
 
     /**
@@ -232,7 +222,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the power
      */
     public UnsignedBigInteger pow(int exponent) {
-        return new UnsignedBigInteger(value.pow(exponent), true);
+        return new UnsignedBigInteger(BigIntegerSupport.pow(value, exponent), true);
     }
 
     /**
@@ -242,7 +232,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the maximum
      */
     public UnsignedBigInteger max(UnsignedBigInteger other) {
-        return new UnsignedBigInteger(value.max(other.value), true);
+        return new UnsignedBigInteger(BigIntegerSupport.max(value, other.value), true);
     }
 
     /**
@@ -252,7 +242,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return the minimum
      */
     public UnsignedBigInteger min(UnsignedBigInteger other) {
-        return new UnsignedBigInteger(value.min(other.value), true);
+        return new UnsignedBigInteger(BigIntegerSupport.min(value, other.value), true);
     }
 
     /**
@@ -263,7 +253,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      */
     @Override
     public @View int compareTo(UnsignedBigInteger other) {
-        return value.compareTo(other.value);
+        return BigIntegerSupport.compareTo(value, other.value);
     }
 
     /**
@@ -272,7 +262,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      * @return 0 or 1 as the value of this unsigned big integer is zero or positive
      */
     public int signum() {
-    	return value.equals(BigInteger.ZERO) ? 0 : 1;
+    	return value.signum();
     }
 
     /**
@@ -284,12 +274,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      */
     @Override
     public @View boolean equals(Object other) {
-        return other == this || (other instanceof UnsignedBigInteger && value.equals(((UnsignedBigInteger) other).value));
-    }
-
-    @Override
-    public @View int hashCode() {
-        return value.hashCode();
+        return other == this || (other instanceof UnsignedBigInteger ubi && BigIntegerSupport.equals(value, ubi.value));
     }
 
     /**
@@ -309,17 +294,7 @@ public class UnsignedBigInteger extends Storage implements Comparable<UnsignedBi
      */
     @Override
     public @View String toString() {
-        return value.toString();
-    }
-
-    /**
-     * Returns the string representation of this unsigned big integer in the given radix.
-     *
-     * @param radix the radix
-     * @return the representation
-     */
-    public @View String toString(int radix) {
-        return value.toString(radix);
+        return BigIntegerSupport.toString(value);
     }
 
     /**

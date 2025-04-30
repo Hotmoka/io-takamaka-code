@@ -21,10 +21,6 @@ import static io.takamaka.code.lang.Takamaka.require;
 import static java.math.BigInteger.ZERO;
 
 import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import io.takamaka.code.dao.SharedEntity.Offer;
 import io.takamaka.code.lang.Exported;
@@ -33,6 +29,7 @@ import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.View;
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageMapView;
 import io.takamaka.code.util.StorageSet;
@@ -75,19 +72,16 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	 * @param shareholders the initial shareholders; if there are repetitions, their shares are merged
 	 * @param shares the initial shares of each initial shareholder. This must be as many as {@code shareholders}
 	 */
-	public SimpleSharedEntity(Stream<S> shareholders, Stream<BigInteger> shares) {
+	public SimpleSharedEntity(S[] shareholders, BigInteger[] shares) {
 		require(shareholders != null, "shareholders cannot be null");
 		require(shares != null, "shares cannot be null");
-	
-		List<S> shareholdersAsList = shareholders.collect(Collectors.toList());
-		List<BigInteger> sharesAsList = shares.collect(Collectors.toList());
-	
-		require(shareholdersAsList.size() == sharesAsList.size(), "shareholders and shares must have the same length");
-	
-		Iterator<BigInteger> it = sharesAsList.iterator();
-		for (S shareholder: shareholdersAsList) {
+
+		require(shareholders.length == shares.length, "shareholders and shares must have the same length");
+
+		for (int pos = 0; pos < shareholders.length; pos++) {
+			S shareholder = shareholders[pos];
 			require(shareholder != null, "shareholders cannot be null");
-			BigInteger share = it.next();
+			BigInteger share = shares[pos];
 			require(share != null && share.signum() > 0, "shares must be positive big integers");
 			addShares(shareholder, share);
 		}
@@ -97,23 +91,19 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	}
 
 	/**
-	 * Creates a shared entity with the given set of shareholders and respective shares.
-	 *
-	 * @param shareholders the initial shareholders; if there are repetitions, their shares are merged
-	 * @param shares the initial shares of each initial shareholder. This must have the same length as {@code shareholders}
-	 */
-	public SimpleSharedEntity(S[] shareholders, BigInteger[] shares) {
-		this(Stream.of(shareholders), Stream.of(shares));
-	}
-
-	/**
 	 * Creates a shared entity with one shareholder.
 	 *
 	 * @param shareholder the initial shareholder
 	 * @param share the initial share of the initial shareholder
 	 */
 	public SimpleSharedEntity(S shareholder, BigInteger share) {
-		this(Stream.of(shareholder), Stream.of(share));
+		require(shareholder != null, "shareholders cannot be null");
+		require(share != null && share.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder, share);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
 	}
 
 	/**
@@ -124,8 +114,15 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
      * @param share1       the initial share of the first shareholder
      * @param share2       the initial share of the second shareholder
      */
-    public SimpleSharedEntity(S shareholder1, S shareholder2, BigInteger share1, BigInteger share2) {
-    	this(Stream.of(shareholder1, shareholder2), Stream.of(share1, share2));
+	public SimpleSharedEntity(S shareholder1, S shareholder2, BigInteger share1, BigInteger share2) {
+    	require(shareholder1 != null && shareholder2 != null, "shareholders cannot be null");
+		require(share1 != null && share2 != null && share1.signum() > 0 && share2.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder1, share1);
+		addShares(shareholder2, share2);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
     }
 
     /**
@@ -138,8 +135,16 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
      * @param share2       the initial share of the second shareholder
      * @param share3       the initial share of the third shareholder
      */
-    public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, BigInteger share1, BigInteger share2, BigInteger share3) {
-    	this(Stream.of(shareholder1, shareholder2, shareholder3), Stream.of(share1, share2, share3));
+	public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, BigInteger share1, BigInteger share2, BigInteger share3) {
+    	require(shareholder1 != null && shareholder2 != null && shareholder3 != null, "shareholders cannot be null");
+		require(share1 != null && share2 != null && share1.signum() > 0 && share2.signum() > 0 && share3.signum() > 0 && share3.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder1, share1);
+		addShares(shareholder2, share2);
+		addShares(shareholder3, share3);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
     }
 
     /**
@@ -154,8 +159,17 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
      * @param share3       the initial share of the third shareholder
      * @param share4       the initial share of the fourth shareholder
      */
-    public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, S shareholder4, BigInteger share1, BigInteger share2, BigInteger share3, BigInteger share4) {
-    	this(Stream.of(shareholder1, shareholder2, shareholder3, shareholder4), Stream.of(share1, share2, share3, share4));
+	public SimpleSharedEntity(S shareholder1, S shareholder2, S shareholder3, S shareholder4, BigInteger share1, BigInteger share2, BigInteger share3, BigInteger share4) {
+    	require(shareholder1 != null && shareholder2 != null && shareholder3 != null && shareholder4 != null, "shareholders cannot be null");
+		require(share1 != null && share2 != null && share1.signum() > 0 && share2.signum() > 0 && share3.signum() > 0 && share3.signum() > 0 && share4 .signum() > 0 && share4.signum() > 0, "shares must be positive big integers");
+
+		addShares(shareholder1, share1);
+		addShares(shareholder2, share2);
+		addShares(shareholder3, share3);
+		addShares(shareholder4, share4);
+
+		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfOffers = offers.snapshot();
     }
 
     @Override
@@ -169,8 +183,13 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	}
 
     @Override
-    public @View BigInteger getTotalShares() {
-    	return shares.values().reduce(BigInteger.ZERO, BigInteger::add);
+    public @View final BigInteger getTotalShares() {
+    	class WrappedBigInteger {
+    		private BigInteger sum = ZERO;
+    	}
+    	var wbi = new WrappedBigInteger();
+    	shares.forEachValue(value -> wbi.sum = BigIntegerSupport.add(wbi.sum, value));
+    	return wbi.sum;
     }
 
     @Override
@@ -179,28 +198,26 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
     }
 
     @Override
-	public final Stream<S> getShareholders() {
-		return snapshotOfShares.keys();
-	}
-
-    @Override
 	public final @View BigInteger sharesOf(S shareholder) {
 		return shares.getOrDefault(shareholder, ZERO);
 	}
 
     @Override
 	public final @View BigInteger sharesOnSaleOf(S shareholder) {
-		return offers.stream()
-			.filter(offer -> offer.seller == shareholder && offer.isOngoing())
-			.map(offer -> offer.sharesOnSale)
-			.reduce(ZERO, BigInteger::add);
+    	BigInteger sum = ZERO;
+
+    	for (O offer: offers)
+    		if (offer.seller == shareholder && offer.isOngoing())
+    			sum = BigIntegerSupport.add(sum, offer.sharesOnSale);
+
+    	return sum;
 	}
 
     @Override
 	public @FromContract(PayableContract.class) @Payable void place(BigInteger amount, O offer) {
 		require(offer.seller == caller(), "only the seller can place its own offer");
 		require(shares.containsKey(offer.seller), "the seller is not a shareholder");
-		require(sharesOf(offer.seller).subtract(sharesOnSaleOf(offer.seller)).compareTo(offer.sharesOnSale) >= 0, "the seller has not enough shares to sell");
+		require(BigIntegerSupport.compareTo(BigIntegerSupport.subtract(sharesOf(offer.seller), sharesOnSaleOf(offer.seller)), offer.sharesOnSale) >= 0, "the seller has not enough shares to sell");
 		cleanUpOffers(null);
 		offers.add(offer);
 		snapshotOfOffers = offers.snapshot();
@@ -212,7 +229,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
     	require(caller() == buyer, "only the future owner can buy the shares");
 		require(offers.contains(offer), "unknown offer");
 		require(offer.isOngoing(), "the sale offer is not ongoing anymore");
-		require(offer.cost.compareTo(amount) <= 0, "not enough money to accept the offer");
+		require(BigIntegerSupport.compareTo(offer.cost, amount) <= 0, "not enough money to accept the offer");
 		require(offer.buyer == null || buyer == offer.buyer, "the sale offer is reserved for another buyer");
 		cleanUpOffers(offer);
 		removeShares(offer.seller, offer.sharesOnSale);
@@ -232,11 +249,6 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 			@Override @View
 			public StorageMapView<S, BigInteger> getShares() {
 				return SimpleSharedEntity.this.getShares();
-			}
-
-			@Override
-			public Stream<S> getShareholders() {
-				return SimpleSharedEntity.this.getShareholders();
 			}
 
 			@Override @View
@@ -279,11 +291,6 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 				return snapshotOfShares;
 			}
 
-			@Override
-			public Stream<S> getShareholders() {
-				return snapshotOfShares.keys();
-			}
-
 			@Override @View
 			public boolean isShareholder(Object who) {
 				return snapshotOfShares.containsKey(who);
@@ -296,7 +303,12 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 
 			@Override @View
 			public BigInteger getTotalShares() {
-				return snapshotOfShares.values().reduce(BigInteger.ZERO, BigInteger::add);
+				class WrappedBigInteger {
+		    		private BigInteger sum = ZERO;
+		    	}
+		    	var wbi = new WrappedBigInteger();
+		    	snapshotOfShares.forEachValue(value -> wbi.sum = BigIntegerSupport.add(wbi.sum, value));
+		    	return wbi.sum;
 			}
 
 			@Override @View
@@ -317,10 +329,10 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		BigInteger toDistribute = sharesOf(toRemove);
 		shares.remove(toRemove);
 		event(new ShareholderRemoved<>(toRemove));
-		BigInteger total = shares.values().reduce(ZERO, BigInteger::add);
+		BigInteger total = getTotalShares();
 		if (total.signum() > 0)
 			// TODO: avoid approximation: the last should get all the remaining shares
-			shares.keys().forEachOrdered(shareholder -> shares.update(shareholder, old -> old.add(toDistribute.multiply(old).divide(total))));
+			shares.forEachKey(shareholder -> shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total))));
 	
 		snapshotOfShares = shares.snapshot();
 	}
@@ -332,7 +344,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	 * @param removed the shares to remove
 	 */
 	private void removeShares(S shareholder, BigInteger removed) {
-		shares.update(shareholder, old -> old.subtract(removed));
+		shares.update(shareholder, old -> BigIntegerSupport.subtract(old, removed));
 		if (shares.get(shareholder).signum() == 0) {
 			shares.remove(shareholder);
 			event(new ShareholderRemoved<>(shareholder));
@@ -345,9 +357,9 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	 * @param offerToRemove an offer whose first occurrence must be removed
 	 */
 	private void cleanUpOffers(O offerToRemove) {
-		offers.stream()
-			.filter(offer -> offer == offerToRemove || !offer.isOngoing())
-			.forEachOrdered(offers::remove);
+		for (O offer: offers)
+			if (offer == offerToRemove || !offer.isOngoing())
+				offers.remove(offer);
 	}
 
 	private void addShares(S shareholder, BigInteger share) {
@@ -356,6 +368,6 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 				event(new ShareholderAdded<>(shareholder));
 				return ZERO;
 			},
-			share::add);
+			bi -> BigIntegerSupport.add(bi, share));
 	}
 }

@@ -19,15 +19,13 @@ package io.takamaka.code.util;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StorageSupport;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -104,7 +102,8 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	 * @param parent the parent collection
 	 */
 	public StorageLinkedList(Collection<? extends E> parent) {
-		parent.forEach(this::add);
+		for (var element: parent)
+			add(element);
 	}
 
 	@Override
@@ -159,7 +158,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	public boolean remove(Object e) {
 		for (Node<E> cursor = first, previous = null; cursor != null; previous = cursor, cursor = cursor.next) {
 			E element = cursor.element;
-			if (e == null ? element == null : e.equals(element)) {
+			if (e == null ? element == null : (element != null && StorageSupport.equals(e, element))) {
 				if (last == cursor)
 					last = previous;
 
@@ -182,7 +181,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	public @View boolean contains(Object e) {
 		for (Node<E> cursor = first; cursor != null; cursor = cursor.next) {
 			E element = cursor.element;
-			if (e == null ? element == null : e.equals(element))
+			if (e == null ? element == null : (element != null && StorageSupport.equals(e, element)))
 				return true;
 		}
 
@@ -230,7 +229,17 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 
 	@Override @View
 	public String toString() {
-		return stream().map(Objects::toString).collect(Collectors.joining(",", "[", "]"));
+		String result = "[";
+		boolean first = true;
+		for (E element: this)
+			if (first) {
+				result = StringSupport.concat(result, element);
+				first = false;
+			}
+			else
+				result = StringSupport.concat(result, ",", element);
+
+		return StringSupport.concat(result, "]");
 	}
 
 	@Override
@@ -254,13 +263,13 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	}
 
 	@Override
-	public Stream<E> stream() {
-		return StreamSupport.stream(spliterator(), false);
-	}
+	public E[] toArray(IntFunction<E[]> generator) {
+		E[] result = generator.apply(size);
+		int pos = 0;
+		for (E element: this)
+			result[pos++] = element;
 
-	@Override
-	public <A> A[] toArray(IntFunction<A[]> generator) {
-		return stream().toArray(generator);
+		return result;
 	}
 
 	@Override
@@ -293,11 +302,6 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			}
 
 			@Override
-			public Stream<E> stream() {
-				return StorageLinkedList.this.stream();
-			}
-
-			@Override
 			public E first() {
 				return StorageLinkedList.this.first();
 			}
@@ -318,13 +322,18 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			}
 
 			@Override
-			public <A> A[] toArray(IntFunction<A[]> generator) {
+			public E[] toArray(IntFunction<E[]> generator) {
 				return StorageLinkedList.this.toArray(generator);
 			}
 
 			@Override
 			public StorageListView<E> snapshot() {
 				return StorageLinkedList.this.snapshot();
+			}
+
+			@Override
+			public void forEach(Consumer<? super E> action) {
+				StorageLinkedList.this.forEach(action);
 			}
 		}
 
@@ -333,8 +342,8 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 
 	@Override
 	public StorageListView<E> snapshot() {
-		StorageLinkedList<E> copy = new StorageLinkedList<>();
-		stream().forEachOrdered(copy::addLast);
+		var copy = new StorageLinkedList<E>();
+		forEach(copy::addLast);
 		return copy.view();
 	}
 }

@@ -16,20 +16,15 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -90,8 +85,9 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	 */
 	public StorageTreeArray(int length, V initialValue) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, initialValue));
+
+		for (int index = 0; index < length; index++)
+			set(index, initialValue);
 	}
 
 	/**
@@ -105,8 +101,9 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	 */
 	public StorageTreeArray(int length, Supplier<? extends V> supplier) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, supplier.get()));
+
+		for (int index = 0; index < length; index++)
+			set(index, supplier.get());
 	}
 
 	/**
@@ -122,8 +119,9 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	 */
 	public StorageTreeArray(int length, IntFunction<? extends V> supplier) {
 		this(length);
-	
-		IntStream.range(0, length).forEachOrdered(index -> set(index, supplier.apply(index)));
+
+		for (int index = 0; index < length; index++)
+			set(index, supplier.apply(index));
 	}
 
 	/**
@@ -312,7 +310,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public @View V get(int index) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in get is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in get is outside bounds [0,", length, ")"));
 
 		return get(root, index);
 	}
@@ -337,7 +335,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public @View V getOrDefault(int index, V _default) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in getOrDefault is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in getOrDefault is outside bounds [0,", length, ")"));
 
 		return getOrDefault(root, index, _default);
 	}
@@ -355,7 +353,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public V getOrDefault(int index, Supplier<? extends V> _default) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in getOrDefault is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in getOrDefault is outside bounds [0,", length, ")"));
 
 		return getOrDefault(root, index, _default);
 	}
@@ -374,7 +372,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void set(int index, V value) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in set is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in set is outside bounds [0,", length, ")"));
 
 		root = set(root, index, value);
 		mkRootBlack();
@@ -400,7 +398,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void update(int index, UnaryOperator<V> how) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in update is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in update is outside bounds [0,", length, ")"));
 
 		root = update(root, index, how);
 		mkRootBlack();
@@ -425,7 +423,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void update(int index, V _default, UnaryOperator<V> how) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in update is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in update is outside bounds [0,", length, ")"));
 
 		root = update(root, index, _default, how);
 		mkRootBlack();
@@ -453,7 +451,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	@Override
 	public void update(int index, Supplier<? extends V> _default, UnaryOperator<V> how) {
 		if (index < 0 || index >= length)
-			throw new ArrayIndexOutOfBoundsException(index + " in update is outside bounds [0," + length + ")");
+			throw new ArrayIndexOutOfBoundsException(StringSupport.concat(index, " in update is outside bounds [0,", length, ")"));
 
 		root = update(root, index, _default, how);
 		mkRootBlack();
@@ -604,9 +602,19 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 		return new StorageArrayIterator<>(root, length);
 	}
 
+	private static class Stack<V> {
+		private final V head;
+		private final Stack<V> tail;
+
+		private Stack(V head, Stack<V> tail) {
+			this.head = head;
+			this.tail = tail;
+		}
+	}
+
 	private static class StorageArrayIterator<V> implements Iterator<V> {
 		// the path under enumeration; it holds that the left children have already been enumerated
-		private final List<Node<V>> stack = new ArrayList<>();
+		private Stack<Node<V>> stack = null;
 		private int nextKey;
 		private final int length;
 
@@ -615,7 +623,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 
 			// initially, the stack contains the leftmost path of the tree
 			for (Node<V> cursor = root; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 		}
 
 		@Override
@@ -626,16 +634,17 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 		@Override
 		public V next() {
 			// first check if we are in a hole of null values
-			if (stack.isEmpty() || nextKey < stack.get(stack.size() - 1).index) {
+			if (stack == null || nextKey < stack.head.index) {
 				nextKey++;
 				return null;
 			}
 
-			Node<V> topmost = stack.remove(stack.size() - 1);
+			Node<V> topmost = stack.head;
+			stack = stack.tail;
 
 			// we add the leftmost path of the right child of topmost
 			for (Node<V> cursor = topmost.right; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 
 			nextKey++;
 			return topmost.value;
@@ -643,13 +652,13 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 	}
 
 	@Override
-	public Stream<V> stream() {
-		return StreamSupport.stream(spliterator(), false);
-	}
+	public V[] toArray(IntFunction<V[]> generator) {
+		V[] result = generator.apply(length);
+		int pos = 0;
+		for (V element: this)
+			result[pos++] = element;
 
-	@Override
-	public <A> A[] toArray(IntFunction<A[]> generator) {
-		return stream().toArray(generator);
+		return result;
 	}
 
 	@Override
@@ -687,12 +696,7 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 			}
 
 			@Override
-			public Stream<V> stream() {
-				return StorageTreeArray.this.stream();
-			}
-
-			@Override
-			public <A> A[] toArray(IntFunction<A[]> generator) {
+			public V[] toArray(IntFunction<V[]> generator) {
 				return StorageTreeArray.this.toArray(generator);
 			}
 
@@ -710,6 +714,11 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 			public StorageArrayView<V> snapshot() {
 				return StorageTreeArray.this.snapshot();
 			}
+
+			@Override
+			public void forEach(Consumer<? super V> action) {
+				StorageTreeArray.this.forEach(action);
+			}
 		}
 
 		return new StorageArrayViewImpl();
@@ -722,6 +731,22 @@ public class StorageTreeArray<V> extends Storage implements StorageArray<V> {
 
 	@Override
 	public String toString() {
-		return stream().map(Objects::toString).collect(Collectors.joining(",", "[", "]"));
+		String result = "[";
+		boolean first = true;
+		for (V element: this)
+			if (first) {
+				result = StringSupport.concat(result, element);
+				first = false;
+			}
+			else
+				result = StringSupport.concat(result, ",", element);
+
+		return StringSupport.concat(result, "]");
+	}
+
+	@Override
+	public void forEach(Consumer<? super V> action) {
+		for (V element: this)
+			action.accept(element);
 	}
 }

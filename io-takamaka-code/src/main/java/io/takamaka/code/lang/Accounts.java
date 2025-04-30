@@ -19,11 +19,10 @@ package io.takamaka.code.lang;
 import static io.takamaka.code.lang.Takamaka.require;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageIntMap;
 import io.takamaka.code.util.StorageTreeIntMap;
 
@@ -40,13 +39,11 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	private final StorageIntMap<A> accounts;
 
 	/**
-	 * Creates the container. If red/green accounts are being created, ths constructor
-	 * does not initialize their red balance, for which {{@link #setRedBalances(BigInteger, BigInteger[])}
-	 * must be called after construction.
+	 * Creates the container.
 	 * 
 	 * @param amount the total amount of coins distributed to the accounts that get created;
 	 *               this must be the sum of all {@code balances}
-	 * @param balances the initial, green balances of the accounts; they must be as many as the {@code publicKeys}
+	 * @param balances the initial balances of the accounts; they must be as many as the {@code publicKeys}
 	 *                 and their sum must be {@code amount}
 	 * @param publicKeys the Base64-encoded public keys of the accounts
 	 */
@@ -55,43 +52,15 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 		require(publicKeys != null, "the public keys cannot be null");
 		int length = balances.length;
 		require(length == publicKeys.length, "the balances must be as many as the public keys");
-		require(amount.equals(Stream.of(balances).reduce(BigInteger.ZERO, BigInteger::add)),
+		BigInteger sum = BigInteger.ZERO;
+		for (var balance: balances)
+			sum = BigIntegerSupport.add(sum, balance);
+		require(BigIntegerSupport.equals(amount, sum),
 			"the amount paid for creating this collector must be equal to the sum of the balances of the accounts being created");
 
 		this.accounts = new StorageTreeIntMap<>();
 		for (int pos = 0; pos < length; pos++)
 			accounts.put(pos, mkAccount(balances[pos], publicKeys[pos]));
-	}
-
-	/**
-	 * Sets the red balances of the accounts, if they are red/green accounts.
-	 * 
-	 * @param amount the total amount of red coins distributed to the accounts that get created;
-	 *               this must be the sum of all {@code redBalances}
-	 * @param redBalances the initial, red balances of the accounts; they must be as many as the accounts
-	 *                    and their sum must be {@code amount}
-	 */
-	protected @FromContract @RedPayable void setRedBalances(BigInteger amount, BigInteger[] redBalances) {
-		require(redBalances != null, "balances cannot be null");
-		int length = accounts.size();
-		require(length == redBalances.length, "the red balances must be as many as the accounts");
-		require(amount.equals(Stream.of(redBalances).reduce(BigInteger.ZERO, BigInteger::add)),
-			"the amount paid for this method must be equal to the sum of the red balances of the accounts being created");
-
-		for (int pos = 0; pos < length; pos++)
-			get(pos).receiveRed(redBalances[pos]);
-	}
-
-	/**
-	 * Sets the red balances of the accounts, if they are red/green accounts.
-	 * 
-	 * @param amount the total amount of red coins distributed to the accounts that get created;
-	 *               this must be the sum of all {@code redBalances}
-	 * @param redBalances the initial, red balances of the accounts, as a space-separated sequence of big integers;
-	 *                    they must be as many as the accounts and their sum must be {@code amount}
-	 */
-	public @FromContract @RedPayable void addRedBalances(BigInteger amount, String redBalances) {
-		setRedBalances(amount, buildBalances(redBalances));
 	}
 
 	/**
@@ -119,27 +88,37 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	protected abstract A mkAccount(BigInteger balance, String publicKey);
 
 	private static BigInteger[] buildBalances(String balancesAsStringSequence) {
-		return splitAtSpaces(balancesAsStringSequence).stream()
-			.map(BigInteger::new)
-			.toArray(BigInteger[]::new);
+		String[] segments = splitAtSpaces(balancesAsStringSequence);
+		var result = new BigInteger[segments.length];
+		int pos = 0;
+		for (String s: segments)
+			result[pos++] = BigIntegerSupport.from(s);
+
+		return result;
 	}
 
 	private static String[] buildPublicKeys(String publicKeysAsStringSequence) {
-		return splitAtSpaces(publicKeysAsStringSequence).toArray(String[]::new);
+		return splitAtSpaces(publicKeysAsStringSequence);
 	}
 
-	private static List<String> splitAtSpaces(String s) {
-		List<String> list = new ArrayList<>();
+	private static String[] splitAtSpaces(String s) {
+		int counter = s.isEmpty() ? 0 : 1;
+		for (int i = 0; i < s.length() - 1; i++)
+			if (s.charAt(i) == ' ')
+				counter++;
+
+		var result = new String[counter];
 		int pos;
-		while ((pos = s.indexOf(' ')) >= 0) {
-			list.add(s.substring(0, pos));
-			s = s.substring(pos + 1);
+		int i = 0;
+		while ((pos = StringSupport.indexOf(s, ' ')) >= 0) {
+			result[i++] = StringSupport.substring(s, 0, pos);
+			s = StringSupport.substring(s, pos + 1);
 		}
 
 		if (!s.isEmpty())
-			list.add(s);
+			result[i++] = s;
 
-		return list;
+		return result;
 	}
 
 	/**
@@ -149,16 +128,29 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 	 */
 	@Override
 	public final Iterator<A> iterator() {
-		return stream().iterator();
+		var it = accounts.iterator();
+
+		return new Iterator<A>() {
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public A next() {
+				return it.next().getValue();
+			}
+		};
 	}
 
 	/**
-	 * Yields the accounts in this collector.
+	 * Performs the given action for each account in this container.
 	 * 
-	 * @return the accounts
+	 * @param action the action the action to perform
 	 */
-	public final Stream<A> stream() {
-		return accounts.values();
+	public final void forEach(Consumer<? super A> action) {
+		accounts.forEachValue(action);
 	}
 
 	/**

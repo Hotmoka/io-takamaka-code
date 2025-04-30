@@ -26,6 +26,7 @@ import io.takamaka.code.dao.PollWithTimeWindow;
 import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -106,7 +107,7 @@ public class Versions<V extends Validator> extends Contract {
 
 		@Override
 		public String getDescription() {
-			return "sets the verification version of the network to " + newVerificationVersion;
+			return StringSupport.concat("sets the verification version of the network to ", newVerificationVersion);
 		}
 
 		@Override

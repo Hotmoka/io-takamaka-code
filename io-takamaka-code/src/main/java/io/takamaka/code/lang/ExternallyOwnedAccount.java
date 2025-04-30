@@ -20,10 +20,7 @@ import java.math.BigInteger;
 
 /**
  * A contract that can be used to pay for a transaction.
- * Its constructors allow one to create such a contract with an initial
- * amount of coins. In order to initialize its red balance as well,
- * one can later call its {@link io.takamaka.code.lang.PayableContract#receiveRed(int)} method
- * or similar.
+ * Its constructors allow one to create such a contract with an initial amount of coins.
  */
 public class ExternallyOwnedAccount extends PayableContract implements Account {
 
@@ -52,7 +49,7 @@ public class ExternallyOwnedAccount extends PayableContract implements Account {
 	}
 
 	/**
-	 * Creates an externally owned contract with the given initial green funds.
+	 * Creates an externally owned contract with the given initial funds.
 	 * 
 	 * @param initialAmount the initial funds
 	 * @param publicKey the Base64-encoded public key that will be assigned to the account
@@ -63,7 +60,7 @@ public class ExternallyOwnedAccount extends PayableContract implements Account {
 	}
 
 	/**
-	 * Creates an externally owned contract with the given initial green funds.
+	 * Creates an externally owned contract with the given initial funds.
 	 * 
 	 * @param initialAmount the initial funds
 	 * @param publicKey the Base64-encoded public key that will be assigned to the account
@@ -74,7 +71,7 @@ public class ExternallyOwnedAccount extends PayableContract implements Account {
 	}
 
 	/**
-	 * Creates an externally owned contract with the given initial green funds.
+	 * Creates an externally owned contract with the given initial funds.
 	 * 
 	 * @param initialAmount the initial funds
 	 * @param publicKey the Base64-encoded public key that will be assigned to the account

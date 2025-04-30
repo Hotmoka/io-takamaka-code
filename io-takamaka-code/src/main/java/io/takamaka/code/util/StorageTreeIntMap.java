@@ -16,20 +16,17 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -77,15 +74,6 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 	 * Builds an empty map.
 	 */
 	public StorageTreeIntMap() {}
-
-	/**
-	 * Creates a map initialized to the same bindings as the given parent map.
-	 * 
-	 * @param parent the parent map
-	 */
-	public StorageTreeIntMap(Map<Integer, ? extends V> parent) {
-		parent.forEach(this::put);
-	}
 
 	/**
 	 * Yields a snapshot of the given map.
@@ -599,7 +587,7 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 
 	@Override
 	public @View int select(int k) {
-		if (k < 0 || k >= size()) throw new IllegalArgumentException("argument to select() is invalid: " + k);
+		if (k < 0 || k >= size()) throw new IllegalArgumentException(StringSupport.concat("argument to select() is invalid: ", k));
 		return select(root, k).key;
 	}
 
@@ -828,66 +816,43 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 		return new StorageMapIterator<>(root);
 	}
 
+	private static class Stack<V> {
+		private final V head;
+		private final Stack<V> tail;
+
+		private Stack(V head, Stack<V> tail) {
+			this.head = head;
+			this.tail = tail;
+		}
+	}
+
 	private static class StorageMapIterator<V> implements Iterator<Entry<V>> {
 		// the path under enumeration; it holds that the left children
 		// have already been enumerated
-		private final List<Node<V>> stack = new ArrayList<>();
+		private Stack<Node<V>> stack = null;
 
 		private StorageMapIterator(Node<V> root) {
 			// initially, the stack contains the leftmost path of the tree
 			for (var cursor = root; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 		}
 
 		@Override
 		public boolean hasNext() {
-			return !stack.isEmpty();
+			return stack != null;
 		}
 
 		@Override
 		public Entry<V> next() {
-			var topmost = stack.remove(stack.size() - 1);
+			var topmost = stack.head;
+			stack = stack.tail;
 
 			// we add the leftmost path of the right child of topmost
 			for (var cursor = topmost.right; cursor != null; cursor = cursor.left)
-				stack.add(cursor);
+				stack = new Stack<>(cursor, stack);
 
 			return topmost;
 		}
-	}
-
-	@Override
-	public Stream<Entry<V>> stream() {
-		return StreamSupport.stream(spliterator(), false);
-	}
-
-	@Override
-	public List<Integer> keyList() {
-		List<Integer> keys = new ArrayList<>();
-		if (root != null)
-			keyList(root, keys);
-
-		return keys;
-	}
-
-	private static <V> void keyList(Node<V> x, List<Integer> keys) {
-		if (x.left != null)
-			keyList(x.left, keys);
-
-		keys.add(x.key);
-
-		if (x.right != null)
-			keyList(x.right, keys);
-	}
-
-	@Override
-	public IntStream keys() {
-		return stream().mapToInt(Entry::getKey);
-	}
-
-	@Override
-	public Stream<V> values() {
-		return stream().map(Entry::getValue);
 	}
 
 	@Override
@@ -974,28 +939,23 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 			}
 
 			@Override
-			public Stream<Entry<V>> stream() {
-				return StorageTreeIntMap.this.stream();
-			}
-
-			@Override
-			public List<Integer> keyList() {
-				return StorageTreeIntMap.this.keyList();
-			}
-
-			@Override
-			public IntStream keys() {
-				return StorageTreeIntMap.this.keys();
-			}
-
-			@Override
 			public StorageIntMapView<V> snapshot() {
 				return StorageTreeIntMap.this.snapshot();
 			}
 
 			@Override
-			public Stream<V> values() {
-				return StorageTreeIntMap.this.values();
+			public void forEach(Consumer<? super Entry<V>> action) {
+				StorageTreeIntMap.this.forEach(action);
+			}
+
+			@Override
+			public void forEachKey(IntConsumer action) {
+				StorageTreeIntMap.this.forEachKey(action);
+			}
+
+			@Override
+			public void forEachValue(Consumer<? super V> action) {
+				StorageTreeIntMap.this.forEachValue(action);
 			}
 		}
 
@@ -1005,5 +965,21 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 	@Override
 	public StorageIntMapView<V> snapshot() {
 		return new StorageTreeIntMap<>(this).view();
+	}
+
+	@Override
+	public void forEach(Consumer<? super Entry<V>> action) {
+		for (var entry: this)
+			action.accept(entry);
+	}
+
+	@Override
+	public void forEachKey(IntConsumer action) {
+		forEach(entry -> action.accept(entry.getKey()));
+	}
+
+	@Override
+	public void forEachValue(Consumer<? super V> action) {
+		forEach(entry -> action.accept(entry.getValue()));
 	}
 }

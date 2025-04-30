@@ -17,6 +17,7 @@ limitations under the License.
 package io.takamaka.code.governance;
 
 import io.takamaka.code.lang.FromContract;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -35,7 +36,7 @@ public class VerificationVersionUpdate extends ConsensusUpdate {
 	 * @param newVerificationVersion the new verification version
 	 */
 	@FromContract VerificationVersionUpdate(long newVerificationVersion) {
-		super("the version of the verification module has been set to " + newVerificationVersion);
+		super(StringSupport.concat("the version of the verification module has been set to ", newVerificationVersion));
 
 		this.newVerificationVersion = newVerificationVersion;
 	}

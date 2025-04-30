@@ -17,7 +17,6 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
 import io.takamaka.code.lang.View;
 
@@ -109,13 +108,6 @@ public interface StorageSetView<V> extends Iterable<V> {
 	 * @throws IllegalArgumentException if {@code value} is {@code null}
 	 */
 	@View int rank(Object value);
-
-	/**
-	 * Yields an ordered stream of the values in this set, in increasing order.
-	 * 
-	 * @return the stream
-	 */
-	Stream<V> stream();
 
 	/**
 	 * Yields a snapshot of this set. The snapshot contains the elements in this set

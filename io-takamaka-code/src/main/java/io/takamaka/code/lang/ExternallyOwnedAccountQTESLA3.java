@@ -21,9 +21,7 @@ import java.math.BigInteger;
 /**
  * A contract that can be used to pay for a transaction.
  * Its constructors allow one to create such a contract with an initial
- * amount of green coins. In order to initialize its red balance as well,
- * one can later call its {@link io.takamaka.code.lang.PayableContract#receiveRed(int)} method
- * or similar. It uses the qtesla-p-III algorithm for signing transactions.
+ * amount of coins. It uses the qtesla-p-III algorithm for signing transactions.
  */
 public class ExternallyOwnedAccountQTESLA3 extends ExternallyOwnedAccount implements AccountQTESLA3 {
 
@@ -37,7 +35,7 @@ public class ExternallyOwnedAccountQTESLA3 extends ExternallyOwnedAccount implem
 	}
 
 	/**
-	 * Creates an externally owned contract with the given initial green funds.
+	 * Creates an externally owned contract with the given initial funds.
 	 * 
 	 * @param initialAmount the initial green funds
 	 * @param publicKey the Base64-encoded qtesla public key that will be assigned to the account
@@ -48,7 +46,7 @@ public class ExternallyOwnedAccountQTESLA3 extends ExternallyOwnedAccount implem
 	}
 
 	/**
-	 * Creates an externally owned contract with the given initial green funds.
+	 * Creates an externally owned contract with the given initial funds.
 	 * 
 	 * @param initialAmount the initial green funds
 	 * @param publicKey the Base64-encoded qtesla public key that will be assigned to the account
@@ -59,7 +57,7 @@ public class ExternallyOwnedAccountQTESLA3 extends ExternallyOwnedAccount implem
 	}
 
 	/**
-	 * Creates an externally owned contract with the given initial green funds.
+	 * Creates an externally owned contract with the given initial funds.
 	 * 
 	 * @param initialAmount the initial green funds
 	 * @param publicKey the Base64-encoded qtesla public key that will be assigned to the account

@@ -25,6 +25,7 @@ import io.takamaka.code.lang.ExternallyOwnedAccountED25519;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Gamete;
 import io.takamaka.code.lang.Payable;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageTreeMap;
@@ -65,7 +66,7 @@ public class AccountsLedger extends Contract {
 	 * @return the account, if any. Yields {@code null} otherwise
 	 */
 	public @View ExternallyOwnedAccount get(String publicKey) {
-		if (gamete.publicKey().equals(publicKey))
+		if (StringSupport.equals(gamete.publicKey(), publicKey))
 			return gamete;
 		else
 			return accounts.get(publicKey);
@@ -80,7 +81,7 @@ public class AccountsLedger extends Contract {
 	 * @return the account in the ledger, old or new
 	 */
 	public final @FromContract @Payable ExternallyOwnedAccount add(BigInteger amount, String publicKey) {
-		if (gamete.publicKey().equals(publicKey)) {
+		if (StringSupport.equals(gamete.publicKey(), publicKey)) {
 			gamete.receive(amount);
 			return gamete;
 		}

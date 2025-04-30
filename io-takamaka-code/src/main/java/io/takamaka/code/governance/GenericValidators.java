@@ -91,9 +91,13 @@ public class GenericValidators extends AbstractValidators<Validator> {
 	}
 
 	private static Validator[] buildValidators(String publicKeysAsStringSequence) {
-		return splitAtSpaces(publicKeysAsStringSequence).stream()
-			.map(Validator::new)
-			.toArray(Validator[]::new);
+		String[] list = splitAtSpaces(publicKeysAsStringSequence);
+		var result = new Validator[list.length];
+		int pos = 0;
+		for (String s: list)
+			result[pos++] = new Validator(s);
+
+		return result;
 	}
 
 	@Override

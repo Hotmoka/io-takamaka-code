@@ -20,10 +20,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.IntStream;
 
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Immutable;
+import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 
 /**
@@ -98,7 +98,7 @@ public final class Bytes8Snapshot extends AbstractStorageByteArrayView {
 		if (elements == null)
 			throw new IllegalArgumentException("Expected a non-null array of elements");
 		if (elements.length != length)
-			throw new IllegalArgumentException("Expected " + length + " elements, but got " + elements.length);
+			throw new IllegalArgumentException(StringSupport.concat("Expected ", length, " elements, but got ", elements.length));
 
 		byte0 = elements[0];
 		byte1 = elements[1];
@@ -214,11 +214,6 @@ public final class Bytes8Snapshot extends AbstractStorageByteArrayView {
 			(byte5 << 5) ^
 			(byte6 << 6) ^
 			(byte7 << 7);
-	}
-
-	@Override
-	public IntStream stream() {
-		return IntStream.of(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7);
 	}
 
 	@Override
