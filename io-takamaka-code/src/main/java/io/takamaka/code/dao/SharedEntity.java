@@ -56,7 +56,7 @@ public interface SharedEntity<S extends PayableContract, O extends SharedEntity.
 	@View BigInteger sharesOnSaleOf(S shareholder);
 
 	/**
-	 * Place an offer of sale of shares for this entity. This method checks
+	 * Place a shares sale offer for this entity. This method checks
 	 * the offer, adds it to the current offers and issues an event.
 	 * 
 	 * @param amount the ticket payed to place the offer; implementations may allow zero for this
