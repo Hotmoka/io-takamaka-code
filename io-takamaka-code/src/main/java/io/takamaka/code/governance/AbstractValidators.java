@@ -577,7 +577,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	private void slash(V validator, int percent) {
 		BigInteger oldStakes = getStake(validator);
 		BigInteger newStakes = BigIntegerSupport.divide(BigIntegerSupport.multiply(oldStakes, BigInteger.valueOf(100_000_000L - percent)), _100_000_000);
-		event(new ValidatorSlashed<V>(validator, BigIntegerSupport.subtract(oldStakes, newStakes)));
+		event(new ValidatorSlashed<>(validator, BigIntegerSupport.subtract(oldStakes, newStakes)));
 
 		if (newStakes.signum() == 0) {
 			// if the staked coins reached zero, we remove the validator altogether

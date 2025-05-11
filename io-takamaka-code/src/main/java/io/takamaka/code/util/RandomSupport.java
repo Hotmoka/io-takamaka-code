@@ -36,7 +36,8 @@ public abstract class RandomSupport {
 	 * @param bytes the array to fill
 	 */
 	public static void nextBytes(Random random, byte[] bytes) {
-		Takamaka.charge(bytes.length);
+		if (bytes != null)
+			Takamaka.charge(bytes.length);
 		random.nextBytes(bytes);
 	}
 }
