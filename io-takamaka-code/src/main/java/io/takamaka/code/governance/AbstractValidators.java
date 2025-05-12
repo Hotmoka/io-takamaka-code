@@ -296,8 +296,43 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		event(new ValidatorsUpdate());
 	}
 
+	/**
+	 * Place a shares sale offer for this entity. This method checks
+	 * the offer, adds it to the current offers and issues an event.
+	 * 
+	 * @param amount the ticket payed to place the offer; implementations may allow zero for this
+	 * @param seller the seller of the shares; this must coincide with the caller of the constructor
+	 * @param sharesOnSale the shares on sale, positive
+	 * @param cost the cost, non-negative
+	 * @param duration the duration of validity of the offer, in milliseconds from now, always non-negative
+	 * @return the offer that has been placed
+	 */
+	public @FromContract(PayableContract.class) @Payable Offer<V> place(BigInteger amount, V seller, BigInteger sharesOnSale, BigInteger cost, long duration) {
+		var offer = new Offer<>(seller, sharesOnSale, cost, duration);
+    	place(amount, offer);
+    	return offer;
+	}
+
+	/**
+	 * Place a shares sale offer for this entity. This method checks
+	 * the offer, adds it to the current offers and issues an event.
+	 * 
+	 * @param amount the ticket payed to place the offer; implementations may allow zero for this
+	 * @param seller the seller of the shares; this must coincide with the caller of the constructor
+	 * @param sharesOnSale the shares on sale, positive
+	 * @param cost the cost, non-negative
+	 * @param duration the duration of validity of the offer, in milliseconds from now, always non-negative
+	 * @param buyer the only buyer allowed for this offer
+	 * @return the offer that has been placed
+	 */
+	public @FromContract(PayableContract.class) @Payable Offer<V> place(BigInteger amount, V seller, BigInteger sharesOnSale, BigInteger cost, long duration, V buyer) {
+		var offer = new Offer<>(seller, sharesOnSale, cost, duration, buyer);
+		place(amount, offer);
+		return offer;
+	}
+
 	@Override
-	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) { // TODO: rename into rewardTendermint
+	@FromContract @Payable public void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
 		require(isSystemCall(), "the validators can only be rewarded with a system request");
 
 		String[] behavingIDs = splitAtSpaces(behaving);
@@ -542,7 +577,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	private void slash(V validator, int percent) {
 		BigInteger oldStakes = getStake(validator);
 		BigInteger newStakes = BigIntegerSupport.divide(BigIntegerSupport.multiply(oldStakes, BigInteger.valueOf(100_000_000L - percent)), _100_000_000);
-		event(new ValidatorSlashed<V>(validator, BigIntegerSupport.subtract(oldStakes, newStakes)));
+		event(new ValidatorSlashed<>(validator, BigIntegerSupport.subtract(oldStakes, newStakes)));
 
 		if (newStakes.signum() == 0) {
 			// if the staked coins reached zero, we remove the validator altogether

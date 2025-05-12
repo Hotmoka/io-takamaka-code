@@ -47,4 +47,13 @@ public interface Account {
 	 * @return the public key
 	 */
 	@View String publicKey();
+
+	/**
+	 * Changes the public key of this account. Only this same account can call this method on itself.
+	 * 
+	 * @param publicKey the new, Base64-encoded public key that will be assigned to this account.
+	 *                  After this rotation, the new key must be used to control the account
+	 *                  while the old key will not work anymore
+	 */
+	@FromContract(ExternallyOwnedAccount.class) void rotatePublicKey(String publicKey);
 }

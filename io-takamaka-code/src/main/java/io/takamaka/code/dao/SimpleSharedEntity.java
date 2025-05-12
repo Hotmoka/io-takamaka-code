@@ -224,7 +224,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		event(new OfferPlaced<>(offer));
 	}
 
-    @Override
+	@Override
 	public @FromContract(PayableContract.class) @Payable void accept(BigInteger amount, S buyer, O offer) {
     	require(caller() == buyer, "only the future owner can buy the shares");
 		require(offers.contains(offer), "unknown offer");
