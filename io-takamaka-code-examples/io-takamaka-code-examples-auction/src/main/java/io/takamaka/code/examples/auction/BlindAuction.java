@@ -1,5 +1,4 @@
 /*
-    A blind auction smart contract example in Takamaka.
     Copyright (C) 2021 Fausto Spoto (fausto.spoto@gmail.com)
 
     This program is free software: you can redistribute it and/or modify
