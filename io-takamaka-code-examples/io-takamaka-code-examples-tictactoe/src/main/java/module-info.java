@@ -16,7 +16,7 @@
 */
 
 // This module contains the tic-tac-toe smart contract of the Takamaka tutorial.
-module ponzi_simple {
+module tictactoe {
 	exports io.takamaka.code.examples.tictactoe;
 	requires transitive io.takamaka.code;
 }

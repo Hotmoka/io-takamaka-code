@@ -16,7 +16,7 @@
 */
 
 // This module contains the ERC20 token smart contract of the Takamaka tutorial.
-module auction_events {
+module erc20 {
 	exports io.takamaka.code.examples.erc20;
 	requires transitive io.takamaka.code;
 }

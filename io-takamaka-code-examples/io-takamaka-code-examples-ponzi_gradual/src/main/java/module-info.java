@@ -16,7 +16,7 @@
 */
 
 // This module contains the gradual Ponzi smart contract of the Takamaka tutorial.
-module ponzi_simple {
+module ponzi_gradual {
 	exports io.takamaka.code.examples.ponzi;
 	requires transitive io.takamaka.code;
 }

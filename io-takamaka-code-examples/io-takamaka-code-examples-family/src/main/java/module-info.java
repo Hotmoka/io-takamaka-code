@@ -16,7 +16,7 @@
 */
 
 // This module contains the minimal family smart contract of the Takamaka tutorial.
-module auction_events {
+module family {
 	exports io.takamaka.code.examples.family;
 	requires transitive io.takamaka.code;
 }

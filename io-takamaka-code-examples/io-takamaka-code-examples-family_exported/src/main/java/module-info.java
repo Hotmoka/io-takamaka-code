@@ -15,8 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// This module contains the ERC721 token smart contract of the Takamaka tutorial.
-module erc721 {
-	exports io.takamaka.code.examples.erc721;
+// This module contains the family smart contract of the Takamaka tutorial, as an exported object.
+module family_exported {
+	exports io.takamaka.code.examples.family;
 	requires transitive io.takamaka.code;
 }
