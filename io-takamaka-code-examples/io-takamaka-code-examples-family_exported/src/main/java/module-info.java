@@ -17,6 +17,5 @@
 
 // This module contains the family smart contract of the Takamaka tutorial, as an exported object.
 module family_exported {
-	exports io.takamaka.code.examples.family;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

@@ -17,6 +17,5 @@
 
 // This module contains the auction smart contract with events example of the Takamaka tutorial.
 module auction_events {
-	exports io.takamaka.code.examples.auction;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

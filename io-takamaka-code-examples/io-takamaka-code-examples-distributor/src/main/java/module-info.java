@@ -17,6 +17,5 @@
 
 // This module contains the distributor smart contract of the Takamaka tutorial.
 module ponzi_simple {
-	exports io.takamaka.code.examples.distributor;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

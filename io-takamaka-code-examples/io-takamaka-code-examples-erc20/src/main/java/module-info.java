@@ -17,6 +17,5 @@
 
 // This module contains the ERC20 token smart contract of the Takamaka tutorial.
 module erc20 {
-	exports io.takamaka.code.examples.erc20;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

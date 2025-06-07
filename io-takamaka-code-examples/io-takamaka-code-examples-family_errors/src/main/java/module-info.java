@@ -17,6 +17,5 @@
 
 // This module contains the family smart contract of the Takamaka tutorial, with errors that prevent its installation.
 module family_errors {
-	exports io.takamaka.code.examples.family;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

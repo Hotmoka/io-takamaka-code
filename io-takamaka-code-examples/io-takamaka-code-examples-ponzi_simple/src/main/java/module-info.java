@@ -17,6 +17,5 @@
 
 // This module contains the simple Ponzi smart contract example of the Takamaka tutorial.
 module ponzi_simple {
-	exports io.takamaka.code.examples.ponzi;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

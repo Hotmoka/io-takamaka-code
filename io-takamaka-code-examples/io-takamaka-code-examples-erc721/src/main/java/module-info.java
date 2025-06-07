@@ -17,6 +17,5 @@
 
 // This module contains the ERC721 token smart contract of the Takamaka tutorial.
 module erc721 {
-	exports io.takamaka.code.examples.erc721;
-	requires transitive io.takamaka.code;
+	requires io.takamaka.code;
 }

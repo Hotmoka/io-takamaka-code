@@ -1,4 +1,5 @@
 /*
+    A blind auction event example in Takamaka.
     Copyright (C) 2021 Fausto Spoto (fausto.spoto@gmail.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -15,7 +16,29 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// This module contains an improved version of the tic-tac-toe smart contract of the Takamaka tutorial.
-module tictactoe_improved {
-	requires io.takamaka.code;
+package auction;
+
+import java.math.BigInteger;
+
+import io.takamaka.code.lang.FromContract;
+import io.takamaka.code.lang.Event;
+import io.takamaka.code.lang.PayableContract;
+import io.takamaka.code.lang.View;
+
+public class BidIncrease extends Event {
+  public final PayableContract bidder;
+  public final BigInteger amount;
+
+  @FromContract BidIncrease(PayableContract bidder, BigInteger amount) {
+    this.bidder = bidder;
+    this.amount = amount;
+  }
+
+  public @View PayableContract getBidder() {
+    return bidder;
+  }
+
+  public @View BigInteger getAmount() {
+    return amount;
+  }
 }
