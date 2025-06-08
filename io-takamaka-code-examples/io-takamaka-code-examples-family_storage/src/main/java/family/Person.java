@@ -19,6 +19,7 @@
 package family;
 
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 
 public class Person extends Storage {
 	private final String name;
@@ -45,6 +46,6 @@ public class Person extends Storage {
 
 	@Override
 	public String toString() {
-		return name + " (" + day + "/" + month + "/" + year + ")";
+		return StringSupport.concat(name, " (", day, "/", month, "/", year, ")");
 	}
 }
