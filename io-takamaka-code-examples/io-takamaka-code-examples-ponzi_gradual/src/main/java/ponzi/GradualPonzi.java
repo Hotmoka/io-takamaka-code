@@ -26,6 +26,8 @@ import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
+import io.takamaka.code.lang.StringSupport;
+import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageLinkedList;
 import io.takamaka.code.util.StorageList;
 
@@ -43,9 +45,10 @@ public class GradualPonzi extends Contract {
   }
 
   public @Payable @FromContract(PayableContract.class) void invest(BigInteger amount) {
-    require(amount.compareTo(MINIMUM_INVESTMENT) >= 0,
-      () -> "you must invest at least " + MINIMUM_INVESTMENT);
-    BigInteger eachInvestorGets = amount.divide(BigInteger.valueOf(investors.size()));
+	// new investments must be at least 10% greater than current
+    require(BigIntegerSupport.compareTo(amount, MINIMUM_INVESTMENT) >= 0,
+      () -> StringSupport.concat("you must invest at least ", MINIMUM_INVESTMENT));
+    BigInteger eachInvestorGets = BigIntegerSupport.divide(amount, BigInteger.valueOf(investors.size()));
     investors.forEach(investor -> investor.receive(eachInvestorGets));
     investors.add((PayableContract) caller());
   }
