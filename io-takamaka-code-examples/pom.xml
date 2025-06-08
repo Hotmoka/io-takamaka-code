@@ -40,7 +40,6 @@
   	<module>io-takamaka-code-examples-ponzi_annotations</module>
   	<module>io-takamaka-code-examples-ponzi_view</module>
   	<module>io-takamaka-code-examples-ponzi_gradual</module>
-  	<module>io-takamaka-code-examples-distributor</module>
   	<module>io-takamaka-code-examples-tictactoe</module>
   	<module>io-takamaka-code-examples-tictactoe_improved</module>
   	<module>io-takamaka-code-examples-erc20</module>

@@ -25,6 +25,8 @@ import java.math.BigInteger;
 import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
+import io.takamaka.code.lang.StringSupport;
+import io.takamaka.code.math.BigIntegerSupport;
 
 public class SimplePonzi extends Contract {
   private final BigInteger _10 = BigInteger.valueOf(10L);
@@ -33,10 +35,11 @@ public class SimplePonzi extends Contract {
   private BigInteger currentInvestment = BigInteger.ZERO;
 
   public @Payable @FromContract void invest(BigInteger amount) {
-    // new investments must be at least 10% greater than current
-    BigInteger minimumInvestment = currentInvestment.multiply(_11).divide(_10);
-    require(amount.compareTo(minimumInvestment) >= 0,
-      () -> "you must invest at least " + minimumInvestment);
+	// new investments must be at least 10% greater than current
+    BigInteger minimumInvestment = BigIntegerSupport.divide
+      (BigIntegerSupport.multiply(currentInvestment, _11), _10);
+    require(BigIntegerSupport.compareTo(amount, minimumInvestment) > 0,
+      () -> StringSupport.concat("you must invest more than ", minimumInvestment));
 
     // document new investor
     currentInvestor = caller();
