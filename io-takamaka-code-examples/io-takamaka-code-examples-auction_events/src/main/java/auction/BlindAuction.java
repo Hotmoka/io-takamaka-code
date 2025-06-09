@@ -1,19 +1,18 @@
 /*
-    A blind auction smart contract example in Takamaka.
-    Copyright (C) 2021 Fausto Spoto (fausto.spoto@gmail.com)
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	A blind acution smart contract.
+	Copyright 2021 Fausto Spoto
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	
+	    http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 */
 
 package auction;
@@ -23,9 +22,7 @@ import static io.takamaka.code.lang.Takamaka.now;
 import static io.takamaka.code.lang.Takamaka.require;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.function.Supplier;
 
 import io.takamaka.code.lang.Contract;
@@ -34,6 +31,9 @@ import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.PayableContract;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
+import io.takamaka.code.math.BigIntegerSupport;
+import io.takamaka.code.security.SHA256Digest;
 import io.takamaka.code.util.Bytes32Snapshot;
 import io.takamaka.code.util.StorageLinkedList;
 import io.takamaka.code.util.StorageList;
@@ -41,7 +41,7 @@ import io.takamaka.code.util.StorageMap;
 import io.takamaka.code.util.StorageTreeMap;
 
 /**
- * A contract for a simple auction. This class is derived from the Solidity code at
+ * A contract for a simple auction. This class is derived from the Solidity code shown at
  * https://solidity.readthedocs.io/en/v0.5.9/solidity-by-example.html#id2
  * In this contract, bidders place bids together with a hash. At the end of
  * the bidding period, bidders are expected to reveal if and which of their bids
@@ -51,7 +51,7 @@ import io.takamaka.code.util.StorageTreeMap;
 public class BlindAuction extends Contract {
 
   /**
-   * A bid placed by a bidder. The deposit has been paid in full.
+   * A bid placed by a bidder. The deposit has been payed in full.
    * If, later, the bid will be revealed as fake, then the deposit will
    * be fully refunded. If, instead, the bid will be revealed as real, but for
    * a lower amount, then only the difference will be refunded.
@@ -64,9 +64,9 @@ public class BlindAuction extends Contract {
     private final Bytes32Snapshot hash;
 
     /**
-      * The value of the bid. Its real value might be lower and known
-      * at real time only.
-      */
+     * The value of the bid. Its real value might be lower and known
+     * at real time only.
+     */
     private final BigInteger deposit;
 
     private Bid(Bytes32Snapshot hash, BigInteger deposit) {
@@ -83,11 +83,21 @@ public class BlindAuction extends Contract {
      * @param digest the hasher
      * @return true if and only if the hashes match
      */
-    private boolean matches(RevealedBid revealed, MessageDigest digest) {
-      digest.update(revealed.value.toByteArray());
+    private boolean matches(RevealedBid revealed, SHA256Digest digest) {
+      digest.update(BigIntegerSupport.toByteArray(revealed.value));
       digest.update(revealed.fake ? (byte) 0 : (byte) 1);
       digest.update(revealed.salt.toArray());
-      return Arrays.equals(hash.toArray(), digest.digest());
+      byte[] arr1 = hash.toArray();
+      byte[] arr2 = digest.digest();
+
+      if (arr1.length != arr2.length)
+        return false;
+
+      for (int pos = 0; pos < arr1.length; pos++)
+        if (arr1[pos] != arr2[pos])
+          return false;
+
+      return true;
     }
   }
 
@@ -159,20 +169,17 @@ public class BlindAuction extends Contract {
   }
 
   /**
-   * Places a blinded bid with the given hash.
-   * The money sent is only refunded if the bid is correctly
+   * Places a blinded bid the given hash.
+   * The sent money is only refunded if the bid is correctly
    * revealed in the revealing phase. The bid is valid if the
    * money sent together with the bid is at least "value" and
    * "fake" is not true. Setting "fake" to true and sending
    * not the exact amount are ways to hide the real bid but
    * still make the required deposit. The same bidder can place multiple bids.
    */
-  public @Payable @FromContract(PayableContract.class) void bid
-      (BigInteger amount, Bytes32Snapshot hash) {
-
-    onlyBefore(biddingEnd);
-    bids.computeIfAbsent((PayableContract) caller(), (Supplier<StorageList<Bid>>) StorageLinkedList::new)
-      .add(new Bid(hash, amount));
+  public @Payable @FromContract(PayableContract.class) void bid(BigInteger amount, Bytes32Snapshot hash) {
+  	onlyBefore(biddingEnd);
+    bids.computeIfAbsent((PayableContract) caller(), (Supplier<? extends StorageList<Bid>>) StorageLinkedList::new).add(new Bid(hash, amount));
   }
 
   /**
@@ -182,33 +189,24 @@ public class BlindAuction extends Contract {
    * @param revealed the revealed bid
    * @throws NoSuchAlgorithmException if the hashing algorithm is not available
    */
-  public @FromContract(PayableContract.class) void reveal
-      (RevealedBid revealed) throws NoSuchAlgorithmException {
-
+  public @FromContract(PayableContract.class) void reveal(RevealedBid revealed) throws NoSuchAlgorithmException {
     onlyAfter(biddingEnd);
     onlyBefore(revealEnd);
-    var bidder = (PayableContract) caller();
+    PayableContract bidder = (PayableContract) caller();
     StorageList<Bid> bids = this.bids.get(bidder);
     require(bids != null && bids.size() > 0, "No bids to reveal");
     require(revealed != null, () -> "The revealed bid cannot be null");
 
-    // any other hashing algorithm will do, as long as
-    // both bidder and auction contract use the same
-    var digest = MessageDigest.getInstance("SHA-256");
-    // by removing the head of the list, it makes it impossible
-    // for the caller to re-claim the same deposits
+    // any other hashing algorithm will do, as long as both bidder and auction contract use the same
+    var digest = new SHA256Digest();
+    // by removing the head of the list, it makes it impossible for the caller to re-claim the same deposits
     bidder.receive(refundFor(bidder, bids.removeFirst(), revealed, digest));
   }
 
-  /**
-   * Ends the auction and sends the highest bid to the beneficiary.
-   * 
-   * @return the highest bidder
-   */
   public PayableContract auctionEnd() {
     onlyAfter(revealEnd);
     PayableContract winner = highestBidder;
-        
+	
     if (winner != null) {
       beneficiary.receive(highestBid);
       event(new AuctionEnd(winner, highestBid));
@@ -227,21 +225,16 @@ public class BlindAuction extends Contract {
    * @param digest the hashing algorithm
    * @return the amount to refund
    */
-  private BigInteger refundFor(PayableContract bidder, Bid bid,
-      RevealedBid revealed, MessageDigest digest) {
-
+  private BigInteger refundFor(PayableContract bidder, Bid bid, RevealedBid revealed, SHA256Digest digest) {
     if (!bid.matches(revealed, digest))
       // the bid was not actually revealed: no refund
       return BigInteger.ZERO;
-    else if (!revealed.fake && bid.deposit.compareTo(revealed.value) >= 0
-        && placeBid(bidder, revealed.value))
-      // the bid was correctly revealed and is the best up to now:
-      // only the difference between promised and provided is refunded;
+    else if (!revealed.fake && BigIntegerSupport.compareTo(bid.deposit, revealed.value) >= 0 && placeBid(bidder, revealed.value))
+      // the bid was correctly revealed and is the best up to now: only the difference between promised and provided is refunded;
       // the rest might be refunded later if a better bid will be revealed
-      return bid.deposit.subtract(revealed.value);
+      return BigIntegerSupport.subtract(bid.deposit, revealed.value);
     else
-      // the bid was correctly revealed and is not the best one:
-      // it is fully refunded
+      // the bid was correctly revealed and is not the best one: it is fully refunded
       return bid.deposit;
   }
 
@@ -253,7 +246,7 @@ public class BlindAuction extends Contract {
    * @return true if and only if this is the best bid, up to now
    */
   private boolean placeBid(PayableContract bidder, BigInteger value) {
-    if (highestBid != null && value.compareTo(highestBid) <= 0)
+    if (highestBid != null && BigIntegerSupport.compareTo(value, highestBid) <= 0)
       // this is not the best bid seen so far
       return false;
 
@@ -271,10 +264,12 @@ public class BlindAuction extends Contract {
   }
 
   private static void onlyBefore(long when) {
-    require(now() < when, "Too late");
+    long diff = now() - when;
+    require(diff <= 0, StringSupport.concat(diff, " ms too late"));
   }
 
   private static void onlyAfter(long when) {
-    require(now() > when, "Too early");
+    long diff = now() - when;
+    require(diff >= 0, StringSupport.concat(-diff, " ms too early"));
   }
 }
