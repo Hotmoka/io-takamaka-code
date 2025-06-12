@@ -14,24 +14,6 @@
     <version>parent</version>
   </parent>
 
-  <profiles>
-	<profile>
-	  <id>release</id>
-      <build>
-	    <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
-            <configuration>
-              <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
-            </configuration>
-          </plugin>
-	    </plugins>
-      </build>
-	</profile>
-  </profiles>
-
   <modules>
   	<module>io-takamaka-code-examples-auction</module>
   	<module>io-takamaka-code-examples-auction_events</module>
@@ -44,7 +26,6 @@
   	<module>io-takamaka-code-examples-tictactoe_improved</module>
   	<module>io-takamaka-code-examples-erc20</module>
   	<module>io-takamaka-code-examples-erc721</module>
-  	<module>io-takamaka-code-examples-family</module>
   	<module>io-takamaka-code-examples-family_storage</module>
   	<module>io-takamaka-code-examples-family_exported</module>
   	<module>io-takamaka-code-examples-family_errors</module>

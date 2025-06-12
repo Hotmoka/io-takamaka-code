@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Constants about Takamaka and Hotmoka.
+ * Constants about Takamaka.
  */
 public final class Constants {
 
