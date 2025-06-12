@@ -21,6 +21,7 @@ package family;
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.Storage;
+import io.takamaka.code.lang.StringSupport;
 
 @Exported
 public class Person extends Storage {
@@ -52,7 +53,7 @@ public class Person extends Storage {
 
   @Override
   public String toString() {
-    toStringCounter++; // error (line 37): static update (putstatic) is not allowed
-    return name +" (" + day + "/" + month + "/" + year + ")";
+    toStringCounter++; // error: static update (putstatic) is not allowed
+    return StringSupport.concat(name, " (", day, "/", month, "/", year, ")");
   }
 }

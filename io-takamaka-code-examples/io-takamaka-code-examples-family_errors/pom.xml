@@ -5,7 +5,7 @@
   <artifactId>io-takamaka-code-examples-family_errors</artifactId>
   <packaging>jar</packaging>
   <name>io-takamaka-code-examples-family_errors</name>
-  <description>This module contains the family smart contract of the Takamaka tutorial, with errors that prevent its installation.</description>
+  <description>This module contains the family smart contract of the Takamaka tutorial, with errors that prevent its successful static verification.</description>
 
   <parent>
     <groupId>io.hotmoka</groupId>
