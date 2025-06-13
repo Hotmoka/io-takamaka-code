@@ -83,7 +83,6 @@ Note: submodules whose artifact must be deployed on Maven Central must activate 
   <modules>
     <module>io-takamaka-code</module>
     <module>io-takamaka-code-constants</module>
-    <module>io-takamaka-code-examples</module>
   </modules>
 
   <!-- typical dependencies if submodules use JUnit 5 -->
