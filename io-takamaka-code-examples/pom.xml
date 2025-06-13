@@ -15,15 +15,6 @@
   </parent>
 
   <modules>
-  	<module>io-takamaka-code-examples-auction</module>
-  	<module>io-takamaka-code-examples-auction_events</module>
-  	<module>io-takamaka-code-examples-ponzi_simple</module>
-  	<module>io-takamaka-code-examples-ponzi_payable</module>
-  	<module>io-takamaka-code-examples-ponzi_annotations</module>
-  	<module>io-takamaka-code-examples-ponzi_view</module>
-  	<module>io-takamaka-code-examples-ponzi_gradual</module>
-  	<module>io-takamaka-code-examples-tictactoe</module>
-  	<module>io-takamaka-code-examples-tictactoe_improved</module>
   	<module>io-takamaka-code-examples-erc20</module>
   	<module>io-takamaka-code-examples-erc721</module>
   </modules>
