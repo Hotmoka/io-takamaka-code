@@ -26,8 +26,5 @@
   	<module>io-takamaka-code-examples-tictactoe_improved</module>
   	<module>io-takamaka-code-examples-erc20</module>
   	<module>io-takamaka-code-examples-erc721</module>
-  	<module>io-takamaka-code-examples-family_storage</module>
-  	<module>io-takamaka-code-examples-family_exported</module>
-  	<module>io-takamaka-code-examples-family_errors</module>
   </modules>
 </project>
