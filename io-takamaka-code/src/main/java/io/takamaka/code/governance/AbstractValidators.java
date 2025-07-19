@@ -109,6 +109,12 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	private final BigInteger finalSupply;
 
 	/**
+	 * The height after which coins are not minted anymore and the current
+	 * supply reaches the final supply.
+	 */
+	private final BigInteger heightAtFinalSupply;
+
+	/**
 	 * The number of transactions validated up to now.
 	 * Note that this is updated at each reward.
 	 */
@@ -152,6 +158,8 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 	 *                         require to pay this amount for starting a poll
 	 * @param finalSupply the final supply of coins that will be reached, eventually
+	 * @param heightAtFinalSupply the height after which coins are not minted anymore and the current
+	 *                            supply reaches the final supply
 	 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 	 *                      1000000 = 1%
 	 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -160,7 +168,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 	 */
 	protected AbstractValidators(Manifest<V> manifest, V[] validators, BigInteger[] powers, BigInteger ticketForNewPoll,
-			BigInteger finalSupply, int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
+			BigInteger finalSupply, BigInteger heightAtFinalSupply, int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 
 		super(validators, powers);
 
@@ -172,6 +180,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		this.currentSupply = gamete.balance(); // initially, all coins are inside the gamete
 		this.initialSupply = currentSupply;
 		this.finalSupply = finalSupply;
+		this.heightAtFinalSupply = heightAtFinalSupply;
 		this.ticketForNewPoll = ticketForNewPoll;
 		this.buyerSurcharge = buyerSurcharge;
 		this.percentStaked = percentStaked;
@@ -185,23 +194,28 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	}
 
 	@Override
-	public final BigInteger getStake(V validator) {
+	public final @View BigInteger getStake(V validator) {
 		return stakes.getOrDefault(validator, BigInteger.ZERO);
 	}
 
 	@Override
-	public final BigInteger getInitialSupply() {
+	public final @View BigInteger getInitialSupply() {
 		return initialSupply;
 	}
 
 	@Override
-	public final BigInteger getCurrentSupply() {
+	public final @View BigInteger getCurrentSupply() {
 		return currentSupply;
 	}
 
 	@Override
-	public final BigInteger getFinalSupply() {
+	public final @View BigInteger getFinalSupply() {
 		return finalSupply;
+	}
+
+	@Override
+	public final @View BigInteger getHeightAtFinalSupply() {
+		return heightAtFinalSupply;
 	}
 
 	@Override

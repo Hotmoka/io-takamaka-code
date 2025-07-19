@@ -122,6 +122,14 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	@View BigInteger getFinalSupply();
 
 	/**
+	 * Yields the height when the current supply reaches the final supply;
+	 * from there, coins are not minted anymore.
+	 * 
+	 * @return the height when the current supply reaches the final supply
+	 */
+	@View BigInteger getHeightAtFinalSupply();
+
+	/**
 	 * Yields the percent of validators' rewards that gets staked. The rest is sent to the validators immediately.
 	 * 1000000 = 1%.
 	 * 
