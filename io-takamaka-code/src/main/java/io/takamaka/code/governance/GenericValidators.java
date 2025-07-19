@@ -43,9 +43,6 @@ public class GenericValidators extends AbstractValidators<Validator> {
 	 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 	 *                         require to pay this amount for starting a poll
 	 * @param finalSupply the final supply of coins that will be reached, eventually
-	 * @param initialInflation the initial inflation applied to the gas consumed by transactions before it gets sent
-	 *                		   as reward to the validators. 1,000,000 means 1%.
-	 *                         Inflation can be negative. For instance, -300,000 means -0.3%
 	 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 	 *                      1000000 = 1%
 	 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -54,9 +51,9 @@ public class GenericValidators extends AbstractValidators<Validator> {
 	 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 	 */
 	protected GenericValidators(Manifest<Validator> manifest, Validator[] validators, BigInteger[] powers, BigInteger ticketForNewPoll,
-			BigInteger finalSupply, long initialInflation, int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
+			BigInteger finalSupply, int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 
-		super(manifest, validators, powers, ticketForNewPoll, finalSupply, initialInflation, percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
+		super(manifest, validators, powers, ticketForNewPoll, finalSupply, percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
 	}
 
 	/**
@@ -73,9 +70,6 @@ public class GenericValidators extends AbstractValidators<Validator> {
 	 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 	 *                         require to pay this amount for starting a poll
 	 * @param finalSupply the final supply of coins that will be reached, eventually
-	 * @param initialInflation the initial inflation applied to the gas consumed by transactions before it gets sent
-	 *                		   as reward to the validators. 1,000,000 means 1%.
-	 *                         Inflation can be negative. For instance, -300,000 means -0.3%
 	 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 	 *                      1000000 = 1%
 	 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -83,10 +77,10 @@ public class GenericValidators extends AbstractValidators<Validator> {
 	 * @param shashingForMisbehaving the percent of stake that gets slashed for each misbehaving. 1000000 means 1%
 	 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 	 */
-	private GenericValidators(Manifest<Validator> manifest, String publicKeys, String powers, BigInteger ticketForNewPoll, BigInteger finalSupply, long initialInflation,
+	private GenericValidators(Manifest<Validator> manifest, String publicKeys, String powers, BigInteger ticketForNewPoll, BigInteger finalSupply,
 			int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 
-		this(manifest, buildValidators(publicKeys), buildPowers(powers), ticketForNewPoll, finalSupply, initialInflation,
+		this(manifest, buildValidators(publicKeys), buildPowers(powers), ticketForNewPoll, finalSupply,
 				percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
 	}
 
@@ -118,7 +112,6 @@ public class GenericValidators extends AbstractValidators<Validator> {
 		private final String powers;
 		private final BigInteger ticketForNewPoll;
 		private final BigInteger finalSupply;
-		private final long initialInflation;
 		private final int percentStaked;
 		private final int buyerSurcharge;
 		private final int slashingForMisbehaving;
@@ -137,9 +130,6 @@ public class GenericValidators extends AbstractValidators<Validator> {
 		 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 		 *                         require to pay this amount for starting a poll
 		 * @param finalSupply the final supply of coins that will be reached, eventually
-		 * @param initialInflation the initial inflation applied to the gas consumed by transactions before it gets sent
-		 *                		   as reward to the validators. 1,000,000 means 1%.
-		 *                         Inflation can be negative. For instance, -300,000 means -0.3%
 		 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 		 *                      1000000 = 1%
 		 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -147,14 +137,13 @@ public class GenericValidators extends AbstractValidators<Validator> {
 		 * @param slashingForMisbehaving the percent of stake that gets slashed for each misbehaving. 1000000 means 1%
 		 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 		 */
-		public Builder(String publicKeys, String powers, BigInteger ticketForNewPoll, BigInteger finalSupply, long initialInflation,
+		public Builder(String publicKeys, String powers, BigInteger ticketForNewPoll, BigInteger finalSupply,
 				int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 
 			this.publicKeys = publicKeys;
 			this.powers = powers;
 			this.ticketForNewPoll = ticketForNewPoll;
 			this.finalSupply = finalSupply;
-			this.initialInflation = initialInflation;
 			this.percentStaked = percentStaked;
 			this.buyerSurcharge = buyerSurcharge;
 			this.slashingForMisbehaving = slashingForMisbehaving;
@@ -163,8 +152,7 @@ public class GenericValidators extends AbstractValidators<Validator> {
 
 		@Override
 		public GenericValidators apply(Manifest<Validator> manifest) {
-			return new GenericValidators(manifest, publicKeys, powers, ticketForNewPoll, finalSupply, initialInflation,
-				percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
+			return new GenericValidators(manifest, publicKeys, powers, ticketForNewPoll, finalSupply, percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
 		}
 	}
 }

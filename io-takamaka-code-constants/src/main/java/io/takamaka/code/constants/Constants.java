@@ -225,11 +225,6 @@ public final class Constants {
 	public final static String GAS_PRICE_UPDATE_NAME = "io.takamaka.code.governance.GasPriceUpdate";
 
 	/**
-	 * The name of the class type for {@code io.takamaka.code.governance.InflationUpdate}.
-	 */
-	public final static String INFLATION_UPDATE_NAME = "io.takamaka.code.governance.InflationUpdate";
-
-	/**
 	 * The name of the class type for {@code io.takamaka.code.governance.VerificationVersionUpdate}.
 	 */
 	public final static String VERIFICATION_VERSION_UPDATE_NAME = "io.takamaka.code.governance.VerificationVersionUpdate";

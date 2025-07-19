@@ -122,25 +122,6 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	@View BigInteger getFinalSupply();
 
 	/**
-	 * Yields the initial inflation applied to the gas consumed by transactions before it gets sent
-	 * as reward to the validators. 1,000,000 means 1%.
-	 * Inflation can be negative. For instance, -300,000 means -0.3%.
-	 * 
-	 * @return the initial inflation
-	 */
-	@View long getInitialInflation();
-
-	/**
-	 * Yields the current inflation applied to the gas consumed by transactions before it gets sent
-	 * as reward to the validators. 1,000,000 means 1%.
-	 * Inflation can be negative. For instance, -300,000 means -0.3%.
-	 * This starts at {@link #getInitialInflation()} and decreases towards zero.
-	 * 
-	 * @return the current inflation
-	 */
-	@View long getCurrentInflation();
-
-	/**
 	 * Yields the percent of validators' rewards that gets staked. The rest is sent to the validators immediately.
 	 * 1000000 = 1%.
 	 * 

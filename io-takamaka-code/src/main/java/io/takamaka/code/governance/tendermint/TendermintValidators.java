@@ -46,9 +46,6 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 	 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 	 *                         require to pay this amount for starting a poll
 	 * @param finalSupply the final supply of coins that will be reached, eventually
-	 * @param initialInflation the initial inflation applied to the gas consumed by transactions before it gets sent
-	 *                		   as reward to the validators. 0 means 0%, 1,000,000 means 1%,
-	 *                  	   Inflation can be negative. For instance, -300,000 means -0.3%
 	 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 	 *                      1000000 = 1%
 	 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -57,11 +54,10 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 	 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 	 */
 	private TendermintValidators(Manifest<TendermintED25519Validator> manifest, TendermintED25519Validator[] validators,
-			BigInteger[] powers, BigInteger ticketForNewPoll, BigInteger finalSupply, long initialInflation,
+			BigInteger[] powers, BigInteger ticketForNewPoll, BigInteger finalSupply,
 			int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 
-		super(manifest, validators, powers, ticketForNewPoll, finalSupply, initialInflation, percentStaked,
-				buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
+		super(manifest, validators, powers, ticketForNewPoll, finalSupply, percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
 	}
 
 	@Override
@@ -82,7 +78,6 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 		private final StorageList<BigInteger> powers = new StorageLinkedList<>();
 		private final BigInteger ticketForNewPoll;
 		private final BigInteger finalSupply;
-		private final long initialInflation;
 		private final int percentStaked;
 		private final int buyerSurcharge;
 		private final int slashingForMisbehaving;
@@ -96,9 +91,6 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 		 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 		 *                         require to pay this amount for starting a poll
 		 * @param finalSupply the final supply of coins that will be reached, eventually
-		 * @param initialInflation the initial inflation applied to the gas consumed by transactions before it gets sent
-		 *                		   as reward to the validators. 0 means 0%, 1,000,000 means 1%,
-		 *                  	   Inflation can be negative. For instance, -300,000 means -0.3%
 		 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 		 *                      1000000 = 1%
 		 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -106,12 +98,9 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 		 * @param slashingForMisbehaving the percent of stake that gets slashed for each misbehaving. 1000000 means 1%
 		 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 		 */
-		public Builder(BigInteger ticketForNewPoll, BigInteger finalSupply, long initialInflation,
-				int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
-
+		public Builder(BigInteger ticketForNewPoll, BigInteger finalSupply, int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 			this.ticketForNewPoll = ticketForNewPoll;
 			this.finalSupply = finalSupply;
-			this.initialInflation = initialInflation;
 			this.percentStaked = percentStaked;
 			this.buyerSurcharge = buyerSurcharge;
 			this.slashingForMisbehaving = slashingForMisbehaving;
@@ -132,8 +121,7 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 		@Override
 		public TendermintValidators apply(Manifest<TendermintED25519Validator> manifest) {
 			return new TendermintValidators(manifest, validators.toArray(TendermintED25519Validator[]::new),
-				powers.toArray(BigInteger[]::new), ticketForNewPoll, finalSupply, initialInflation,
-				percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
+				powers.toArray(BigInteger[]::new), ticketForNewPoll, finalSupply, percentStaked, buyerSurcharge, slashingForMisbehaving, slashingForNotBehaving);
 		}
 	}
 }

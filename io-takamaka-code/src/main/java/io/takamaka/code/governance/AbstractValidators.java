@@ -109,21 +109,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	private final BigInteger finalSupply;
 
 	/**
-	 * The initial inflation applied to the gas consumed by transactions before it gets sent
-	 * as reward to the validators. 1,000,000 means 1%.
-	 * Inflation can be negative. For instance, -300,000 means -0.3%.
-	 */
-	private final long initialInflation;
-
-	/**
-	 * The current inflation applied to the gas consumed by transactions before it gets sent
-	 * as reward to the validators. 1,000,000 means 1%.
-	 * Inflation can be negative. For instance, -300,000 means -0.3%.
-	 * This starts at {@link #initialInflation} and goes towards zero.
-	 */
-	private long currentInflation;
-
-	/**
 	 * The number of transactions validated up to now.
 	 * Note that this is updated at each reward.
 	 */
@@ -167,9 +152,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 *                         {@link #newPoll(BigInteger, io.takamaka.code.dao.SimplePoll.Action, long, long)}
 	 *                         require to pay this amount for starting a poll
 	 * @param finalSupply the final supply of coins that will be reached, eventually
-	 * @param initialInflation the initial inflation applied to the gas consumed by transactions before it gets sent
-	 *                		   as reward to the validators. 1,000,000 means 1%.
-	 *                         Inflation can be negative. For instance, -300,000 means -0.3%
 	 * @param percentStaked the amount of rewards that gets staked. The rest is sent to the validators immediately.
 	 *                      1000000 = 1%
 	 * @param buyerSurcharge the extra tax paid when a validator acquires the shares of another validator
@@ -178,8 +160,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * @param slashingForNotBehaving the percent of stake that gets slashed for not behaving (no vote). 1000000 means 1%
 	 */
 	protected AbstractValidators(Manifest<V> manifest, V[] validators, BigInteger[] powers, BigInteger ticketForNewPoll,
-			BigInteger finalSupply, long initialInflation, int percentStaked, int buyerSurcharge, int slashingForMisbehaving,
-			int slashingForNotBehaving) {
+			BigInteger finalSupply, int percentStaked, int buyerSurcharge, int slashingForMisbehaving, int slashingForNotBehaving) {
 
 		super(validators, powers);
 
@@ -191,8 +172,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 		this.currentSupply = gamete.balance(); // initially, all coins are inside the gamete
 		this.initialSupply = currentSupply;
 		this.finalSupply = finalSupply;
-		this.initialInflation = initialInflation;
-		this.currentInflation = initialInflation;
 		this.ticketForNewPoll = ticketForNewPoll;
 		this.buyerSurcharge = buyerSurcharge;
 		this.percentStaked = percentStaked;
@@ -223,16 +202,6 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	@Override
 	public final BigInteger getFinalSupply() {
 		return finalSupply;
-	}
-
-	@Override
-	public final @View long getInitialInflation() {
-		return initialInflation;
-	}
-
-	@Override
-	public final @View long getCurrentInflation() {
-		return currentInflation;
 	}
 
 	@Override
@@ -447,35 +416,13 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 
 	private void updateParameters(BigInteger minted, BigInteger numberOfTransactionsSinceLastReward) {
 		// we increase the number of rewards (ie, the height of the blockchain, if the node is part of a blockchain)
-		// but only if there are transactions, which gives to the underlying blockchain engine the possibility to stop generating empty blocks
-		if (numberOfTransactionsSinceLastReward.signum() > 0) {
-			height = BigIntegerSupport.add(height, ONE);
+		height = BigIntegerSupport.add(height, ONE);
 
-			// we add to the cumulative number of transactions validated up to now
-			numberOfTransactions = BigIntegerSupport.add(numberOfTransactions, numberOfTransactionsSinceLastReward);
+		// we add to the cumulative number of transactions validated up to now
+		numberOfTransactions = BigIntegerSupport.add(numberOfTransactions, numberOfTransactionsSinceLastReward);
 
-			// the total supply is increased by the coins minted since the previous reward
-			currentSupply = BigIntegerSupport.add(currentSupply, minted);
-
-			// we compute the current inflation, so that it approaches zero while
-			// the current supply is reaching the final supply
-			BigInteger delta = BigIntegerSupport.subtract(finalSupply, initialSupply);
-			if (delta.signum() != 0) {
-				BigInteger currentDelta = BigIntegerSupport.subtract(finalSupply, currentSupply);
-				long oldCurrentInflation = currentInflation;
-
-				// if the current supply reached the total supply, inflation is forced to zero
-				if (delta.signum() <= 0 && currentDelta.signum() >= 0)
-					currentInflation = 0L;
-				else if (delta.signum() >= 0 && currentDelta.signum() <= 0)
-					currentInflation = 0L;
-				else
-					currentInflation = BigIntegerSupport.divide(BigIntegerSupport.multiply(BigInteger.valueOf(initialInflation), currentDelta), delta).longValue();
-
-				if (currentInflation != oldCurrentInflation)
-					event(new InflationUpdate(currentInflation));
-			}
-		}
+		// the total supply is increased by the coins minted since the previous reward
+		currentSupply = BigIntegerSupport.add(currentSupply, minted);
 	}
 
 	private void rewardBehavingValidators(String[] behavingIDs) {
