@@ -62,6 +62,11 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	private final long maxCumulativeSizeOfDependencies;
 
 	/**
+	 * The maximal request size (in bytes).
+	 */
+	private final long maxRequestSize;
+
+	/**
 	 * True if and only if the use of the {@code faucet()} methods of the gametes is allowed without a valid signature.
 	 */
 	private final boolean allowsUnsignedFaucet;
@@ -119,7 +124,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * @param builderOfGasStation the builder of the gas station of the node having the manifest
 	 * @throws RequirementViolationException if any parameter is null or any builder yields null or the maximal error length is negative
 	 */
-	public Manifest(String genesisTime, String chainId, int maxDependencies, long maxCumulativeSizeOfDependencies,
+	public Manifest(String genesisTime, String chainId, int maxDependencies, long maxCumulativeSizeOfDependencies, long maxRequestSize,
 			boolean allowsUnsignedFaucet, boolean skipsVerification, String signature, Gamete gamete, long verificationVersion,
 			Function<Manifest<V>, Validators<V>> builderOfValidators, Function<Manifest<V>, GasStation<V>> builderOfGasStation) {
 
@@ -139,6 +144,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 		this.gamete = gamete;
 		this.maxDependencies = maxDependencies;
 		this.maxCumulativeSizeOfDependencies = maxCumulativeSizeOfDependencies;
+		this.maxRequestSize = maxRequestSize;
 		this.allowsUnsignedFaucet = allowsUnsignedFaucet;
 		this.skipsVerification = skipsVerification;
 		this.signature = signature;
@@ -187,6 +193,15 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 */
 	public final @View long getMaxCumulativeSizeOfDependencies() {
 		return maxCumulativeSizeOfDependencies;
+	}
+
+	/**
+	 * Yields the maximal request size. Beyond this threshold, requests get rejected.
+	 * 
+	 * @return the maximal request size (in bytes)
+	 */
+	public final @View long getMaxRequestSize() {
+		return maxRequestSize;
 	}
 
 	/**
