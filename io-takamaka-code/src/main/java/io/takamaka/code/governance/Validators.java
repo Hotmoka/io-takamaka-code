@@ -65,29 +65,36 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	@FromContract @Payable void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
 
 	/**
-	 * Rewards the Mokamint node that has created a block. Hotmoka Mokamint nodes
-	 * call this method at regular intervals; for instance, after each committed block in blockchain.
-	 * Its goal is to reward the node that created the block, with the deadline provided by a miner.
+	 * Rewards the Mokamint node and miner that has created a block or provided the deadline
+	 * in the block, respectively. Hotmoka Mokamint nodes call this method at the end of the creation of
+	 * each block of the blockchain.
 	 * 
-	 * @param amount the amount to distribute to the node
+	 * @param amount the total amount to distribute among the node and the miner
+	 * @param forNode the subset of {@code amount} that goes to the node; the rest goes to the miner
 	 * @param minted the subset of {@code amount} that has been minted during the last reward
-	 * @param publicKeyOfNodeBase64 the key of the node
+	 * @param publicKeyOfNodeBase64 the public key of the node
+	 * @param publicKeyOfMinerBase64 the public key of the miner
 	 * @param gasConsumed the gas consumed for CPU, RAM usage or storage by the transactions
 	 *                    executed since the previous reward
-	 * @param numberOfTransactionsSinceLastReward the number of transactions executed since
-	 *                                            the previous reward
+	 * @param numberOfTransactionsSinceLastReward the number of transactions executed since the previous reward
+	 * @return true if and only if also the miner account has been rewarded; otherwise,
+	 *         only the node has been rewarded and a call to reward the miner must be executed later; this trick
+	 *         guarantees that the accounts created during this transaction are only with progressive equal to 0
 	 */
-	@FromContract @Payable public void rewardMokamintNode(BigInteger amount, BigInteger minted, String publicKeyOfNodeBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
+	@FromContract @Payable boolean rewardMokamint(BigInteger amount, BigInteger forNode, BigInteger minted, String publicKeyOfNodeBase64, String publicKeyOfMinerBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
 
 	/**
-	 * Rewards the Mokamint miner that found the deadline for a block. Hotmoka Mokamint nodes
-	 * call this method at regular intervals; for instance, after each committed block in blockchain.
-	 * Its goal is to reward the miner that found the deadline for a block.
+	 * Rewards the miner that has provided the deadline in a block. Hotmoka Mokamint nodes call this method
+	 * at the end of the creation of each block of the blockchain but only when
+	 * {@link #rewardMokamint(BigInteger, BigInteger, BigInteger, String, String, BigInteger, BigInteger)}
+	 * returns false. Note that this method is not payable, since it uses the reward previously sent
+	 * through {@link #rewardMokamint(BigInteger, BigInteger, BigInteger, String, String, BigInteger, BigInteger)}
+	 * but that has not been distributed to the miner and remained in this contract.
 	 * 
-	 * @param amount the amount to distribute to the miner
-	 * @param publicKeyOfMinerBase64 the key of the miner
+	 * @param amount the amount to reward to the miner
+	 * @param publicKeyOfMinerBase64 the public key of the miner
 	 */
-	@FromContract @Payable public void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64);
+	@FromContract void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64);
 
 	/**
 	 * Yields the earnings collected by the given validator and not yet sent to it.

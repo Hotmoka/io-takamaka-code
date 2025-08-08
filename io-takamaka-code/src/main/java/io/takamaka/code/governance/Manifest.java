@@ -115,6 +115,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * @param chainId the initial chainId of the node having the manifest
 	 * @param maxDependencies the maximal number of dependencies per transaction
 	 * @param maxCumulativeSizeOfDependencies the maximal cumulative size of the the dependencies per transaction
+	 * @param maxRequestSize the maximal size of a request, in bytes
 	 * @param allowsUnsignedFaucet true if and only if the use of the {@code faucet()} methods of the gametes is allowed without a valid signature
 	 * @param skipsVerification true if and only if the verification of the classes of the jars installed in the node must be skipped
 	 * @param signature the name of the signature algorithm that must be used to sign the requests sent to the node

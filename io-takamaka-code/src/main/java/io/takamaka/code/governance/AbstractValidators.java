@@ -328,17 +328,26 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	}
 
 	@Override
-	@FromContract @Payable public void rewardMokamintNode(BigInteger amount, BigInteger minted, String publicKeyOfNodeBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
-		require(isSystemCall(), "a node can only be rewarded with a system request");
+	@FromContract @Payable public boolean rewardMokamint(BigInteger amount, BigInteger forNode, BigInteger minted, String publicKeyOfNodeBase64, String publicKeyOfMinerBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward) {
+		require(isSystemCall(), "node and miner can only be rewarded with a system request");
 
-		manifest.accountsLedger.add(amount, publicKeyOfNodeBase64);
+		// if at least one among the node and the miner has been created already, then the subsequent add() call
+		// will not create objects and we can reward the miner as well, since there is no risk of creating
+		// a new account, in the second add() call, whose progressive is not 0
+		boolean alsoMiner = manifest.accountsLedger.get(publicKeyOfNodeBase64) != null || manifest.accountsLedger.get(publicKeyOfMinerBase64) != null;
+
+		manifest.accountsLedger.add(forNode, publicKeyOfNodeBase64);
+		if (alsoMiner)
+			manifest.accountsLedger.add(BigIntegerSupport.subtract(amount, forNode), publicKeyOfMinerBase64);
 
 		updateGasPrice(gasConsumed);
 		updateParameters(minted, numberOfTransactionsSinceLastReward);
+
+		return alsoMiner;
 	}
 
 	@Override
-	@FromContract @Payable public void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64) {
+	@FromContract public void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64) {
 		require(isSystemCall(), "a miner can only be rewarded with a system request");
 
 		manifest.accountsLedger.add(amount, publicKeyOfMinerBase64);

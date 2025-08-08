@@ -133,7 +133,7 @@ public abstract class BigIntegerSupport {
 	 * 
 	 * @param first the first big integer
 	 * @param second the second big integer
-	 * @return the subtraction of the two
+	 * @return the subtraction of {@code second} from {@code first}
 	 */
 	public static BigInteger subtract(BigInteger first, BigInteger second) {
 		if (first != null) {
