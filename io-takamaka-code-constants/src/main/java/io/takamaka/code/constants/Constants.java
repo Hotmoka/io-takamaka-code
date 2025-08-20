@@ -305,9 +305,19 @@ public final class Constants {
 	public final static String GENERIC_GAS_STATION_NAME = "io.takamaka.code.governance.GenericGasStation";
 
 	/**
+	 * The name of the class type for {@code io.takamaka.code.governance.mokamint.MokamintValidators}.
+	 */
+	public final static String MOKAMINT_VALIDATORS_NAME = "io.takamaka.code.governance.mokamint.MokamintValidators";
+
+	/**
 	 * The name of the class type for {@code io.takamaka.code.governance.tendermint.TendermintValidators}.
 	 */
 	public final static String TENDERMINT_VALIDATORS_NAME = "io.takamaka.code.governance.tendermint.TendermintValidators";
+
+	/**
+	 * The name of the class type for {@code io.takamaka.code.governance.disk.DiskValidators}.
+	 */
+	public final static String DISK_VALIDATORS_NAME = "io.takamaka.code.governance.disk.DiskValidators";
 
 	/**
 	 * The name of the class type for {@code io.takamaka.code.governance.tendermint.TendermintED25519Validator}.

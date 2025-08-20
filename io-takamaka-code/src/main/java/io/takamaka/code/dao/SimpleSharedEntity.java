@@ -330,9 +330,28 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		shares.remove(toRemove);
 		event(new ShareholderRemoved<>(toRemove));
 		BigInteger total = getTotalShares();
-		if (total.signum() > 0)
-			// TODO: avoid approximation: the last should get all the remaining shares
-			shares.forEachKey(shareholder -> shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total))));
+		if (total.signum() > 0) {
+			int size = shares.size();
+
+			class Counter {
+				private int counter;
+				private BigInteger rest = toDistribute;
+			}
+
+			Counter counter = new Counter();
+
+			shares.forEachKey(shareholder -> {
+				counter.counter++;
+				if (size == counter.counter)
+					// the last one gets all remaining shares, so that we distribute everything and avoid approximations
+					shares.update(shareholder, old -> BigIntegerSupport.add(old, counter.rest));
+				else {
+					BigInteger previousShares = sharesOf(shareholder);
+					shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total)));
+					counter.rest = BigIntegerSupport.add(counter.rest, BigIntegerSupport.subtract(previousShares, sharesOf(shareholder)));
+				}
+			});
+		}
 	
 		snapshotOfShares = shares.snapshot();
 	}
