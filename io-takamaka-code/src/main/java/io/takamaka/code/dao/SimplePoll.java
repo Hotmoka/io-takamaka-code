@@ -30,8 +30,8 @@ import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.SnapshottableStorageMap;
-import io.takamaka.code.util.SnapshottableStorageMapView;
 import io.takamaka.code.util.SnapshottableStorageTreeMap;
+import io.takamaka.code.util.StorageMapView;
 
 /**
  * The implementation of a simple poll among a set of voters. Each voter can vote with a number of votes
@@ -69,7 +69,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 	/** 
 	 * The eligible voters, with the maximal amount of votes they can cast.
 	 */
-	private final SnapshottableStorageMapView<Voter, BigInteger> eligibleVoters;
+	private final StorageMapView<Voter, BigInteger> eligibleVoters;
 
 	/**
 	 * The voters up to now, with the votes that each of them has cast.
@@ -89,7 +89,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 	/**
 	 * A snapshot of the current {@link #votersUpToNow}.
 	 */
-	private SnapshottableStorageMapView<Voter, BigInteger> snapshotOfVotersUpToNow;
+	private StorageMapView<Voter, BigInteger> snapshotOfVotersUpToNow;
 
 	/**
 	 * The votes cast up to now.
@@ -129,12 +129,12 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 	}
 
 	@Override @View
-	public final SnapshottableStorageMapView<Voter, BigInteger> getEligibleVoters() {
+	public final StorageMapView<Voter, BigInteger> getEligibleVoters() {
 		return eligibleVoters;
 	}
 
 	@Override @View
-	public final SnapshottableStorageMapView<Voter, BigInteger> getVotersUpToNow() {
+	public final StorageMapView<Voter, BigInteger> getVotersUpToNow() {
 		return snapshotOfVotersUpToNow;
 	}
 

@@ -21,7 +21,7 @@ import java.math.BigInteger;
 import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.View;
-import io.takamaka.code.util.SnapshottableStorageMapView;
+import io.takamaka.code.util.StorageMapView;
 
 /**
  * A poll among a set of voters (contracts). Each voter can vote with a number of votes
@@ -40,13 +40,13 @@ public interface Poll<Voter extends Contract> {
 	String getDescription();
 
 	/**
-	 * Yields the voters that are allowed to vote for this poll, with the
+	 * Yields a snapshot of the voters that are allowed to vote for this poll, with the
 	 * maximal number of votes that each of them can cast (its power).
 	 * 
 	 * @return the voters allowed to vote
 	 */
 	@View
-	SnapshottableStorageMapView<Voter, BigInteger> getEligibleVoters();
+	StorageMapView<Voter, BigInteger> getEligibleVoters();
 
 	/**
 	 * Yields a snapshot of the voters that have already voted for this poll, with the
@@ -55,7 +55,7 @@ public interface Poll<Voter extends Contract> {
 	 * @return the voters that have already voted
 	 */
 	@View
-	SnapshottableStorageMapView<Voter, BigInteger> getVotersUpToNow();
+	StorageMapView<Voter, BigInteger> getVotersUpToNow();
 
 	/**
 	 * Yields the maximal number of votes that can be cast for this poll.

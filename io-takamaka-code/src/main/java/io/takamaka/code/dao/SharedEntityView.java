@@ -20,7 +20,7 @@ import java.math.BigInteger;
 
 import io.takamaka.code.lang.Contract;
 import io.takamaka.code.lang.View;
-import io.takamaka.code.util.SnapshottableStorageMapView;
+import io.takamaka.code.util.StorageMapView;
 
 /**
  * A view of a shared entity. It contains only methods for reading its state.
@@ -30,11 +30,11 @@ import io.takamaka.code.util.SnapshottableStorageMapView;
 public interface SharedEntityView<S extends Contract> {
 
 	/**
-	 * Yields the current shares, for each current shareholder.
+	 * Yields a snapshot of the current shares, for each current shareholder.
 	 * 
 	 * @return the shares
 	 */
-	@View SnapshottableStorageMapView<S, BigInteger> getShares();
+	@View StorageMapView<S, BigInteger> getShares();
 
 	/**
 	 * Determine if the given object is a shareholder of this entity.

@@ -31,9 +31,9 @@ import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.SnapshottableStorageMap;
-import io.takamaka.code.util.SnapshottableStorageMapView;
-import io.takamaka.code.util.StorageSet;
 import io.takamaka.code.util.SnapshottableStorageTreeMap;
+import io.takamaka.code.util.StorageMapView;
+import io.takamaka.code.util.StorageSet;
 import io.takamaka.code.util.StorageTreeSet;
 
 /**
@@ -311,7 +311,7 @@ public class ERC721 extends Contract implements IERC721 {
 		return balances.select(k);
 	}
 
-	private Contract ownerOf(BigInteger tokenId, SnapshottableStorageMapView<BigInteger, Contract> owners) {
+	private Contract ownerOf(BigInteger tokenId, StorageMapView<BigInteger, Contract> owners) {
 		Contract owner = owners.get(tokenId);
 		require(owner != null, "non-existent token");
 		return owner;
@@ -322,8 +322,8 @@ public class ERC721 extends Contract implements IERC721 {
 	 */
 	@Exported
 	protected class ERC721Snapshot extends Storage implements IERC721View {
-		private final SnapshottableStorageMapView<BigInteger, Contract> owners = ERC721.this.owners.snapshot();
-		private final SnapshottableStorageMapView<Contract, BigInteger> balances = ERC721.this.balances.snapshot();
+		private final StorageMapView<BigInteger, Contract> owners = ERC721.this.owners.snapshot();
+		private final StorageMapView<Contract, BigInteger> balances = ERC721.this.balances.snapshot();
 
 		/**
 		 * Creates the snapshot.

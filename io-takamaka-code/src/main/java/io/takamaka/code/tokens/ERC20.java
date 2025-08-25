@@ -27,8 +27,8 @@ import io.takamaka.code.lang.Takamaka;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.UnsignedBigInteger;
 import io.takamaka.code.util.SnapshottableStorageMap;
-import io.takamaka.code.util.SnapshottableStorageMapView;
 import io.takamaka.code.util.SnapshottableStorageTreeMap;
+import io.takamaka.code.util.StorageMapView;
 
 /**
  * Implementation inspired by OpenZeppelin's <a href="https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol">ERC20.sol</a>
@@ -277,7 +277,7 @@ public class ERC20 extends Contract implements IERC20 {
     @Exported
 	protected class SnapshotImpl extends Storage implements IERC20View {
 		private final UnsignedBigInteger totalSupply = ERC20.this.totalSupply;
-		private final SnapshottableStorageMapView<Contract, UnsignedBigInteger> balances = ERC20.this.balances.snapshot(); 
+		private final StorageMapView<Contract, UnsignedBigInteger> balances = ERC20.this.balances.snapshot(); 
 
 		/**
 		 * Creates the snapshot.

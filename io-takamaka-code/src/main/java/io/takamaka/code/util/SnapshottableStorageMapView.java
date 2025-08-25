@@ -38,5 +38,5 @@ public interface SnapshottableStorageMapView<K,V> extends StorageMapView<K,V> {
 	 * 
 	 * @return a snapshot of this map
 	 */
-	SnapshottableStorageMapView<K,V> snapshot();
+	StorageMapView<K,V> snapshot();
 }
