@@ -27,8 +27,8 @@ import io.takamaka.code.lang.Gamete;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
-import io.takamaka.code.util.StorageMap;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.StorageSimpleMap;
+import io.takamaka.code.util.StorageSimpleTreeMap;
 
 /**
  * An object that can be used to store and retrieve accounts from their public key.
@@ -56,7 +56,7 @@ public class AccountsLedger extends Contract {
 	/**
 	 * The accounts in this ledger, mapped from their Base64-encoded public key.
 	 */
-	private final StorageMap<String, ExternallyOwnedAccount> accounts = new StorageTreeMap<>();
+	private final StorageSimpleMap<String, ExternallyOwnedAccount> accounts = new StorageSimpleTreeMap<>();
 
 	/**
 	 * Yields the account in this ledger, for the given public key.
