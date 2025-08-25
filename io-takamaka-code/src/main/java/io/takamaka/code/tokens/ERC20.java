@@ -26,9 +26,9 @@ import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.Takamaka;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.UnsignedBigInteger;
-import io.takamaka.code.util.StorageMap;
-import io.takamaka.code.util.StorageMapView;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageMapView;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 
 /**
  * Implementation inspired by OpenZeppelin's <a href="https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol">ERC20.sol</a>
@@ -68,8 +68,8 @@ public class ERC20 extends Contract implements IERC20 {
 	 */
 	public final UnsignedBigInteger ZERO = new UnsignedBigInteger("0");
 
-	private final StorageMap<Contract, UnsignedBigInteger> balances = new StorageTreeMap<>();
-    private final StorageMap<Contract, StorageMap<Contract, UnsignedBigInteger>> allowances = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<Contract, UnsignedBigInteger> balances = new SnapshottableStorageTreeMap<>();
+    private final SnapshottableStorageMap<Contract, SnapshottableStorageMap<Contract, UnsignedBigInteger>> allowances = new SnapshottableStorageTreeMap<>();
     private UnsignedBigInteger totalSupply = ZERO;
     private short decimals;
     private final boolean generateEvents;
@@ -238,7 +238,7 @@ public class ERC20 extends Contract implements IERC20 {
 
     @Override
     public final @View UnsignedBigInteger allowance(Contract owner, Contract spender) {
-        return allowances.getOrDefault(owner, StorageTreeMap::new).getOrDefault(spender, ZERO);
+        return allowances.getOrDefault(owner, SnapshottableStorageTreeMap::new).getOrDefault(spender, ZERO);
     }
 
     @Override
@@ -277,7 +277,7 @@ public class ERC20 extends Contract implements IERC20 {
     @Exported
 	protected class SnapshotImpl extends Storage implements IERC20View {
 		private final UnsignedBigInteger totalSupply = ERC20.this.totalSupply;
-		private final StorageMapView<Contract, UnsignedBigInteger> balances = ERC20.this.balances.snapshot(); 
+		private final SnapshottableStorageMapView<Contract, UnsignedBigInteger> balances = ERC20.this.balances.snapshot(); 
 
 		/**
 		 * Creates the snapshot.
@@ -477,7 +477,7 @@ public class ERC20 extends Contract implements IERC20 {
 	    require(spender != null, "approve rejected: approve to the null account");
 	    require(amount != null, "approve rejected: amount cannot be null");
 	
-	    StorageMap<Contract, UnsignedBigInteger> ownerAllowances = allowances.getOrDefault(owner, StorageTreeMap::new);
+	    SnapshottableStorageMap<Contract, UnsignedBigInteger> ownerAllowances = allowances.getOrDefault(owner, SnapshottableStorageTreeMap::new);
 	    ownerAllowances.put(spender, amount);
 	    allowances.put(owner, ownerAllowances);
 	

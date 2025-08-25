@@ -30,11 +30,11 @@ import io.takamaka.code.lang.PayableContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
-import io.takamaka.code.util.StorageMap;
-import io.takamaka.code.util.StorageMapView;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageMapView;
 import io.takamaka.code.util.StorageSet;
 import io.takamaka.code.util.StorageSetView;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 import io.takamaka.code.util.StorageTreeSet;
 
 /**
@@ -49,7 +49,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	/**
 	 * The shares of each shareholder. These are always positive.
 	 */
-	private final StorageMap<S, BigInteger> shares = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<S, BigInteger> shares = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * The set of offers of sale of shares.
@@ -59,7 +59,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	/**
 	 * A snapshot of the current shares.
 	 */
-	private StorageMapView<S, BigInteger> snapshotOfShares;
+	private SnapshottableStorageMapView<S, BigInteger> snapshotOfShares;
 
 	/**
 	 * A snapshot of the current offers.
@@ -178,7 +178,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	}
 
     @Override
-	public @View final StorageMapView<S, BigInteger> getShares() {
+	public @View final SnapshottableStorageMapView<S, BigInteger> getShares() {
 		return snapshotOfShares;
 	}
 
@@ -247,7 +247,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		class SharedEntityViewImpl extends Storage implements SharedEntityView<S> {
 
 			@Override @View
-			public StorageMapView<S, BigInteger> getShares() {
+			public SnapshottableStorageMapView<S, BigInteger> getShares() {
 				return SimpleSharedEntity.this.getShares();
 			}
 
@@ -284,10 +284,10 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 			/**
 			 * Saves the shares at the time of creation of the snapshot.
 			 */
-			private final StorageMapView<S, BigInteger> snapshotOfShares = SimpleSharedEntity.this.snapshotOfShares;
+			private final SnapshottableStorageMapView<S, BigInteger> snapshotOfShares = SimpleSharedEntity.this.snapshotOfShares;
 
 			@Override @View
-			public StorageMapView<S, BigInteger> getShares() {
+			public SnapshottableStorageMapView<S, BigInteger> getShares() {
 				return snapshotOfShares;
 			}
 

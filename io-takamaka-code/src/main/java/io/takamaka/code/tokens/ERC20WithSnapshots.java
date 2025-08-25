@@ -24,8 +24,8 @@ import io.takamaka.code.lang.Event;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.UnsignedBigInteger;
-import io.takamaka.code.util.StorageMap;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 
 /**
  * An {@link IERC20} token decorator, that additionally tracks
@@ -40,7 +40,7 @@ public abstract class ERC20WithSnapshots extends Contract implements IERC20 {
 	 * The decorated token.
 	 */
 	protected final IERC20 parent;
-    private final StorageMap<UnsignedBigInteger, IERC20View> _snapshots = new StorageTreeMap<>();
+    private final SnapshottableStorageMap<UnsignedBigInteger, IERC20View> _snapshots = new SnapshottableStorageTreeMap<>();
     private UnsignedBigInteger _currentSnapshotId = new UnsignedBigInteger(); // Note: First snapshot has the id 1 -> see snapshot()
 
     /**

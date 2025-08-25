@@ -35,10 +35,10 @@ import io.takamaka.code.lang.PayableContract;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
-import io.takamaka.code.util.StorageMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
 import io.takamaka.code.util.StorageSet;
 import io.takamaka.code.util.StorageSetView;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 import io.takamaka.code.util.StorageTreeSet;
 
 /**
@@ -58,7 +58,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * They are not given immediately to the validators,
 	 * but rather stored in this map and given only if a validator sells all its shares.
 	 */
-	private final StorageMap<V, BigInteger> stakes = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<V, BigInteger> stakes = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * The amount of coins to pay for starting a new poll among the validators.
@@ -323,7 +323,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * 
 	 * @return the stakes of the validators
 	 */
-	protected StorageMap<V, BigInteger> getStakes() {
+	protected SnapshottableStorageMap<V, BigInteger> getStakes() {
 		return stakes;
 	}
 

@@ -135,6 +135,11 @@ public final class Constants {
 	public final static String STORAGE_MAP_VIEW_NAME = "io.takamaka.code.util.StorageMapView";
 
 	/**
+	 * The name of the class type for {@code io.takamaka.code.util.SnapshottableStorageMapView}.
+	 */
+	public final static String SNAPSHOTTABLE_STORAGE_MAP_VIEW_NAME = "io.takamaka.code.util.SnapshottableStorageMapView";
+
+	/**
 	 * The name of the class type for {@code io.takamaka.code.util.StorageTreeMap}.
 	 */
 	public final static String STORAGE_TREE_MAP_NAME = "io.takamaka.code.util.StorageTreeMap";
@@ -179,6 +184,11 @@ public final class Constants {
 	 */
 	public final static String STORAGE_MAP_NAME = "io.takamaka.code.util.StorageMap";
 	
+	/**
+	 * The name of the class type for {@code io.takamaka.code.util.SnapshottableStorageMap}.
+	 */
+	public final static String SNAPSHOTTABLE_STORAGE_MAP_NAME = "io.takamaka.code.util.SnapshottableStorageMap";
+
 	/**
 	 * The name of the class type for {@code io.takamaka.code.util.StorageArray}.
 	 */

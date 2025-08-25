@@ -83,39 +83,32 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	 */
 	public StorageTreeMap() {}
 
-	/**
-	 * Yields a snapshot of the given map.
-	 * 
-	 * @param parent the map
-	 */
-	private StorageTreeMap(StorageTreeMap<K,V> parent) {
-		this.root = parent.root;
-	}
-
 	private void mkRootBlack() {
-		if (isRed(root))
-			root = Node.mkBlack(root.key, root.value, root.size, root.left, root.right);
+		root.color = Node.BLACK;
 	}
 
 	private void mkRootRed() {
-		if (isBlack(root))
-			root = Node.mkRed(root.key, root.value, root.size, root.left, root.right);
+		root.color = Node.RED;
 	}
 
 	/**
 	 * A node of the binary search tree that implements the map.
 	 */
-	private abstract static class Node<K,V> extends Storage implements Entry<K,V> {
-		protected final K key; // always non-null
-		protected final V value; // possibly null
-		protected final Node<K,V> left, right;
+	private final static class Node<K,V> extends Storage implements Entry<K,V> {
+		private boolean color;
+		private final static boolean RED = true;
+		private final static boolean BLACK = false;
+		private final K key; // always non-null
+		private V value; // possibly null
+		private Node<K,V> left, right;
 
 		/**
 		 * Count of the subtree nodes.
 		 */
-		protected final int size;
+		private int size;
 
-		private Node(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
+		private Node(boolean color, K key, V value, int size, Node<K,V> left, Node<K,V> right) {
+			this.color = color;
 			this.key = key;
 			this.value = value;
 			this.size = size;
@@ -123,16 +116,16 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 			this.right = right;
 		}
 
-		protected static <K,V> Node<K,V> mkBlack(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
-			return new BlackNode<>(key, value, size, left, right);
+		private static <K,V> Node<K,V> mkBlack(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
+			return new Node<>(BLACK, key, value, size, left, right);
 		}
 
-		protected static <K,V> Node<K,V> mkRed(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
-			return new RedNode<>(key, value, size, left, right);
+		private static <K,V> Node<K,V> mkRed(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
+			return new Node<>(RED, key, value, size, left, right);
 		}
 
-		protected static <K,V> Node<K,V> mkRed(K key, V value) {
-			return new RedNode<>(key, value, 1, null, null);
+		private static <K,V> Node<K,V> mkRed(K key, V value) {
+			return new Node<>(RED, key, value, 1, null, null);
 		}
 
 		@Override
@@ -150,32 +143,69 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 			return 42;
 		}
 
-		protected abstract Node<K,V> setValue(V value);
+		private void setValue(V value) {
+			this.value = value;
+		}
 
-		protected abstract Node<K,V> setLeft(Node<K,V> left);
+		private void setLeft(Node<K,V> left) {
+			this.left = left;
+		}
 
-		protected abstract Node<K,V> setRight(Node<K,V> right);
+		private void setRight(Node<K,V> right) {
+			this.right = right;
+		}
 
-		protected abstract Node<K,V> rotateRight();
+		private Node<K,V> rotateRight() {
+			final Node<K,V> x = left;
+			Node<K,V> newThis = mkRed(key, value, size(x.right) + size(right) + 1, x.right, right);
 
-		protected abstract Node<K,V> rotateLeft();
+			if (color == RED)
+				return mkRed(x.key, x.value, size, x.left, newThis);
+			else
+				return mkBlack(x.key, x.value, size, x.left, newThis);
+		}
 
-		protected abstract Node<K,V> flipColors();
+		private Node<K,V> rotateLeft() {
+			final Node<K,V> x = right;
+			Node<K,V> newThis = mkRed(key, value, size(x.left) + size(left) + 1, left, x.left);
 
-		protected abstract Node<K,V> fixSize();
+			if (color == RED)
+				return mkRed(x.key, x.value, size, newThis, x.right);
+			else
+				return mkBlack(x.key, x.value, size, newThis, x.right);
+		}
 
-		protected abstract Node<K,V> flipColor();
+		private void flipColors() {
+			color = !color;
+			left.color = !left.color;
+			right.color = !right.color;
+		}
+
+		private void fixSize() {
+			size = size(left) + size(right) + 1;
+		}
 
 		private Node<K,V> moveRedLeft() {
-			// assert isRed(this) && isBlack(left) && isBlack(left.left);
-			Node<K,V> h = flipColors();
-			return isRed(h.right.left) ? h.setRight(h.right.rotateRight()).rotateLeft().flipColors() : h;
+			flipColors();
+			if (isRed(right.left)) {
+				setRight(right.rotateRight());
+				var result = rotateLeft();
+				result.flipColors();
+				return result;
+			}
+			else
+				return this;
 		}
 
 		private Node<K,V> moveRedRight() {
-			// assert isRed(this) && isBlack(right) && isBlack(right.left);
-			Node<K,V> h = flipColors();
-			return isRed(h.left.left) ? h.rotateRight().flipColors() : h;
+			flipColors();
+			if (isRed(left.left)) {
+				var result = rotateRight();
+				result.flipColors();
+				return result;
+			}
+			else
+				return this;
 		}
 
 		// restore red-black tree invariant
@@ -183,121 +213,10 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 			Node<K,V> h = this;
 			if (isRed(h.right))                      h = h.rotateLeft();
 			if (isRed(h.left) && isRed(h.left.left)) h = h.rotateRight();
-			if (isRed(h.left) && isRed(h.right))     h = h.flipColors();
+			if (isRed(h.left) && isRed(h.right))     h.flipColors();
 
-			return h.fixSize();
-		}
-	}
-
-	private static class RedNode<K,V> extends Node<K,V> {
-
-		private RedNode(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
-			super(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K,V> fixSize() {
-			return mkRed(key, value, size(left) + size(right) + 1, left, right);
-		}
-
-		@Override
-		protected Node<K, V> flipColor() {
-			return mkBlack(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K, V> rotateLeft() {
-			final Node<K,V> x = right;
-			Node<K,V> newThis = mkRed(key, value, size(x.left) + size(left) + 1, left, x.left);
-			return mkRed(x.key, x.value, size, newThis, x.right);
-		}
-
-		@Override
-		protected Node<K, V> rotateRight() {
-			// assert isRed(left);
-			final Node<K,V> x = left;
-			Node<K,V> newThis = mkRed(key, value, size(x.right) + size(right) + 1, x.right, right);
-			return mkRed(x.key, x.value, size, x.left, newThis);
-		}
-
-		@Override
-		protected Node<K, V> setValue(V value) {
-			return mkRed(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K, V> setLeft(Node<K, V> left) {
-			return mkRed(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K, V> setRight(Node<K, V> right) {
-			return mkRed(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K,V> flipColors() {
-			// h must have opposite color of its two children
-			// assert (h != null) && (h.left != null) && (h.right != null);
-			// assert (isBlack(h) &&  isRed(h.left) &&  isRed(h.right))
-			//    || (isRed(h)  && isBlack(h.left) && isBlack(h.right));
-			return mkBlack(key, value, size, left.flipColor(), right.flipColor());
-		}
-	}
-
-	private static class BlackNode<K,V> extends Node<K,V> {
-
-		private BlackNode(K key, V value, int size, Node<K,V> left, Node<K,V> right) {
-			super(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K,V> fixSize() {
-			return mkBlack(key, value, size(left) + size(right) + 1, left, right);
-		}
-
-		@Override
-		protected Node<K, V> flipColor() {
-			return mkRed(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K, V> rotateLeft() {
-			final Node<K,V> x = right;
-			Node<K,V> newThis = mkRed(key, value, size(x.left) + size(left) + 1, left, x.left);
-			return mkBlack(x.key, x.value, size, newThis, x.right);
-		}
-
-		@Override
-		protected Node<K, V> rotateRight() {
-			// assert isRed(left);
-			final Node<K,V> x = left;
-			Node<K,V> newThis = mkRed(key, value, size(x.right) + size(right) + 1, x.right, right);
-			return mkBlack(x.key, x.value, size, x.left, newThis);
-		}
-
-		@Override
-		protected Node<K, V> setValue(V value) {
-			return mkBlack(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K, V> setLeft(Node<K, V> left) {
-			return mkBlack(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K, V> setRight(Node<K, V> right) {
-			return mkBlack(key, value, size, left, right);
-		}
-
-		@Override
-		protected Node<K,V> flipColors() {
-			// this must have opposite color of its two children
-			// assert (left != null) && (right != null);
-			// assert (isBlack(this) && isRed(left) && isRed(right))
-			//    || (isRed(this) && isBlack(left) && isBlack(right));
-			return mkRed(key, value, size, left.flipColor(), right.flipColor());
+			h.fixSize();
+			return h;
 		}
 	}
 
@@ -308,7 +227,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	 * @return true if and only if {@code x} is red
 	 */
 	private static <K,V> boolean isRed(Node<K,V> x) {
-		return x instanceof RedNode<?,?>;
+		return x != null && x.color == Node.RED;
 	}
 
 	/**
@@ -318,7 +237,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 	 * @return true if and only if {@code x} is black
 	 */
 	private static <K,V> boolean isBlack(Node<K,V> x) {
-		return x == null || x instanceof BlackNode<?,?>;
+		return x == null || x.color == Node.BLACK;
 	}
 
 	/**
@@ -431,16 +350,17 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		if (h == null) return Node.mkRed(key, value);
 
 		int cmp = StorageSupport.compare(key, h.key);
-		if      (cmp < 0) h = h.setLeft(put(h.left, key, value)); 
-		else if (cmp > 0) h = h.setRight(put(h.right, key, value));
-		else              h = h.setValue(value);
+		if      (cmp < 0) h.setLeft(put(h.left, key, value)); 
+		else if (cmp > 0) h.setRight(put(h.right, key, value));
+		else              h.setValue(value);
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) &&  isBlack(h.left))    h = h.rotateLeft();
 		if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+		if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 		
-		return h.fixSize();
+		h.fixSize();
+		return h;
 	}
 
 	@Override
@@ -463,7 +383,9 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		if (isBlack(h.left) && isBlack(h.left.left))
 			h = h.moveRedLeft();
 
-		return h.setLeft(removeMin(h.left)).balance();
+		h.setLeft(removeMin(h.left));
+		h.balance();
+		return h;
 	}
 
 	@Override
@@ -489,7 +411,8 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		if (isBlack(h.right) && isBlack(h.right.left))
 			h = h.moveRedRight();
 
-		return h.setRight(removeMax(h.right)).balance();
+		h.setRight(removeMax(h.right));
+		return h.balance();
 	}
 
 	@Override
@@ -513,7 +436,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 			if (isBlack(h.left) && isBlack(h.left.left))
 				h = h.moveRedLeft();
 
-			h = h.setLeft(remove(h.left, key));
+			h.setLeft(remove(h.left, key));
 		}
 		else {
 			if (isRed(h.left))
@@ -530,8 +453,9 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					h = Node.mkBlack(x.key, x.value, h.size, h.left, removeMin(h.right));
 			}
 			else
-				h = h.setRight(remove(h.right, key));
+				h.setRight(remove(h.right, key));
 		}
+
 		return h.balance();
 	}
 
@@ -643,16 +567,17 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		if (h == null) return Node.mkRed(key, how.apply(null));
 
 		int cmp = StorageSupport.compare(key, h.key);
-		if      (cmp < 0) h = h.setLeft(update(h.left,  key, how)); 
-		else if (cmp > 0) h = h.setRight(update(h.right, key, how)); 
-		else              h = h.setValue(how.apply(h.value));
+		if      (cmp < 0) h.setLeft(update(h.left,  key, how)); 
+		else if (cmp > 0) h.setRight(update(h.right, key, how)); 
+		else              h.setValue(how.apply(h.value));
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) && isBlack(h.left))     h = h.rotateLeft();
 		if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+		if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 
-		return h.fixSize();
+		h.fixSize();
+		return h;
 	}
 
 	@Override
@@ -666,19 +591,20 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		if (h == null) return Node.mkRed(key, how.apply(_default));
 
 		int cmp = StorageSupport.compare(key, h.key);
-		if      (cmp < 0) h = h.setLeft(update(h.left, key, _default, how)); 
-		else if (cmp > 0) h = h.setRight(update(h.right, key, _default, how));
+		if      (cmp < 0) h.setLeft(update(h.left, key, _default, how)); 
+		else if (cmp > 0) h.setRight(update(h.right, key, _default, how));
 		else if (h.value == null)
-			h = h.setValue(how.apply(_default));
+			h.setValue(how.apply(_default));
 		else
-			h = h.setValue(how.apply(h.value));
+			h.setValue(how.apply(h.value));
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) && isBlack(h.left))     h = h.rotateLeft();
 		if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+		if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 
-		return h.fixSize();
+		h.fixSize();
+		return h;
 	}
 
 	@Override
@@ -692,19 +618,20 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		if (h == null) return Node.mkRed(key, how.apply(_default.get()));
 
 		int cmp = StorageSupport.compare(key, h.key);
-		if      (cmp < 0) h = h.setLeft(update(h.left, key, _default, how)); 
-		else if (cmp > 0) h = h.setRight(update(h.right, key, _default, how));
+		if      (cmp < 0) h.setLeft(update(h.left, key, _default, how)); 
+		else if (cmp > 0) h.setRight(update(h.right, key, _default, how));
 		else if (h.value == null)
-			h = h.setValue(how.apply(_default.get()));
+			h.setValue(how.apply(_default.get()));
 		else
-			h = h.setValue(how.apply(h.value));
+			h.setValue(how.apply(h.value));
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) && isBlack(h.left))     h = h.rotateLeft();
 		if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+		if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 
-		return h.fixSize();
+		h.fixSize();
+		return h;
 	}
 
 	@Override
@@ -721,11 +648,13 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					return Node.mkRed(key, value);
 
 				int cmp = StorageSupport.compare(key, h.key);
-				if      (cmp < 0) h = h.setLeft(putIfAbsent(h.left));
-				else if (cmp > 0) h = h.setRight(putIfAbsent(h.right));
-				else if (h.value == null)
+				if      (cmp < 0) h.setLeft(putIfAbsent(h.left));
+				else if (cmp > 0) h.setRight(putIfAbsent(h.right));
+				else if (h.value == null) {
 					// found but was bound to null: result remains null
-					return h.setValue(value);
+					h.setValue(value);
+					return h;
+				}
 				else {
 					// found and was bound to a non-null value
 					result = h.value;
@@ -735,9 +664,10 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 				// fix-up any right-leaning links
 				if (isRed(h.right) && isBlack(h.left))     h = h.rotateLeft();
 				if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-				if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+				if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 
-				return h.fixSize();
+				h.fixSize();
+				return h;
 			}
 		}
 
@@ -761,11 +691,11 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					return Node.mkRed(key, result = supplier.get());
 
 				int cmp = StorageSupport.compare(key, h.key);
-				if      (cmp < 0) h = h.setLeft(computeIfAbsent(h.left));
-				else if (cmp > 0) h = h.setRight(computeIfAbsent(h.right));
+				if      (cmp < 0) h.setLeft(computeIfAbsent(h.left));
+				else if (cmp > 0) h.setRight(computeIfAbsent(h.right));
 				else if (h.value == null) {
 					// found but was bound to null
-					h = h.setValue(supplier.get());
+					h.setValue(supplier.get());
 					result = h.value;
 					return h;
 				}
@@ -778,9 +708,10 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 				// fix-up any right-leaning links
 				if (isRed(h.right) && isBlack(h.left))     h = h.rotateLeft();
 				if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-				if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+				if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 
-				return h.fixSize();
+				h.fixSize();
+				return h;
 			}
 		}
 
@@ -804,11 +735,11 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 					return Node.mkRed(key, result = supplier.apply(key));
 
 				int cmp = StorageSupport.compare(key, h.key);
-				if      (cmp < 0) h = h.setLeft(computeIfAbsent(h.left));
-				else if (cmp > 0) h = h.setRight(computeIfAbsent(h.right));
+				if      (cmp < 0) h.setLeft(computeIfAbsent(h.left));
+				else if (cmp > 0) h.setRight(computeIfAbsent(h.right));
 				else if (h.value == null) {
 					// found but was bound to null
-					h = h.setValue(supplier.apply(key));
+					h.setValue(supplier.apply(key));
 					result = h.value;
 					return h;
 				}
@@ -821,9 +752,10 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 				// fix-up any right-leaning links
 				if (isRed(h.right) && isBlack(h.left))     h = h.rotateLeft();
 				if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-				if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
+				if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
 
-				return h.fixSize();
+				h.fixSize();
+				return h;
 			}
 		}
 
@@ -991,18 +923,8 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 			public void forEachValue(Consumer<? super V> action) {
 				StorageTreeMap.this.forEachValue(action);
 			}
-
-			@Override
-			public StorageMapView<K, V> snapshot() {
-				return StorageTreeMap.this.snapshot();
-			}
 		}
 
 		return new StorageMapViewImpl();
-	}
-
-	@Override
-	public StorageMapView<K,V> snapshot() {
-		return new StorageTreeMap<>(this).view();
 	}
 }

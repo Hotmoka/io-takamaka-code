@@ -38,8 +38,8 @@ import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.StorageLinkedList;
 import io.takamaka.code.util.StorageList;
-import io.takamaka.code.util.StorageMap;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 
 /**
  * The validators of a Tendermint blockchain. They have an ED25519 public key
@@ -73,7 +73,7 @@ public class TendermintValidators extends AbstractValidators<TendermintED25519Va
 	 * The number of times that a validators didn't behave (didn't answer) in the
 	 * immediately previous rewards. If this reaches zero, they will be slashed.
 	 */
-	private final StorageMap<String, BigInteger> alreadyNotBehaving = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<String, BigInteger> alreadyNotBehaving = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * Creates a set of validators of a Tendermint blockchain.
