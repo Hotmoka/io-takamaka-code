@@ -812,7 +812,7 @@ public class SnapshottableStorageTreeIntMap<V> extends Storage implements Snapsh
 		root = null;
 	}
 
-	//@Override
+	@Override
 	public Iterator<Entry<V>> iterator() {
 		return new StorageMapIterator<>(root);
 	}
@@ -952,6 +952,11 @@ public class SnapshottableStorageTreeIntMap<V> extends Storage implements Snapsh
 			@Override
 			public void forEachValue(Consumer<? super V> action) {
 				SnapshottableStorageTreeIntMap.this.forEachValue(action);
+			}
+
+			@Override
+			public Iterator<Entry<V>> iterator() {
+				return SnapshottableStorageTreeIntMap.this.iterator();
 			}
 		}
 

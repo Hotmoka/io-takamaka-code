@@ -17,7 +17,6 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.NoSuchElementException;
-import java.util.function.Consumer;
 
 /**
  * A sorted set of (non-{@code null}) storage values,
@@ -68,11 +67,4 @@ public interface StorageSet<V> extends StorageSetView<V> {
 	 * @return a view of this set
 	 */
 	StorageSetView<V> view();
-
-	/**
-	 * Runs the given action for each element of this set, in their order.
-	 * 
-	 * @param action the action to run
-	 */
-	void forEach(Consumer<? super V> action);
 }

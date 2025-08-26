@@ -867,6 +867,11 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 			public void forEachValue(Consumer<? super V> action) {
 				StorageTreeIntMap.this.forEachValue(action);
 			}
+
+			@Override
+			public Iterator<Entry<V>> iterator() {
+				return StorageTreeIntMap.this.iterator();
+			}
 		}
 
 		return new StorageIntMapViewImpl();
@@ -874,9 +879,8 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 
 	@Override
 	public void forEach(Consumer<? super Entry<V>> action) {
-		var it = new StorageMapIterator<>(root);
-		while (it.hasNext())
-			action.accept(it.next());
+		for (var entry: this)
+			action.accept(entry);
 	}
 
 	@Override
@@ -887,5 +891,10 @@ public class StorageTreeIntMap<V> extends Storage implements StorageIntMap<V> {
 	@Override
 	public void forEachValue(Consumer<? super V> action) {
 		forEach(entry -> action.accept(entry.getValue()));
+	}
+
+	@Override
+	public Iterator<Entry<V>> iterator() {
+		return new StorageMapIterator<>(root);
 	}
 }

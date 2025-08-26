@@ -31,7 +31,7 @@ import io.takamaka.code.lang.View;
  * 
  * @param <V> the type of the values
  */
-public interface StorageIntMapView<V> {
+public interface StorageIntMapView<V> extends Iterable<StorageIntMapView.Entry<V>> {
 
 	/**
 	 * A key/value pair.

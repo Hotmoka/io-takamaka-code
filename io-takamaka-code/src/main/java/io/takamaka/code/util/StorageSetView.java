@@ -17,6 +17,7 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 import io.takamaka.code.lang.View;
 
@@ -118,4 +119,11 @@ public interface StorageSetView<V> extends Iterable<V> {
 	 * @return a snapshot of this set
 	 */
 	StorageSetView<V> snapshot();
+
+	/**
+	 * Runs the given action for each element of this set, in their order.
+	 * 
+	 * @param action the action to run
+	 */
+	void forEach(Consumer<? super V> action);
 }

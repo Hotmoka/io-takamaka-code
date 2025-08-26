@@ -881,9 +881,8 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 
 	@Override
 	public void forEach(Consumer<? super Entry<K, V>> action) {
-		var it = new StorageMapIterator<>(root);
-		while (it.hasNext())
-			action.accept(it.next());
+		for (var entry: this)
+			action.accept(entry);
 	}
 
 	@Override
@@ -894,6 +893,11 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 	@Override
 	public void forEachValue(Consumer<? super V> action) {
 		forEach(entry -> action.accept(entry.getValue()));
+	}
+
+	@Override
+	public Iterator<Entry<K, V>> iterator() {
+		return new StorageMapIterator<>(root);
 	}
 
 	@Override
@@ -987,6 +991,11 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 			@Override
 			public SnapshottableStorageMapView<K, V> snapshot() {
 				return SnapshottableStorageTreeMap.this.snapshot();
+			}
+
+			@Override
+			public Iterator<Entry<K, V>> iterator() {
+				return SnapshottableStorageTreeMap.this.iterator();
 			}
 		}
 
