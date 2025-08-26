@@ -16,7 +16,6 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -72,16 +71,6 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	 * Builds an empty set.
 	 */
 	public StorageTreeSet() {}
-
-	/**
-	 * Creates a set initialized to the same elements as the given parent collection.
-	 * 
-	 * @param parent the parent collection
-	 */
-	public StorageTreeSet(Collection<? extends V> parent) {
-		for (var element: parent)
-			add(element);
-	}
 
 	/**
 	 * Yields a snapshot of the given set.

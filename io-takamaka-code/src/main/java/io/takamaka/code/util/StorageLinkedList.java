@@ -16,7 +16,6 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -93,18 +92,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	/**
 	 * Creates an empty list.
 	 */
-	public StorageLinkedList() {
-	}
-
-	/**
-	 * Creates a list initialized to the same elements as the given parent collection.
-	 * 
-	 * @param parent the parent collection
-	 */
-	public StorageLinkedList(Collection<? extends E> parent) {
-		for (var element: parent)
-			add(element);
-	}
+	public StorageLinkedList() {}
 
 	@Override
 	public void addFirst(E element) {
@@ -327,23 +315,11 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			}
 
 			@Override
-			public StorageListView<E> snapshot() {
-				return StorageLinkedList.this.snapshot();
-			}
-
-			@Override
 			public void forEach(Consumer<? super E> action) {
 				StorageLinkedList.this.forEach(action);
 			}
 		}
 
 		return new StorageListViewImpl();
-	}
-
-	@Override
-	public StorageListView<E> snapshot() {
-		var copy = new StorageLinkedList<E>();
-		forEach(copy::addLast);
-		return copy.view();
 	}
 }
