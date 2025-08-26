@@ -31,7 +31,7 @@ import io.takamaka.code.lang.View;
  * 
  * @param <V> the type of the values
  */
-public interface StorageIntMapView<V> extends Iterable<StorageIntMapView.Entry<V>> {
+public interface StorageIntMapView<V> {
 
 	/**
 	 * A key/value pair.
@@ -178,14 +178,4 @@ public interface StorageIntMapView<V> extends Iterable<StorageIntMapView.Entry<V
 	 * @param action the action to perform
 	 */
 	void forEachValue(Consumer<? super V> action);
-
-	/**
-	 * Yields a snapshot of this map. The snapshot contains the elements in this map
-	 * but is independent from this map: any future modification of this map will
-	 * not be seen through the snapshot. A snapshot is always
-	 * {@link io.takamaka.code.lang.Exported}.
-	 * 
-	 * @return a snapshot of this map
-	 */
-	StorageIntMapView<V> snapshot();
 }

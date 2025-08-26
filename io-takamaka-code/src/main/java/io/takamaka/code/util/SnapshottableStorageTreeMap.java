@@ -840,11 +840,6 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 		root = null;
 	}
 
-	@Override
-	public Iterator<Entry<K,V>> iterator() {
-		return new StorageMapIterator<>(root);
-	}
-
 	private static class Stack<V> {
 		private final V head;
 		private final Stack<V> tail;
@@ -886,8 +881,9 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 
 	@Override
 	public void forEach(Consumer<? super Entry<K, V>> action) {
-		for (var entry: this)
-			action.accept(entry);
+		var it = new StorageMapIterator<>(root);
+		while (it.hasNext())
+			action.accept(it.next());
 	}
 
 	@Override
@@ -926,11 +922,6 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 			@Override
 			public @View boolean containsKey(Object value) {
 				return SnapshottableStorageTreeMap.this.containsKey(value);
-			}
-
-			@Override
-			public Iterator<Entry<K, V>> iterator() {
-				return SnapshottableStorageTreeMap.this.iterator();
 			}
 
 			@Override

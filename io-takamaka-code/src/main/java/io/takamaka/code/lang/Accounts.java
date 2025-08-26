@@ -19,7 +19,6 @@ package io.takamaka.code.lang;
 import static io.takamaka.code.lang.Takamaka.require;
 
 import java.math.BigInteger;
-import java.util.Iterator;
 import java.util.function.Consumer;
 
 import io.takamaka.code.math.BigIntegerSupport;
@@ -31,7 +30,7 @@ import io.takamaka.code.util.StorageTreeIntMap;
  *
  * @param <A> the type of the accounts contained in this collector
  */
-public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contract implements Iterable<A> {
+public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contract {
 
 	/**
 	 * The accounts contained in this container, in order of creation.
@@ -119,29 +118,6 @@ public abstract class Accounts<A extends ExternallyOwnedAccount> extends Contrac
 			result[i++] = s;
 
 		return result;
-	}
-
-	/**
-	 * Yields an iterator over the accounts in this collector.
-	 * 
-	 * @return the iterator
-	 */
-	@Override
-	public final Iterator<A> iterator() {
-		var it = accounts.iterator();
-
-		return new Iterator<A>() {
-
-			@Override
-			public boolean hasNext() {
-				return it.hasNext();
-			}
-
-			@Override
-			public A next() {
-				return it.next().getValue();
-			}
-		};
 	}
 
 	/**
