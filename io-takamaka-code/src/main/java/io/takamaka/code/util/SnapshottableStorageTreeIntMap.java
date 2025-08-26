@@ -174,7 +174,7 @@ public class SnapshottableStorageTreeIntMap<V> extends Storage implements Snapsh
 		// restore red-black tree invariant
 		private Node<V> balance() {
 			Node<V> h = this;
-			if (isRed(h.right))                      h = h.rotateLeft();
+			if (isRed(h.right) && isBlack(h.left))   h = h.rotateLeft();
 			if (isRed(h.left) && isRed(h.left.left)) h = h.rotateRight();
 			if (isRed(h.left) && isRed(h.right))     h = h.flipColors();
 
@@ -970,9 +970,8 @@ public class SnapshottableStorageTreeIntMap<V> extends Storage implements Snapsh
 
 	@Override
 	public void forEach(Consumer<? super Entry<V>> action) {
-		var it = new StorageMapIterator<>(root);
-		while (it.hasNext())
-			action.accept(it.next());
+		for (var entry: this)
+			action.accept(entry);
 	}
 
 	@Override

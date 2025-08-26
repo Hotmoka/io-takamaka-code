@@ -206,7 +206,7 @@ public class StorageTreeMap<K,V> extends Storage implements StorageMap<K,V> {
 		// restore red-black tree invariant
 		private Node<K,V> balance() {
 			Node<K,V> h = this;
-			if (isRed(h.right))                      h = h.rotateLeft();
+			if (isRed(h.right) && isBlack(h.left))   h = h.rotateLeft();
 			if (isRed(h.left) && isRed(h.left.left)) h = h.rotateRight();
 			if (isRed(h.left) && isRed(h.right))     h.flipColors();
 
