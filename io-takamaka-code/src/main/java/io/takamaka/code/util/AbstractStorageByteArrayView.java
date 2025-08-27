@@ -17,6 +17,7 @@ limitations under the License.
 package io.takamaka.code.util;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.StringSupport;
@@ -67,5 +68,11 @@ abstract class AbstractStorageByteArrayView extends Storage implements StorageBy
 		}
 
 		return result;
+	}
+
+	@Override
+	public void forEach(Consumer<? super Byte> action) {
+		for (Byte b: this)
+			action.accept(b);
 	}
 }

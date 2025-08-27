@@ -220,9 +220,4 @@ public final class Bytes8Snapshot extends AbstractStorageByteArrayView {
 	public byte[] toArray() {
 		return new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7 };
 	}
-
-	@Override
-	public StorageByteArrayView snapshot() {
-		return this;
-	}
 }

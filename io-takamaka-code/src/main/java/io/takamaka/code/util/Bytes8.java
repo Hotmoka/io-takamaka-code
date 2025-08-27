@@ -18,6 +18,7 @@ package io.takamaka.code.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 
@@ -31,7 +32,7 @@ import io.takamaka.code.lang.View;
  * By iterating on this object, one gets its values, in increasing index order.
  */
 
-public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteArray {
+public class Bytes8 extends AbstractStorageByteArrayView implements SnapshottableStorageByteArray {
 
 	/**
 	 * The immutable size of the array.
@@ -248,10 +249,10 @@ public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteA
 	}
 
 	@Override
-	public StorageByteArrayView view() {
+	public SnapshottableStorageByteArrayView view() {
 
 		@Exported
-		class StorageByteArrayViewImpl implements StorageByteArrayView {
+		class SnapshottableStorageByteArrayViewImpl implements SnapshottableStorageByteArrayView {
 
 			@Override
 			public Iterator<Byte> iterator() {
@@ -277,9 +278,14 @@ public class Bytes8 extends AbstractStorageByteArrayView implements StorageByteA
 			public StorageByteArrayView snapshot() {
 				return Bytes8.this.snapshot();
 			}
+
+			@Override
+			public void forEach(Consumer<? super Byte> action) {
+				Bytes8.this.forEach(action);
+			}
 		}
 
-		return new StorageByteArrayViewImpl();
+		return new SnapshottableStorageByteArrayViewImpl();
 	}
 
 	@Override

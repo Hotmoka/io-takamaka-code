@@ -16,6 +16,8 @@ limitations under the License.
 
 package io.takamaka.code.util;
 
+import java.util.function.Consumer;
+
 import io.takamaka.code.lang.View;
 
 /**
@@ -72,12 +74,9 @@ public interface StorageByteArrayView extends Iterable<Byte> {
 	int hashCode();
 
 	/**
-	 * Yields a snapshot of this array. The snapshot contains the elements in this array
-	 * but is independent from this array: any future modification of this array will
-	 * not be seen through the snapshot. A snapshot is always
-	 * {@link io.takamaka.code.lang.Exported}.
+	 * Executes the given action for each element in this array (also its {@code null} elements).
 	 * 
-	 * @return a snapshot of this array
+	 * @param action the action to execute
 	 */
-	StorageByteArrayView snapshot();
+	void forEach(Consumer<? super Byte> action);
 }

@@ -29,7 +29,7 @@ import io.takamaka.code.lang.View;
 /**
  * A mutable array of bytes, that can be kept in storage. Elements not set default to 0.
  * The length of the array is decided at creation time and cannot be changed later.
- * Its elements can be updated.
+ * Its elements can be updated. It supports snapshots.
  * By iterating on this object, one gets its values, in increasing index order.
  *
  * This code is derived from Sedgewick and Wayne's code for
@@ -49,7 +49,7 @@ import io.takamaka.code.lang.View;
  * @author Kevin Wayne
  */
 
-public class StorageTreeByteArray extends AbstractStorageByteArrayView implements StorageByteArray {
+public class SnapshottableStorageTreeByteArray extends AbstractStorageByteArrayView implements SnapshottableStorageByteArray {
 
 	/**
 	 * The root of the tree.
@@ -67,7 +67,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 * @param length the length of the array
 	 * @throws NegativeArraySizeException if {@code length} is negative
 	 */
-	public StorageTreeByteArray(int length) {
+	public SnapshottableStorageTreeByteArray(int length) {
 		if (length < 0)
 			throw new NegativeArraySizeException();
 	
@@ -82,7 +82,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 * @param initialValue the initial value of the array
 	 * @throws NegativeArraySizeException if {@code length} is negative
 	 */
-	public StorageTreeByteArray(int length, byte initialValue) {
+	public SnapshottableStorageTreeByteArray(int length, byte initialValue) {
 		this(length);
 
 		for (int index = 0; index < length; index++)
@@ -99,7 +99,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 *                 is cast to {@code byte}
 	 * @throws NegativeArraySizeException if {@code length} is negative
 	 */
-	public StorageTreeByteArray(int length, IntSupplier supplier) {
+	public SnapshottableStorageTreeByteArray(int length, IntSupplier supplier) {
 		this(length);
 
 		for (int index = 0; index < length; index++)
@@ -117,37 +117,53 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 *                 {@code (byte) supplier.applyAsInt(i)}
 	 * @throws NegativeArraySizeException if {@code length} is negative
 	 */
-	public StorageTreeByteArray(int length, IntUnaryOperator supplier) {
+	public SnapshottableStorageTreeByteArray(int length, IntUnaryOperator supplier) {
 		this(length);
 
 		for (int index = 0; index < length; index++)
 			set(index, (byte) supplier.applyAsInt(index));
 	}
 
+	/**
+	 * Yields a snapshot of the given array.
+	 * 
+	 * @param parent the array
+	 */
+	private SnapshottableStorageTreeByteArray(SnapshottableStorageTreeByteArray parent) {
+		this.root = parent.root;
+		this.length = parent.length;
+	}
+
 	private void mkRootBlack() {
-		root.color = Node.BLACK;
+		if (isRed(root))
+			root = Node.mkBlack(root.index, root.value, root.left, root.right);
 	}
 
 	/**
 	 * A node of the binary search tree that implements the map.
 	 */
-	private final static class Node extends Storage {
-		private boolean color;
-		private final static boolean RED = false;
-		private final static boolean BLACK = true;
-		private final int index;
-		private byte value;
-		private Node left, right;
+	private abstract static class Node extends Storage {
+		protected final int index;
+		protected final byte value;
+		protected final Node left, right;
 
-		/**
-		 * Creates a node, initially red and without children.
-		 *
-		 * @param index the index of the node
-		 * @param value the value of the node
-		 */
-		private Node(int index, byte value) {
+		private Node(int index, byte value, Node left, Node right) {
 			this.index = index;
 			this.value = value;
+			this.left = left;
+			this.right = right;
+		}
+
+		protected static Node mkBlack(int index, byte value, Node left, Node right) {
+			return new BlackNode(index, value, left, right);
+		}
+
+		protected static Node mkRed(int index, byte value, Node left, Node right) {
+			return new RedNode(index, value, left, right);
+		}
+
+		protected static Node mkRed(int index, byte value) {
+			return new RedNode(index, value, null, null);
 		}
 
 		@Override
@@ -155,42 +171,110 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 			return 42;
 		}
 
-		private void setValue(byte value) {
-			this.value = value;
+		protected abstract Node setValue(byte value);
+
+		protected abstract Node setLeft(Node left);
+
+		protected abstract Node setRight(Node right);
+
+		protected abstract Node rotateRight();
+
+		protected abstract Node rotateLeft();
+
+		protected abstract Node flipColors();
+
+		protected abstract Node flipColor();
+	}
+
+	private static class RedNode extends Node {
+
+		private RedNode(int index, byte value, Node left, Node right) {
+			super(index, value, left, right);
 		}
 
-		private void setLeft(Node left) {
-			this.left = left;
+		@Override
+		protected Node flipColor() {
+			return mkBlack(index, value, left, right);
 		}
 
-		private void setRight(Node right) {
-			this.right = right;
+		@Override
+		protected Node rotateLeft() {
+			final Node x = right;
+			Node newThis = mkRed(index, value, left, x.left);
+			return mkRed(x.index, x.value, newThis, x.right);
 		}
 
-		private Node rotateRight() {
-			Node x = left;
-	        left = x.right;
-	        x.right = this;
-	        x.color = color;
-	        color = RED;
-
-	        return x;
+		@Override
+		protected Node rotateRight() {
+			final Node x = left;
+			Node newThis = mkRed(index, value, x.right, right);
+			return mkRed(x.index, x.value, x.left, newThis);
 		}
 
-		private Node rotateLeft() {
-			Node x = right;
-	        right = x.left;
-	        x.left = this;
-	        x.color = color;
-	        color = RED;
-
-	        return x;
+		@Override
+		protected Node setValue(byte value) {
+			return mkRed(index, value, left, right);
 		}
 
-		private void flipColors() {
-			color = !color;
-			left.color = !left.color;
-			right.color = !right.color;
+		@Override
+		protected Node setLeft(Node left) {
+			return mkRed(index, value, left, right);
+		}
+
+		@Override
+		protected Node setRight(Node right) {
+			return mkRed(index, value, left, right);
+		}
+
+		@Override
+		protected Node flipColors() {
+			return mkBlack(index, value, left.flipColor(), right.flipColor());
+		}
+	}
+
+	private static class BlackNode extends Node {
+
+		private BlackNode(int index, byte value, Node left, Node right) {
+			super(index, value, left, right);
+		}
+
+		@Override
+		protected Node flipColor() {
+			return mkRed(index, value, left, right);
+		}
+
+		@Override
+		protected Node rotateLeft() {
+			final Node x = right;
+			Node newThis = mkRed(index, value, left, x.left);
+			return mkBlack(x.index, x.value, newThis, x.right);
+		}
+
+		@Override
+		protected Node rotateRight() {
+			final Node x = left;
+			Node newThis = mkRed(index, value, x.right, right);
+			return mkBlack(x.index, x.value, x.left, newThis);
+		}
+
+		@Override
+		protected Node setValue(byte value) {
+			return mkBlack(index, value, left, right);
+		}
+
+		@Override
+		protected Node setLeft(Node left) {
+			return mkBlack(index, value, left, right);
+		}
+
+		@Override
+		protected Node setRight(Node right) {
+			return mkBlack(index, value, left, right);
+		}
+
+		@Override
+		protected Node flipColors() {
+			return mkRed(index, value, left.flipColor(), right.flipColor());
 		}
 	}
 
@@ -206,7 +290,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 * @return true if and only if {@code x} is red
 	 */
 	private static boolean isRed(Node x) {
-		return x != null && x.color == Node.RED;
+		return x instanceof RedNode;
 	}
 
 	/**
@@ -216,7 +300,7 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	 * @return true if and only if {@code x} is black
 	 */
 	private static boolean isBlack(Node x) {
-		return x == null || x.color == Node.BLACK;
+		return x == null || x instanceof BlackNode;
 	}
 
 	private static int compareTo(int index1, int index2) {
@@ -259,17 +343,17 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 
 	// insert the index-value pair in the subtree rooted at h
 	private static Node set(Node h, int index, byte value) { 
-		if (h == null) return new Node(index, value);
+		if (h == null) return Node.mkRed(index, value);
 
 		int cmp = compareTo(index, h.index);
-		if      (cmp < 0) h.setLeft(set(h.left,  index, value)); 
-		else if (cmp > 0) h.setRight(set(h.right, index, value)); 
-		else              h.setValue(value);
+		if      (cmp < 0) h = h.setLeft(set(h.left,  index, value)); 
+		else if (cmp > 0) h = h.setRight(set(h.right, index, value)); 
+		else              h = h.setValue(value);
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) && isBlack(h.left))    h = h.rotateLeft();
 		if (isRed(h.left)  && isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  && isRed(h.right))     h.flipColors();
+		if (isRed(h.left)  && isRed(h.right))     h = h.flipColors();
 
 		return h;
 	}
@@ -284,17 +368,17 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	}
 
 	private static Node update(Node h, int index, IntUnaryOperator how) { 
-		if (h == null) return new Node(index, (byte) how.applyAsInt(0));
+		if (h == null) return Node.mkRed(index, (byte) how.applyAsInt(0));
 
 		int cmp = compareTo(index, h.index);
-		if      (cmp < 0) h.setLeft(update(h.left,  index, how)); 
-		else if (cmp > 0) h.setRight(update(h.right, index, how)); 
-		else              h.setValue((byte) how.applyAsInt(h.value));
+		if      (cmp < 0) h = h.setLeft(update(h.left,  index, how)); 
+		else if (cmp > 0) h = h.setRight(update(h.right, index, how)); 
+		else              h = h.setValue((byte) how.applyAsInt(h.value));
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) && isBlack(h.left))    h = h.rotateLeft();
 		if (isRed(h.left)  && isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  && isRed(h.right))     h.flipColors();
+		if (isRed(h.left)  && isRed(h.right))     h = h.flipColors();
 
 		return h;
 	}
@@ -365,37 +449,47 @@ public class StorageTreeByteArray extends AbstractStorageByteArrayView implement
 	}
 
 	@Override
-	public StorageByteArrayView view() {
+	public SnapshottableStorageByteArrayView view() {
 		
 		@Exported
-		class StorageByteArrayViewImpl implements StorageByteArrayView {
+		class SnapshottableStorageByteArrayViewImpl implements SnapshottableStorageByteArrayView {
 
 			@Override
 			public Iterator<Byte> iterator() {
-				return StorageTreeByteArray.this.iterator();
+				return SnapshottableStorageTreeByteArray.this.iterator();
 			}
 
 			@Override
 			public int length() {
-				return StorageTreeByteArray.this.length();
+				return SnapshottableStorageTreeByteArray.this.length();
 			}
 
 			@Override
 			public byte get(int index) {
-				return StorageTreeByteArray.this.get(index);
+				return SnapshottableStorageTreeByteArray.this.get(index);
 			}
 
 			@Override
 			public byte[] toArray() {
-				return StorageTreeByteArray.this.toArray();
+				return SnapshottableStorageTreeByteArray.this.toArray();
+			}
+
+			@Override
+			public StorageByteArrayView snapshot() {
+				return SnapshottableStorageTreeByteArray.this.snapshot();
 			}
 
 			@Override
 			public void forEach(Consumer<? super Byte> action) {
-				StorageTreeByteArray.this.forEach(action);
+				SnapshottableStorageTreeByteArray.this.forEach(action);
 			}
 		}
 
-		return new StorageByteArrayViewImpl();
+		return new SnapshottableStorageByteArrayViewImpl();
+	}
+
+	@Override
+	public StorageByteArrayView snapshot() {
+		return new SnapshottableStorageTreeByteArray(this).view();
 	}
 }
