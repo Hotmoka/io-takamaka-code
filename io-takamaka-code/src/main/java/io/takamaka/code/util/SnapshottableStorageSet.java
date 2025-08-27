@@ -17,12 +17,16 @@ limitations under the License.
 package io.takamaka.code.util;
 
 /**
- * A mutable array of byte values. Unset elements default to 0.
- * By iterating on this object, one gets the values of the array, in increasing index order.
+ * A sorted set of (non-{@code null}) storage values,
+ * that can be kept in storage. By iterating on this object, one gets
+ * the values in the set, in increasing order. This interface includes
+ * read and modification methods.
+ * 
+ * @param <V> the type of the values. This type must be allowed in storage
  */
 
-public interface SnapshottableStorageByteArray extends StorageByteArray, SnapshottableStorageByteArrayView {
+public interface SnapshottableStorageSet<V> extends SnapshottableStorageSetView<V>, StorageSet<V> {
 
 	@Override
-	SnapshottableStorageByteArrayView view();
+	SnapshottableStorageSetView<V> view();
 }

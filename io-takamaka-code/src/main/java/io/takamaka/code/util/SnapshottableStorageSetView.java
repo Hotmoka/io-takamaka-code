@@ -17,26 +17,23 @@ limitations under the License.
 package io.takamaka.code.util;
 
 /**
- * A map from storage keys to (possibly {@code null}) storage values,
- * that can be kept in storage. By iterating on this object, one gets
- * the key/value pairs of the map, in increasing key order.
+ * A sorted set of (non-{@code null}) storage values.
+ * By iterating on this object, one gets the values in the set, in increasing order.
  * This interface has only access methods. Its sub-interface
- * {@link SnapshottableStorageMap} includes modification methods as well.
- * It allows to perform snapshots of the map.
+ * {@link StorageSet} includes modification methods as well.
  * 
- * @param <K> the type of the keys
- * @param <V> the type of the values
+ * @param <V> the type of the values. This type must be allowed in storage
  */
 
-public interface SnapshottableStorageMapView<K,V> extends StorageMapView<K,V> {
+public interface SnapshottableStorageSetView<V> extends StorageSetView<V> {
 
 	/**
-	 * Yields a snapshot of this map. The snapshot contains the elements in this map
-	 * but is independent from this map: any future modification of this map will
+	 * Yields a snapshot of this set. The snapshot contains the elements in this set
+	 * but is independent from this set: any future modification of this set will
 	 * not be seen through the snapshot. A snapshot is always
 	 * {@link io.takamaka.code.lang.Exported}.
 	 * 
-	 * @return a snapshot of this map
+	 * @return a snapshot of this set
 	 */
-	StorageMapView<K,V> snapshot();
+	StorageSetView<V> snapshot();
 }

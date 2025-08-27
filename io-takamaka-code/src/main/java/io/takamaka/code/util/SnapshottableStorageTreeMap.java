@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Fausto Spoto
+Copyright 2025 Fausto Spoto
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -989,7 +989,7 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 			}
 
 			@Override
-			public SnapshottableStorageMapView<K, V> snapshot() {
+			public StorageMapView<K, V> snapshot() {
 				return SnapshottableStorageTreeMap.this.snapshot();
 			}
 
@@ -1003,7 +1003,7 @@ public class SnapshottableStorageTreeMap<K,V> extends Storage implements Snapsho
 	}
 
 	@Override
-	public SnapshottableStorageMapView<K,V> snapshot() {
+	public StorageMapView<K,V> snapshot() {
 		return new SnapshottableStorageTreeMap<>(this).view();
 	}
 }

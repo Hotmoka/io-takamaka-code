@@ -29,7 +29,7 @@ import io.takamaka.code.lang.View;
 /**
  * A sorted set of (non-{@code null}) storage values,
  * that can be kept in storage. By iterating on this object, one gets
- * the values in the set, in increasing order.
+ * the values in the set, in increasing order. It supports the creation of snapshots.
  *
  * This code is derived from Sedgewick and Wayne's code for
  * red-black trees, with some adaptation. It implements an associative
@@ -60,7 +60,7 @@ import io.takamaka.code.lang.View;
  * @param <V> the type of the values
  */
 
-public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
+public class SnapshottableStorageTreeSet<V> extends Storage implements SnapshottableStorageSet<V> {
 
 	/**
 	 * The root of the tree.
@@ -70,39 +70,56 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	/**
 	 * Builds an empty set.
 	 */
-	public StorageTreeSet() {}
+	public SnapshottableStorageTreeSet() {}
+
+	/**
+	 * Yields a snapshot of the given set.
+	 * 
+	 * @param parent the map
+	 */
+	private SnapshottableStorageTreeSet(SnapshottableStorageTreeSet<V> parent) {
+		this.root = parent.root;
+	}
 
 	private void mkRootBlack() {
-		root.color = Node.BLACK;
+		if (isRed(root))
+			root = Node.mkBlack(root.value, root.size, root.left, root.right);
 	}
 
 	private void mkRootRed() {
-		root.color = Node.RED;
+		if (isBlack(root))
+			root = Node.mkRed(root.value, root.size, root.left, root.right);
 	}
 
 	/**
 	 * A node of the binary search tree that implements the set.
 	 */
-	private final static class Node<V> extends Storage {
-		private boolean color;
-		private final static boolean RED = false;
-		private final static boolean BLACK = true;
-		private V value; // never null
-		private Node<V> left, right;
+	private abstract static class Node<V> extends Storage {
+		protected final V value; // never null
+		protected final Node<V> left, right;
 
 		/**
 		 * Count of the subtree nodes.
 		 */
-		private int size;
+		protected final int size;
 
-		/**
-		 * Creates a node, initially red and without children.
-		 *
-		 * @param value the value of the node
-		 */
-		private Node(V value) {
+		private Node(V value, int size, Node<V> left, Node<V> right) {
 			this.value = value;
-			this.size = 1;
+			this.size = size;
+			this.left = left;
+			this.right = right;
+		}
+
+		protected static <V> Node<V> mkBlack(V value, int size, Node<V> left, Node<V> right) {
+			return new BlackNode<>(value, size, left, right);
+		}
+
+		protected static <V> Node<V> mkRed(V value, int size, Node<V> left, Node<V> right) {
+			return new RedNode<>(value, size, left, right);
+		}
+
+		protected static <V> Node<V> mkRed(V value) {
+			return new RedNode<>(value, 1, null, null);
 		}
 
 		@Override
@@ -110,73 +127,30 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 			return 42;
 		}
 
-		private void setValue(V value) {
-			this.value = value;
-		}
+		protected abstract Node<V> setValue(V value);
 
-		private void setLeft(Node<V> left) {
-			this.left = left;
-		}
+		protected abstract Node<V> setLeft(Node<V> left);
 
-		private void setRight(Node<V> right) {
-			this.right = right;
-		}
+		protected abstract Node<V> setRight(Node<V> right);
 
-		private Node<V> rotateRight() {
-			Node<V> x = left;
-	        left = x.right;
-	        x.right = this;
-	        x.color = color;
-	        color = RED;
-	        x.size = size;
-	        size = size(left) + size(right) + 1;
+		protected abstract Node<V> rotateRight();
 
-	        return x;
-		}
+		protected abstract Node<V> rotateLeft();
 
-		private Node<V> rotateLeft() {
-			Node<V> x = right;
-	        right = x.left;
-	        x.left = this;
-	        x.color = color;
-	        color = RED;
-	        x.size = size;
-	        size = size(left) + size(right) + 1;
+		protected abstract Node<V> flipColors();
 
-	        return x;
-		}
+		protected abstract Node<V> fixSize();
 
-		private void flipColors() {
-			color = !color;
-			left.color = !left.color;
-			right.color = !right.color;
-		}
-
-		private void fixSize() {
-			size = size(left) + size(right) + 1;
-		}
+		protected abstract Node<V> flipColor();
 
 		private Node<V> moveRedLeft() {
-			flipColors();
-			if (isRed(right.left)) {
-				setRight(right.rotateRight());
-				var result = rotateLeft();
-				result.flipColors();
-				return result;
-			}
-			else
-				return this;
+			Node<V> h = flipColors();
+			return isRed(h.right.left) ? h.setRight(h.right.rotateRight()).rotateLeft().flipColors() : h;
 		}
 
 		private Node<V> moveRedRight() {
-			flipColors();
-			if (isRed(left.left)) {
-				var result = rotateRight();
-				result.flipColors();
-				return result;
-			}
-			else
-				return this;
+			Node<V> h = flipColors();
+			return isRed(h.left.left) ? h.rotateRight().flipColors() : h;
 		}
 
 		// restore red-black tree invariant
@@ -184,10 +158,112 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 			Node<V> h = this;
 			if (isRed(h.right) && isBlack(h.left))   h = h.rotateLeft();
 			if (isRed(h.left) && isRed(h.left.left)) h = h.rotateRight();
-			if (isRed(h.left) && isRed(h.right))     h.flipColors();
+			if (isRed(h.left) && isRed(h.right))     h = h.flipColors();
 
-			h.fixSize();
-			return h;
+			return h.fixSize();
+		}
+	}
+
+	private static class RedNode<V> extends Node<V> {
+
+		private RedNode(V value, int size, Node<V> left, Node<V> right) {
+			super(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> fixSize() {
+			return mkRed(value, size(left) + size(right) + 1, left, right);
+		}
+
+		@Override
+		protected Node<V> flipColor() {
+			return mkBlack(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> rotateLeft() {
+			final Node<V> x = right;
+			Node<V> newThis = mkRed(value, size(x.left) + size(left) + 1, left, x.left);
+			return mkRed(x.value, size, newThis, x.right);
+		}
+
+		@Override
+		protected Node<V> rotateRight() {
+			// assert isRed(left);
+			final Node<V> x = left;
+			Node<V> newThis = mkRed(value, size(x.right) + size(right) + 1, x.right, right);
+			return mkRed(x.value, size, x.left, newThis);
+		}
+
+		@Override
+		protected Node<V> setValue(V value) {
+			return mkRed(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> setLeft(Node<V> left) {
+			return mkRed(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> setRight(Node<V> right) {
+			return mkRed(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> flipColors() {
+			return mkBlack(value, size, left.flipColor(), right.flipColor());
+		}
+	}
+
+	private static class BlackNode<V> extends Node<V> {
+
+		private BlackNode(V value, int size, Node<V> left, Node<V> right) {
+			super(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> fixSize() {
+			return mkBlack(value, size(left) + size(right) + 1, left, right);
+		}
+
+		@Override
+		protected Node<V> flipColor() {
+			return mkRed(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> rotateLeft() {
+			final Node<V> x = right;
+			Node<V> newThis = mkRed(value, size(x.left) + size(left) + 1, left, x.left);
+			return mkBlack(x.value, size, newThis, x.right);
+		}
+
+		@Override
+		protected Node<V> rotateRight() {
+			final Node<V> x = left;
+			Node<V> newThis = mkRed(value, size(x.right) + size(right) + 1, x.right, right);
+			return mkBlack(x.value, size, x.left, newThis);
+		}
+
+		@Override
+		protected Node<V> setValue(V value) {
+			return mkBlack(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> setLeft(Node<V> left) {
+			return mkBlack(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> setRight(Node<V> right) {
+			return mkBlack(value, size, left, right);
+		}
+
+		@Override
+		protected Node<V> flipColors() {
+			return mkRed(value, size, left.flipColor(), right.flipColor());
 		}
 	}
 
@@ -198,7 +274,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	 * @return true if and only if {@code x} is red
 	 */
 	private static <K,V> boolean isRed(Node<V> x) {
-		return x != null && x.color == Node.RED;
+		return x instanceof RedNode<?>;
 	}
 
 	/**
@@ -208,7 +284,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	 * @return true if and only if {@code x} is black
 	 */
 	private static <K,V> boolean isBlack(Node<V> x) {
-		return x == null || x.color == Node.BLACK;
+		return x == null || x instanceof BlackNode<?>;
 	}
 
 	/**
@@ -270,21 +346,19 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 
 	// insert the value in the subtree rooted at h
 	private static <V> Node<V> put(Node<V> h, V value) { 
-		if (h == null) return new Node<>(value);
+		if (h == null) return Node.mkRed(value);
 
 		int cmp = StorageSupport.compare(value, h.value);
-		if      (cmp < 0) h.setLeft(put(h.left, value)); 
-		else if (cmp > 0) h.setRight(put(h.right, value));
-		else              h.setValue(value);
+		if      (cmp < 0) h = h.setLeft(put(h.left, value)); 
+		else if (cmp > 0) h = h.setRight(put(h.right, value));
+		else              h = h.setValue(value);
 
 		// fix-up any right-leaning links
 		if (isRed(h.right) &&  isBlack(h.left))    h = h.rotateLeft();
 		if (isRed(h.left)  &&  isRed(h.left.left)) h = h.rotateRight();
-		if (isRed(h.left)  &&  isRed(h.right))     h.flipColors();
+		if (isRed(h.left)  &&  isRed(h.right))     h = h.flipColors();
 		
-		h.fixSize();
-
-		return h;
+		return h.fixSize();
 	}
 
 	@Override
@@ -306,9 +380,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		if (isBlack(h.left) && isBlack(h.left.left))
 			h = h.moveRedLeft();
 
-		h.setLeft(removeMin(h.left));
-
-		return h.balance();
+		return h.setLeft(removeMin(h.left)).balance();
 	}
 
 	@Override
@@ -333,9 +405,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		if (isBlack(h.right) && isBlack(h.right.left))
 			h = h.moveRedRight();
 
-		h.setRight(removeMax(h.right));
-
-		return h.balance();
+		return h.setRight(removeMax(h.right)).balance();
 	}
 
 	@Override
@@ -356,7 +426,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 			if (isBlack(h.left) && isBlack(h.left.left))
 				h = h.moveRedLeft();
 
-			h.setLeft(remove(h.left, value));
+			h = h.setLeft(remove(h.left, value));
 		}
 		else {
 			if (isRed(h.left))
@@ -367,11 +437,13 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 				h = h.moveRedRight();
 			if (StorageSupport.compare(value, h.value) == 0) {
 				Node<V> x = min(h.right);
-                h.value = x.value;
-                h.right = removeMin(h.right);
+				if (isRed(h))
+					h = Node.mkRed(x.value, h.size, h.left, removeMin(h.right));
+				else
+					h = Node.mkBlack(x.value, h.size, h.left, removeMin(h.right));
 			}
 			else
-				h.setRight(remove(h.right, value));
+				h = h.setRight(remove(h.right, value));
 		}
 		return h.balance();
 	}
@@ -529,7 +601,7 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 	}
 
 	@Override
-	public StorageSetView<V> view() {
+	public SnapshottableStorageSetView<V> view() {
 
 		/**
 		 * A read-only view of a parent storage set. A view contains the same elements
@@ -540,69 +612,79 @@ public class StorageTreeSet<V> extends Storage implements StorageSet<V> {
 		 */
 
 		@Exported
-		class StorageSetViewImpl extends Storage implements StorageSetView<V> {
+		class SnapshottableStorageSetViewImpl extends Storage implements SnapshottableStorageSetView<V> {
 
 			@Override
 			public @View int size() {
-				return StorageTreeSet.this.size();
+				return SnapshottableStorageTreeSet.this.size();
 			}
 
 			@Override
 			public @View boolean isEmpty() {
-				return StorageTreeSet.this.isEmpty();
+				return SnapshottableStorageTreeSet.this.isEmpty();
 			}
 
 			@Override
 			public @View boolean contains(Object value) {
-				return StorageTreeSet.this.contains(value);
+				return SnapshottableStorageTreeSet.this.contains(value);
 			}
 
 			@Override
 			public @View V min() {
-				return StorageTreeSet.this.min();
+				return SnapshottableStorageTreeSet.this.min();
 			} 
 
 			@Override
 			public @View V max() {
-				return StorageTreeSet.this.max();
+				return SnapshottableStorageTreeSet.this.max();
 			} 
 
 			@Override
 			public @View V floorKey(Object value) {
-				return StorageTreeSet.this.floorKey(value);
+				return SnapshottableStorageTreeSet.this.floorKey(value);
 			}    
 
 			@Override
 			public @View V ceilingKey(Object value) {
-				return StorageTreeSet.this.ceilingKey(value);
+				return SnapshottableStorageTreeSet.this.ceilingKey(value);
 			}
 
 			@Override
 			public @View V select(int k) {
-				return StorageTreeSet.this.select(k);
+				return SnapshottableStorageTreeSet.this.select(k);
 			}
 
 			@Override
 			public @View int rank(Object value) {
-				return StorageTreeSet.this.rank(value);
+				return SnapshottableStorageTreeSet.this.rank(value);
 			} 
 
 			@Override
 			public String toString() {
-				return StorageTreeSet.this.toString();
+				return SnapshottableStorageTreeSet.this.toString();
 			}
 
 			@Override
 			public Iterator<V> iterator() {
-				return StorageTreeSet.this.iterator();
+				return SnapshottableStorageTreeSet.this.iterator();
+			}
+
+			@Override
+			public StorageSetView<V> snapshot() {
+				return SnapshottableStorageTreeSet.this.snapshot();
 			}
 
 			@Override
 			public void forEach(Consumer<? super V> action) {
-				StorageTreeSet.this.forEach(action);
+				SnapshottableStorageTreeSet.this.forEach(action);
 			}
 		}
 
-		return new StorageSetViewImpl();
+		return new SnapshottableStorageSetViewImpl();
+	}
+
+	@Override
+	public StorageSetView<V> snapshot() {
+		return new SnapshottableStorageTreeSet<>(this).view();
 	}
 }

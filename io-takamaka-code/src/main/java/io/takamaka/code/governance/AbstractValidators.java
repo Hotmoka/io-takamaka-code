@@ -36,10 +36,10 @@ import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
 import io.takamaka.code.util.SnapshottableStorageMap;
-import io.takamaka.code.util.StorageSet;
-import io.takamaka.code.util.StorageSetView;
+import io.takamaka.code.util.SnapshottableStorageSet;
 import io.takamaka.code.util.SnapshottableStorageTreeMap;
-import io.takamaka.code.util.StorageTreeSet;
+import io.takamaka.code.util.SnapshottableStorageTreeSet;
+import io.takamaka.code.util.StorageSetView;
 
 /**
  * A partial implementation of the validators.
@@ -106,7 +106,7 @@ public abstract class AbstractValidators<V extends Validator> extends SimpleShar
 	 * The polls created among the validators of this manifest, that have not been closed yet.
 	 * Some of these polls might be over.
 	 */
-	private final StorageSet<Poll<V>> polls = new StorageTreeSet<>();
+	private final SnapshottableStorageSet<Poll<V>> polls = new SnapshottableStorageTreeSet<>();
 
 	/**
 	 * A snapshot of the current value of {@link #polls}.
