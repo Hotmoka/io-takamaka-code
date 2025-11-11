@@ -71,7 +71,7 @@ public class Versions<V extends Validator> extends Contract {
 	/**
 	 * Starts a new poll among the validators, with the goal to increase the version of the verification module.
 	 * 
-	 * @param amount the amount of coins payed to start the poll
+	 * @param amount the amount of coins paid to start the poll
 	 * @return the new poll
 	 */
 	@Payable @FromContract

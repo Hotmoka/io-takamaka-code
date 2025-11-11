@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * or constructors from outside the node. If a class is exported, it follows that everybody
  * can run any public method on its instances, even through the instance is apparently
  * encapsulated, since its reference is actually public in the store. This can be problematic
- * if the instances are modifiable throuogh their public API.
+ * if the instances are modifiable through their public API.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value={ TYPE })
