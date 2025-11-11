@@ -29,9 +29,9 @@ import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
-import io.takamaka.code.util.StorageMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 import io.takamaka.code.util.StorageMapView;
-import io.takamaka.code.util.StorageTreeMap;
 
 /**
  * The implementation of a simple poll among a set of voters. Each voter can vote with a number of votes
@@ -74,7 +74,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 	/**
 	 * The voters up to now, with the votes that each of them has cast.
 	 */
-	private final StorageMap<Voter, BigInteger> votersUpToNow = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<Voter, BigInteger> votersUpToNow = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * The action run if the goal of the poll is reached.

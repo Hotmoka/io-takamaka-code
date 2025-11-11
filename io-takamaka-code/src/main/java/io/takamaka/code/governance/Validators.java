@@ -23,7 +23,6 @@ import io.takamaka.code.dao.PollWithTimeWindow;
 import io.takamaka.code.dao.SharedEntity;
 import io.takamaka.code.dao.SharedEntity.Offer;
 import io.takamaka.code.dao.SimplePoll;
-import io.takamaka.code.lang.Event;
 import io.takamaka.code.lang.FromContract;
 import io.takamaka.code.lang.Payable;
 import io.takamaka.code.lang.View;
@@ -38,56 +37,6 @@ import io.takamaka.code.util.StorageSetView;
  * @param <V> the type of the validator contracts
  */
 public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V>> {
-
-	/**
-	 * Rewards validators that behaved correctly and punishes validators that
-	 * misbehaved. Hotmoka nodes might call this method at regular
-	 * intervals; for instance, after each committed block in a blockchain.
-	 * Its goal is to reward the behaving validators and punish the
-	 * misbehaving ones. Note that a validator might not be in
-	 * {@code behaving} nor in {@code misbehaving} if, for instance, it
-	 * failed to vote because it was down. The implementation of this
-	 * method can decide what to do in that case.
-	 * Normally, it is expected that the identifiers in {@code behaving}
-	 * and {@code misbehaving} are those of validators in this validators set.
-	 * 
-	 * @param amount the amount to distribute to the validators
-	 * @param minted the subset of {@code amount} that has been minted during the last reward;
-	 *               this means that {@code amount} is the sum of gas costs incurred by the
-	 *               payers of the transactions and an extra inflation that is exactly {@code minted} coins
-	 * @param behaving space-separated identifiers of validators that behaved correctly
-	 * @param misbehaving space-separated identifiers of validators that misbehaved
-	 * @param gasConsumed the gas consumed for CPU, RAM usage or storage by the transactions
-	 *                    executed since the previous reward
-	 * @param numberOfTransactionsSinceLastReward the number of transactions executed since
-	 *                                            the previous reward
-	 */
-	@FromContract @Payable void reward(BigInteger amount, BigInteger minted, String behaving, String misbehaving, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
-
-	/**
-	 * Rewards the Mokamint node that has created a block. Hotmoka Mokamint nodes
-	 * call this method at regular intervals; for instance, after each committed block in blockchain.
-	 * Its goal is to reward the node that created the block, with the deadline provided by a miner.
-	 * 
-	 * @param amount the amount to distribute to the node
-	 * @param minted the subset of {@code amount} that has been minted during the last reward
-	 * @param publicKeyOfNodeBase64 the key of the node
-	 * @param gasConsumed the gas consumed for CPU, RAM usage or storage by the transactions
-	 *                    executed since the previous reward
-	 * @param numberOfTransactionsSinceLastReward the number of transactions executed since
-	 *                                            the previous reward
-	 */
-	@FromContract @Payable public void rewardMokamintNode(BigInteger amount, BigInteger minted, String publicKeyOfNodeBase64, BigInteger gasConsumed, BigInteger numberOfTransactionsSinceLastReward);
-
-	/**
-	 * Rewards the Mokamint miner that found the deadline for a block. Hotmoka Mokamint nodes
-	 * call this method at regular intervals; for instance, after each committed block in blockchain.
-	 * Its goal is to reward the miner that found the deadline for a block.
-	 * 
-	 * @param amount the amount to distribute to the miner
-	 * @param publicKeyOfMinerBase64 the key of the miner
-	 */
-	@FromContract @Payable public void rewardMokamintMiner(BigInteger amount, String publicKeyOfMinerBase64);
 
 	/**
 	 * Yields the earnings collected by the given validator and not yet sent to it.
@@ -122,53 +71,12 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	@View BigInteger getFinalSupply();
 
 	/**
-	 * Yields the initial inflation applied to the gas consumed by transactions before it gets sent
-	 * as reward to the validators. 1,000,000 means 1%.
-	 * Inflation can be negative. For instance, -300,000 means -0.3%.
+	 * Yields the height when the current supply reaches the final supply;
+	 * from there, coins are not minted anymore.
 	 * 
-	 * @return the initial inflation
+	 * @return the height when the current supply reaches the final supply
 	 */
-	@View long getInitialInflation();
-
-	/**
-	 * Yields the current inflation applied to the gas consumed by transactions before it gets sent
-	 * as reward to the validators. 1,000,000 means 1%.
-	 * Inflation can be negative. For instance, -300,000 means -0.3%.
-	 * This starts at {@link #getInitialInflation()} and decreases towards zero.
-	 * 
-	 * @return the current inflation
-	 */
-	@View long getCurrentInflation();
-
-	/**
-	 * Yields the percent of validators' rewards that gets staked. The rest is sent to the validators immediately.
-	 * 1000000 = 1%.
-	 * 
-	 * @return the percent of validators' reward that gets staked
-	 */
-	@View int getPercentStaked();
-
-	/**
-	 * Yields the extra tax paid when a validator acquires the shares of another validator
-	 * (in percent of the sale offer cost).
-	 * 
-	 * @return the extra tax paid. 1000000 means 1%
-	 */
-	@View int getBuyerSurcharge();
-
-	/**
-	 * Yields the slashing percent applied to stakes for each misbehavior.
-	 * 
-	 * @return the slashing percent. 1000000 means 1%
-	 */
-	@View int getSlashingForMisbehaving();
-
-	/**
-	 * Yields the slashing percent applied to stakes for no misbehavior (no vote).
-	 * 
-	 * @return the slashing percent. 1000000 means 1%
-	 */
-	@View int getSlashingForNotBehaving();
+	@View BigInteger getHeightAtFinalSupply();
 
 	/**
 	 * Yields the amount of coins needed to start a new poll among the validators of this node.
@@ -225,33 +133,4 @@ public interface Validators<V extends Validator> extends SharedEntity<V, Offer<V
 	 * @return the poll
 	 */
 	@Payable @FromContract PollWithTimeWindow<V> newPoll(BigInteger amount, SimplePoll.Action action, long start, long duration);
-
-	/**
-	 * An event triggered when a validator gets slashed for misbehaving.
-	 *
-	 * @param <V> the type of the slashed validator
-	 */
-	final class ValidatorSlashed<V extends Validator> extends Event {
-
-		/**
-		 * The slashed validator.
-		 */
-		public final V validator;
-
-		/**
-		 * The amount of stakes slashed from the validator.
-		 */
-		public final BigInteger amount;
-
-		/**
-		 * Creates the event.
-		 * 
-		 * @param validator the slashed validator
-		 * @param amount the amount of stakes slashed from the validator
-		 */
-		protected @FromContract ValidatorSlashed(V validator, BigInteger amount) {
-			this.validator = validator;
-			this.amount = amount;
-		}
-	}
 }

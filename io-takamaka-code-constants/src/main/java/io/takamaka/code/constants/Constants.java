@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Constants about Takamaka and Hotmoka.
+ * Constants about Takamaka.
  */
 public final class Constants {
 
@@ -135,9 +135,19 @@ public final class Constants {
 	public final static String STORAGE_MAP_VIEW_NAME = "io.takamaka.code.util.StorageMapView";
 
 	/**
+	 * The name of the class type for {@code io.takamaka.code.util.SnapshottableStorageMapView}.
+	 */
+	public final static String SNAPSHOTTABLE_STORAGE_MAP_VIEW_NAME = "io.takamaka.code.util.SnapshottableStorageMapView";
+
+	/**
 	 * The name of the class type for {@code io.takamaka.code.util.StorageTreeMap}.
 	 */
 	public final static String STORAGE_TREE_MAP_NAME = "io.takamaka.code.util.StorageTreeMap";
+
+	/**
+	 * The name of the class type for {@code io.takamaka.code.util.SnapshottableStorageTreeMap}.
+	 */
+	public final static String SNAPSHOTTABLE_STORAGE_TREE_MAP_NAME = "io.takamaka.code.util.SnapshottableStorageTreeMap";
 
 	/**
 	 * The name of the class type for {@code io.takamaka.code.util.StorageTreeArray}.
@@ -180,6 +190,11 @@ public final class Constants {
 	public final static String STORAGE_MAP_NAME = "io.takamaka.code.util.StorageMap";
 	
 	/**
+	 * The name of the class type for {@code io.takamaka.code.util.SnapshottableStorageMap}.
+	 */
+	public final static String SNAPSHOTTABLE_STORAGE_MAP_NAME = "io.takamaka.code.util.SnapshottableStorageMap";
+
+	/**
 	 * The name of the class type for {@code io.takamaka.code.util.StorageArray}.
 	 */
 	public final static String STORAGE_ARRAY_NAME = "io.takamaka.code.util.StorageArray";
@@ -198,6 +213,11 @@ public final class Constants {
 	 * The name of the class type for {@code io.takamaka.code.util.StorageTreeMap.Node}.
 	 */
 	public final static String STORAGE_TREE_MAP_NODE_NAME = "io.takamaka.code.util.StorageTreeMap$Node";
+
+	/**
+	 * The name of the class type for {@code io.takamaka.code.util.StorageTreeMap.Node}.
+	 */
+	public final static String SNAPSHOTTABLE_STORAGE_TREE_MAP_NODE_NAME = "io.takamaka.code.util.SnapshottableStorageMap$Node";
 
 	/**
 	 * The name of the class type for {@code io.takamaka.code.util.StorageTreeIntMap.Node}.
@@ -223,11 +243,6 @@ public final class Constants {
 	 * The name of the class type for {@code io.takamaka.code.governance.GasPriceUpdate}.
 	 */
 	public final static String GAS_PRICE_UPDATE_NAME = "io.takamaka.code.governance.GasPriceUpdate";
-
-	/**
-	 * The name of the class type for {@code io.takamaka.code.governance.InflationUpdate}.
-	 */
-	public final static String INFLATION_UPDATE_NAME = "io.takamaka.code.governance.InflationUpdate";
 
 	/**
 	 * The name of the class type for {@code io.takamaka.code.governance.VerificationVersionUpdate}.
@@ -310,9 +325,19 @@ public final class Constants {
 	public final static String GENERIC_GAS_STATION_NAME = "io.takamaka.code.governance.GenericGasStation";
 
 	/**
+	 * The name of the class type for {@code io.takamaka.code.governance.mokamint.MokamintValidators}.
+	 */
+	public final static String MOKAMINT_VALIDATORS_NAME = "io.takamaka.code.governance.mokamint.MokamintValidators";
+
+	/**
 	 * The name of the class type for {@code io.takamaka.code.governance.tendermint.TendermintValidators}.
 	 */
 	public final static String TENDERMINT_VALIDATORS_NAME = "io.takamaka.code.governance.tendermint.TendermintValidators";
+
+	/**
+	 * The name of the class type for {@code io.takamaka.code.governance.disk.DiskValidators}.
+	 */
+	public final static String DISK_VALIDATORS_NAME = "io.takamaka.code.governance.disk.DiskValidators";
 
 	/**
 	 * The name of the class type for {@code io.takamaka.code.governance.tendermint.TendermintED25519Validator}.

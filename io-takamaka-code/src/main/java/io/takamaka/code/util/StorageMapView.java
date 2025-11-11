@@ -27,7 +27,7 @@ import io.takamaka.code.lang.View;
  * that can be kept in storage. By iterating on this object, one gets
  * the key/value pairs of the map, in increasing key order.
  * This interface has only access methods. Its sub-interface
- * {@link StorageMap} includes modification methods as well.
+ * {@link SnapshottableStorageMap} includes modification methods as well.
  * 
  * @param <K> the type of the keys
  * @param <V> the type of the values
@@ -188,14 +188,4 @@ public interface StorageMapView<K,V> extends Iterable<StorageMapView.Entry<K,V>>
 	 * @param action the action to perform
 	 */
 	void forEachValue(Consumer<? super V> action);
-
-	/**
-	 * Yields a snapshot of this map. The snapshot contains the elements in this map
-	 * but is independent from this map: any future modification of this map will
-	 * not be seen through the snapshot. A snapshot is always
-	 * {@link io.takamaka.code.lang.Exported}.
-	 * 
-	 * @return a snapshot of this map
-	 */
-	StorageMapView<K,V> snapshot();
 }

@@ -85,16 +85,6 @@ public interface StorageListView<E> extends Iterable<E> {
 	E[] toArray(IntFunction<E[]> generator);
 
 	/**
-	 * Yields a snapshot of this list. The snapshot contains the elements in this list
-	 * but is independent from this list: any future modification of this list will
-	 * not be seen through the snapshot. A snapshot is always
-	 * {@link io.takamaka.code.lang.Exported}.
-	 * 
-	 * @return a snapshot of this list
-	 */
-	StorageListView<E> snapshot();
-
-	/**
 	 * Runs the given action for each element of this list, in their order.
 	 * 
 	 * @param action the action to run

@@ -68,7 +68,9 @@ public final class SHA256Digest {
      */
 	public byte[] digest(byte[] input) {
 		Takamaka.chargeForRAM(64*8L);
-		Takamaka.charge(input.length);
+		if (input != null)
+			Takamaka.charge(input.length);
+
 		return digest.digest(input);
 	}
 
@@ -83,7 +85,9 @@ public final class SHA256Digest {
      * @throws DigestException if an error occurs.
      */
 	public int digest(byte[] buf, int offset, int len) throws DigestException {
-		Takamaka.charge(buf.length);
+		if (buf != null)
+			Takamaka.charge(buf.length);
+
 		return digest.digest(buf, offset, len);
 	}
 
@@ -102,7 +106,9 @@ public final class SHA256Digest {
      * @param input the array of bytes.
      */
 	public void update(byte[] input) {
-		Takamaka.charge(input.length);
+		if (input != null)
+			Takamaka.charge(input.length);
+
 		digest.update(input);
 	}
 
@@ -115,7 +121,9 @@ public final class SHA256Digest {
      * @param len the number of bytes to use, starting at {@code offset}.
      */
 	public void update(byte[] input, int offset, int len) {
-		Takamaka.charge(input.length);
+		if (input != null)
+			Takamaka.charge(input.length);
+
 		digest.update(input, offset, len);
 	}
 }

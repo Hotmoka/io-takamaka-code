@@ -40,7 +40,7 @@ public interface Poll<Voter extends Contract> {
 	String getDescription();
 
 	/**
-	 * Yields the voters that are allowed to vote for this poll, with the
+	 * Yields a snapshot of the voters that are allowed to vote for this poll, with the
 	 * maximal number of votes that each of them can cast (its power).
 	 * 
 	 * @return the voters allowed to vote

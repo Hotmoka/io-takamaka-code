@@ -30,10 +30,10 @@ import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
-import io.takamaka.code.util.StorageMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 import io.takamaka.code.util.StorageMapView;
 import io.takamaka.code.util.StorageSet;
-import io.takamaka.code.util.StorageTreeMap;
 import io.takamaka.code.util.StorageTreeSet;
 
 /**
@@ -62,25 +62,25 @@ public class ERC721 extends Contract implements IERC721 {
 	/**
 	 * A map from each token identifier to its owner.
 	 */
-	private final StorageMap<BigInteger, Contract> owners = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<BigInteger, Contract> owners = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * A map from each owner to the number of tokens that it owns.
 	 */
-	private final StorageMap<Contract, BigInteger> balances = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<Contract, BigInteger> balances = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * A map from each token identifier to a contract that has been approved
 	 * for transferring the token: only that contract or the owner of the token
 	 * or the approved operators of the owner can transfer the token.
 	 */
-	private final StorageMap<BigInteger, Contract> tokenApprovals = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<BigInteger, Contract> tokenApprovals = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * A map from each owner to the set of contracts that it has approved for
 	 * transferring all its tokens.
 	 */
-	private final StorageMap<Contract, StorageSet<Contract>> operatorApprovals = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<Contract, StorageSet<Contract>> operatorApprovals = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * The last snapshot of this contract. This gets updated at every change to {@link #owners}

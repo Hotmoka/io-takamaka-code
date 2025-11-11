@@ -291,9 +291,4 @@ public final class Bytes16Snapshot extends AbstractStorageByteArrayView {
 	public byte[] toArray() {
 		return new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15 };
 	}
-
-	@Override
-	public StorageByteArrayView snapshot() {
-		return this;
-	}
 }

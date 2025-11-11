@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Fausto Spoto
+Copyright 2025 Fausto Spoto
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package io.takamaka.code.governance;
-
-import io.takamaka.code.lang.Event;
-import io.takamaka.code.lang.FromContract;
+package io.takamaka.code.util;
 
 /**
- * An event issued when the inflation has changed.
+ * A mutable array of byte values. Unset elements default to 0.
+ * By iterating on this object, one gets the values of the array, in increasing index order.
  */
-public class InflationUpdate extends Event {
 
-	/**
-	 * The new level of inflation.
-	 */
-	public final long newInflation;
+public interface SnapshottableStorageByteArray extends StorageByteArray, SnapshottableStorageByteArrayView {
 
-	/**
-	 * Creates the event
-	 * 
-	 * @param newInflation the new level of inflation
-	 */
-	protected @FromContract InflationUpdate(long newInflation) {
-		this.newInflation = newInflation;
-	}
+	@Override
+	SnapshottableStorageByteArrayView view();
 }

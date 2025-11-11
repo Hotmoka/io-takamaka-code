@@ -26,7 +26,7 @@ Note: submodules whose artifact must be deployed on Maven Central must activate 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
-    <io.takamaka.code.version>1.3.2</io.takamaka.code.version>
+    <io.takamaka.code.version>1.8.0</io.takamaka.code.version>
   </properties>
 
   <groupId>io.hotmoka</groupId>
@@ -71,11 +71,11 @@ Note: submodules whose artifact must be deployed on Maven Central must activate 
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
       <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
 
@@ -226,7 +226,7 @@ Note: submodules whose artifact must be deployed on Maven Central must activate 
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
-              <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+              <nexusUrl>https://ossrh-staging-api.central.sonatype.com/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
               <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
             </configuration>

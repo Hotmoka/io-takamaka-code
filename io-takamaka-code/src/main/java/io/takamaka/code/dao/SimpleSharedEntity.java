@@ -30,12 +30,12 @@ import io.takamaka.code.lang.PayableContract;
 import io.takamaka.code.lang.Storage;
 import io.takamaka.code.lang.View;
 import io.takamaka.code.math.BigIntegerSupport;
-import io.takamaka.code.util.StorageMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageSet;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageTreeSet;
 import io.takamaka.code.util.StorageMapView;
-import io.takamaka.code.util.StorageSet;
 import io.takamaka.code.util.StorageSetView;
-import io.takamaka.code.util.StorageTreeMap;
-import io.takamaka.code.util.StorageTreeSet;
 
 /**
  * A simple implementation of a shared entity. Shareholders hold, sell and buy shares of a shared entity.
@@ -49,12 +49,12 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 	/**
 	 * The shares of each shareholder. These are always positive.
 	 */
-	private final StorageMap<S, BigInteger> shares = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<S, BigInteger> shares = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * The set of offers of sale of shares.
 	 */
-	private final StorageSet<O> offers = new StorageTreeSet<>();
+	private final SnapshottableStorageSet<O> offers = new SnapshottableStorageTreeSet<>();
 
 	/**
 	 * A snapshot of the current shares.
@@ -102,7 +102,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 
 		addShares(shareholder, share);
 
-		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfShares = shares.snapshot();
 		this.snapshotOfOffers = offers.snapshot();
 	}
 
@@ -121,7 +121,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		addShares(shareholder1, share1);
 		addShares(shareholder2, share2);
 
-		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfShares = shares.snapshot();
 		this.snapshotOfOffers = offers.snapshot();
     }
 
@@ -143,7 +143,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		addShares(shareholder2, share2);
 		addShares(shareholder3, share3);
 
-		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfShares = shares.snapshot();
 		this.snapshotOfOffers = offers.snapshot();
     }
 
@@ -168,7 +168,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		addShares(shareholder3, share3);
 		addShares(shareholder4, share4);
 
-		this.snapshotOfShares = this.shares.snapshot();
+		this.snapshotOfShares = shares.snapshot();
 		this.snapshotOfOffers = offers.snapshot();
     }
 
@@ -224,7 +224,7 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		event(new OfferPlaced<>(offer));
 	}
 
-    @Override
+	@Override
 	public @FromContract(PayableContract.class) @Payable void accept(BigInteger amount, S buyer, O offer) {
     	require(caller() == buyer, "only the future owner can buy the shares");
 		require(offers.contains(offer), "unknown offer");
@@ -330,9 +330,28 @@ public class SimpleSharedEntity<S extends PayableContract, O extends Offer<S>> e
 		shares.remove(toRemove);
 		event(new ShareholderRemoved<>(toRemove));
 		BigInteger total = getTotalShares();
-		if (total.signum() > 0)
-			// TODO: avoid approximation: the last should get all the remaining shares
-			shares.forEachKey(shareholder -> shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total))));
+		if (total.signum() > 0) {
+			int size = shares.size();
+
+			class Counter {
+				private int counter;
+				private BigInteger rest = toDistribute;
+			}
+
+			Counter counter = new Counter();
+
+			shares.forEachKey(shareholder -> {
+				counter.counter++;
+				if (size == counter.counter)
+					// the last one gets all remaining shares, so that we distribute everything and avoid approximations
+					shares.update(shareholder, old -> BigIntegerSupport.add(old, counter.rest));
+				else {
+					BigInteger previousShares = sharesOf(shareholder);
+					shares.update(shareholder, old -> BigIntegerSupport.add(old, BigIntegerSupport.divide(BigIntegerSupport.multiply(toDistribute, old), total)));
+					counter.rest = BigIntegerSupport.add(counter.rest, BigIntegerSupport.subtract(previousShares, sharesOf(shareholder)));
+				}
+			});
+		}
 	
 		snapshotOfShares = shares.snapshot();
 	}

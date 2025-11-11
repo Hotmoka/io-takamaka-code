@@ -23,16 +23,16 @@ import java.math.BigInteger;
 import io.takamaka.code.lang.Exported;
 import io.takamaka.code.lang.StringSupport;
 import io.takamaka.code.lang.View;
-import io.takamaka.code.util.StorageMap;
-import io.takamaka.code.util.StorageMapView;
-import io.takamaka.code.util.StorageTreeMap;
+import io.takamaka.code.util.SnapshottableStorageMap;
+import io.takamaka.code.util.SnapshottableStorageMapView;
+import io.takamaka.code.util.SnapshottableStorageTreeMap;
 
 /**
  * A token collection with the possibility of
  * setting the URI for each token in the collection.
  */
 public abstract class ERC721URIStorage extends ERC721 implements IERC721URIStorageView {
-	private final StorageMap<BigInteger, String> tokenURIs = new StorageTreeMap<>();
+	private final SnapshottableStorageMap<BigInteger, String> tokenURIs = new SnapshottableStorageTreeMap<>();
 
 	/**
 	 * Builds a collection of non-fungible tokens that does not generate events.
@@ -60,7 +60,7 @@ public abstract class ERC721URIStorage extends ERC721 implements IERC721URIStora
 		return computeTokenURI(tokenId, tokenURIs);
 	}
 
-	private String computeTokenURI(BigInteger tokenId, StorageMapView<BigInteger, String> tokenURIs) {
+	private String computeTokenURI(BigInteger tokenId, SnapshottableStorageMapView<BigInteger, String> tokenURIs) {
 		require(_exists(tokenId), "URI query for non-existent token");
 
 		String tokenURI = tokenURIs.getOrDefault(tokenId, "");
@@ -97,7 +97,7 @@ public abstract class ERC721URIStorage extends ERC721 implements IERC721URIStora
 	 */
 	@Exported
 	protected class ERC721URIStorageSnapshot extends ERC721Snapshot implements IERC721URIStorageView {
-		private final StorageMapView<BigInteger, String> tokenURIs = ERC721URIStorage.this.tokenURIs;
+		private final SnapshottableStorageMapView<BigInteger, String> tokenURIs = ERC721URIStorage.this.tokenURIs;
 
 		/**
 		 * Creates the snapshot.

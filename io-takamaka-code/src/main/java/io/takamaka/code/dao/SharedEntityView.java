@@ -30,7 +30,7 @@ import io.takamaka.code.util.StorageMapView;
 public interface SharedEntityView<S extends Contract> {
 
 	/**
-	 * Yields the current shares, for each current shareholder.
+	 * Yields a snapshot of the current shares, for each current shareholder.
 	 * 
 	 * @return the shares
 	 */

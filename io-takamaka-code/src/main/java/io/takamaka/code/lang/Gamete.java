@@ -252,12 +252,12 @@ public final class Gamete extends ExternallyOwnedAccount {
 	 * signature, if the {@code allowsUnsignedFaucet} consensus option is set.
 	 * 
 	 * @param contract the payable contract that will receive the coins
-	 * @param green the coins to send to {@code contract}
+	 * @param amount the coins to send to {@code contract}
 	 */
-	public final @FromContract void faucet(PayableContract contract, BigInteger green) {
-		require(green != null && green.signum() >= 0 && BigIntegerSupport.compareTo(green, maxFaucet) <= 0, () -> StringSupport.concat("the balance must be between 0 and ", maxFaucet, " inclusive"));
+	public final @FromContract void faucet(PayableContract contract, BigInteger amount) {
+		require(amount != null && amount.signum() >= 0 && BigIntegerSupport.compareTo(amount, maxFaucet) <= 0, () -> StringSupport.concat("the balance must be between 0 and ", maxFaucet, " inclusive"));
 		require(caller() == this, "only the gamete can call its own faucet");
-		contract.receive(green);
+		contract.receive(amount);
 	}
 
 	/**
@@ -267,12 +267,12 @@ public final class Gamete extends ExternallyOwnedAccount {
 	 * signature, if the {@code allowsUnsignedFaucet} consensus option is set.
 	 * 
 	 * @param contract the payable account that will receive the coins
-	 * @param green the coins to send to {@code contract}
+	 * @param amount the coins to send to {@code contract}
 	 */
-	public final @FromContract void faucet(PayableContract contract, int green) {
-		require(green >= 0 && BigIntegerSupport.compareTo(BigInteger.valueOf(green), maxFaucet) <= 0, () -> StringSupport.concat("the balance must be between 0 and ", maxFaucet, " inclusive"));
+	public final @FromContract void faucet(PayableContract contract, int amount) {
+		require(amount >= 0 && BigIntegerSupport.compareTo(BigInteger.valueOf(amount), maxFaucet) <= 0, () -> StringSupport.concat("the balance must be between 0 and ", maxFaucet, " inclusive"));
 		require(caller() == this, "only the gamete can call its own faucet");
-		contract.receive(green);
+		contract.receive(amount);
 	}
 
 	/**
@@ -282,11 +282,11 @@ public final class Gamete extends ExternallyOwnedAccount {
 	 * signature, if the {@code allowsUnsignedFaucet} consensus option is set.
 	 * 
 	 * @param contract the payable contract that will receive the coins
-	 * @param green the coins to send to {@code contract}
+	 * @param amount the coins to send to {@code contract}
 	 */
-	public final @FromContract void faucet(PayableContract contract, long green) {
-		require(green >= 0 && BigIntegerSupport.compareTo(BigInteger.valueOf(green), maxFaucet) <= 0, () -> StringSupport.concat("the balance must be between 0 and ", maxFaucet, " inclusive"));
+	public final @FromContract void faucet(PayableContract contract, long amount) {
+		require(amount >= 0 && BigIntegerSupport.compareTo(BigInteger.valueOf(amount), maxFaucet) <= 0, () -> StringSupport.concat("the balance must be between 0 and ", maxFaucet, " inclusive"));
 		require(caller() == this, "only the gamete can call its own faucet");
-		contract.receive(green);
+		contract.receive(amount);
 	}
 }

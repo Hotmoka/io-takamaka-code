@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Fausto Spoto
+Copyright 2025 Fausto Spoto
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+package io.takamaka.code.util;
+
 /**
- * This module defines the support library of the Takamaka language.
+ * A sorted set of (non-{@code null}) storage values,
+ * that can be kept in storage. By iterating on this object, one gets
+ * the values in the set, in increasing order. This interface includes
+ * read and modification methods.
+ * 
+ * @param <V> the type of the values. This type must be allowed in storage
  */
-module io.takamaka.code {
-	exports io.takamaka.code.dao;
-	exports io.takamaka.code.lang;
-	exports io.takamaka.code.governance;
-	exports io.takamaka.code.governance.disk;
-	exports io.takamaka.code.governance.mokamint;
-	exports io.takamaka.code.governance.tendermint;
-	exports io.takamaka.code.util;
-	exports io.takamaka.code.math;
-	exports io.takamaka.code.security;
-	exports io.takamaka.code.tokens;
+
+public interface SnapshottableStorageSet<V> extends SnapshottableStorageSetView<V>, StorageSet<V> {
+
+	@Override
+	SnapshottableStorageSetView<V> view();
 }

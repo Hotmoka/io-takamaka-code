@@ -83,16 +83,6 @@ public interface StorageArrayView<V> extends Iterable<V> {
 	V[] toArray(IntFunction<V[]> generator);
 
 	/**
-	 * Yields a snapshot of this array. The snapshot contains the elements in this array
-	 * but is independent from this array: any future modification of this array will
-	 * not be seen through the snapshot. A snapshot is always
-	 * {@link io.takamaka.code.lang.Exported}.
-	 * 
-	 * @return a snapshot of this array
-	 */
-	StorageArrayView<V> snapshot();
-
-	/**
 	 * Executes the given action for each element in this array (also its {@code null} elements).
 	 * 
 	 * @param action the action to execute

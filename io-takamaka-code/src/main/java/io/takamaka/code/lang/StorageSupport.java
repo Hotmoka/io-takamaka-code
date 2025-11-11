@@ -50,7 +50,7 @@ public final class StorageSupport {
 				return e1s.compareByStorageReference(e2s);
 		}
 		else
-			throw new IllegalArgumentException("Illegal comparison between non-storage values");
+			throw new IllegalArgumentException("Illegal comparison " + e1.getClass().getSimpleName() + " vs " + e2.getClass().getSimpleName());
 	}
 
 	/**
@@ -74,6 +74,6 @@ public final class StorageSupport {
 			else
 				return e1s.compareByStorageReference(e2s) == 0;
 		else
-			throw new IllegalArgumentException("Illegal comparison between non-storage values");
+			throw new IllegalArgumentException("Illegal comparison " + e1.getClass().getSimpleName() + " vs " + e2.getClass().getSimpleName());
 	}
 }

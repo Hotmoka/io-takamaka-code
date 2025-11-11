@@ -714,9 +714,4 @@ public final class Bytes64Snapshot extends AbstractStorageByteArrayView {
 							byte32, byte33, byte34, byte35, byte36, byte37, byte38, byte39, byte40, byte41, byte42, byte43, byte44, byte45, byte46, byte47,
 							byte48, byte49, byte50, byte51, byte52, byte53, byte54, byte55, byte56, byte57, byte58, byte59, byte60, byte61, byte62, byte63 };
 	}
-
-	@Override
-	public StorageByteArrayView snapshot() {
-		return this;
-	}
 }

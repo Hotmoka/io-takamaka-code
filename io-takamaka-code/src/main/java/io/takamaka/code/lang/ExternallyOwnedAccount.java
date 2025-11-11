@@ -91,22 +91,12 @@ public class ExternallyOwnedAccount extends PayableContract implements Account {
 		return nonce;
 	}
 
-	/**
-	 * Yields the public key of this account.
-	 * 
-	 * @return the public key
-	 */
+	@Override
 	public @View final String publicKey() {
 		return publicKey;
 	}
 
-	/**
-	 * Changes the public key of this account. Only this same account can call this method on itself.
-	 * 
-	 * @param publicKey the new, Base64-encoded public key that will be assigned to this account.
-	 *                  After this rotation, the new key must be used to control the account
-	 *                  while the old key will not work anymore
-	 */
+	@Override
 	public final @FromContract(ExternallyOwnedAccount.class) void rotatePublicKey(String publicKey) {
 		Takamaka.require(caller() == this, "only this same externally owned account can call this method");
 		this.publicKey = publicKey;

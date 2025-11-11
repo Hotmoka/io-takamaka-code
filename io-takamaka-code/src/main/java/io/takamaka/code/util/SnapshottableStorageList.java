@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Fausto Spoto
+Copyright 2025 Fausto Spoto
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+package io.takamaka.code.util;
+
 /**
- * This module defines the support library of the Takamaka language.
+ * A list of elements. It is possible to access elements at both sides of the list.
+ * A list can hold {@code null} elements.
+ * This interface has access methods and modification methods.
+ * It supports the creation of snapshots.
+ *
+ * @param <E> the type of the elements. This type must be allowed in storage
  */
-module io.takamaka.code {
-	exports io.takamaka.code.dao;
-	exports io.takamaka.code.lang;
-	exports io.takamaka.code.governance;
-	exports io.takamaka.code.governance.disk;
-	exports io.takamaka.code.governance.mokamint;
-	exports io.takamaka.code.governance.tendermint;
-	exports io.takamaka.code.util;
-	exports io.takamaka.code.math;
-	exports io.takamaka.code.security;
-	exports io.takamaka.code.tokens;
+public interface SnapshottableStorageList<E> extends StorageList<E>, SnapshottableStorageListView<E> {
+
+	@Override
+	SnapshottableStorageListView<E> view();
 }

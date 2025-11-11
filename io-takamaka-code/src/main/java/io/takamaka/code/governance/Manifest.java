@@ -52,12 +52,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	private final Gamete gamete;
 
 	/**
-	 * The maximal length of the error message kept in the store of the node.
-	 * Beyond this threshold, the message gets truncated.
-	 */
-	private final int maxErrorLength;
-
-	/**
 	 * The maximal number of dependencies in the classpath of a transaction.
 	 */
 	private final int maxDependencies;
@@ -66,6 +60,11 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * The maximal cumulative size (in bytes) of the instrumented jars of the dependencies of a transaction.
 	 */
 	private final long maxCumulativeSizeOfDependencies;
+
+	/**
+	 * The maximal request size (in bytes).
+	 */
+	private final long maxRequestSize;
 
 	/**
 	 * True if and only if the use of the {@code faucet()} methods of the gametes is allowed without a valid signature.
@@ -114,10 +113,9 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * 
 	 * @param genesisTime a string the will be used to report the genesis time of the node
 	 * @param chainId the initial chainId of the node having the manifest
-	 * @param maxErrorLength the maximal length of the error message kept in the store of the node.
-	 *                       Beyond this threshold, the message gets truncated
 	 * @param maxDependencies the maximal number of dependencies per transaction
 	 * @param maxCumulativeSizeOfDependencies the maximal cumulative size of the the dependencies per transaction
+	 * @param maxRequestSize the maximal size of a request, in bytes
 	 * @param allowsUnsignedFaucet true if and only if the use of the {@code faucet()} methods of the gametes is allowed without a valid signature
 	 * @param skipsVerification true if and only if the verification of the classes of the jars installed in the node must be skipped
 	 * @param signature the name of the signature algorithm that must be used to sign the requests sent to the node
@@ -127,7 +125,7 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 * @param builderOfGasStation the builder of the gas station of the node having the manifest
 	 * @throws RequirementViolationException if any parameter is null or any builder yields null or the maximal error length is negative
 	 */
-	public Manifest(String genesisTime, String chainId, int maxErrorLength, int maxDependencies, long maxCumulativeSizeOfDependencies,
+	public Manifest(String genesisTime, String chainId, int maxDependencies, long maxCumulativeSizeOfDependencies, long maxRequestSize,
 			boolean allowsUnsignedFaucet, boolean skipsVerification, String signature, Gamete gamete, long verificationVersion,
 			Function<Manifest<V>, Validators<V>> builderOfValidators, Function<Manifest<V>, GasStation<V>> builderOfGasStation) {
 
@@ -137,7 +135,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 		require(chainId != null, "the chain identifier must be non-null");
 		require(gamete != null, "the gamete must be non-null");
 		require(builderOfValidators != null, "the builder of the validators must be non-null");
-		require(maxErrorLength >= 0, "the maximal error length must be non-negative");
 		require(maxDependencies >= 1, "the maximal number of dependencies per transaction must be at least 1");
 		require(maxCumulativeSizeOfDependencies >= 100_000, "the maximal cumulative size of the dependencies per transaction must be at least 100,000");
 		require(signature != null, "the name of the signature algorithm cannot be null");
@@ -146,9 +143,9 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 		this.genesisTime = genesisTime;
 		this.chainId = chainId;
 		this.gamete = gamete;
-		this.maxErrorLength = maxErrorLength;
 		this.maxDependencies = maxDependencies;
 		this.maxCumulativeSizeOfDependencies = maxCumulativeSizeOfDependencies;
+		this.maxRequestSize = maxRequestSize;
 		this.allowsUnsignedFaucet = allowsUnsignedFaucet;
 		this.skipsVerification = skipsVerification;
 		this.signature = signature;
@@ -180,16 +177,6 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	}
 
 	/**
-	 * Yields the maximal length of the error message kept in the store of the node.
-	 * Beyond this threshold, the message gets truncated.
-	 * 
-	 * @return the length
-	 */
-	public final @View int getMaxErrorLength() {
-		return maxErrorLength;
-	}
-
-	/**
 	 * Yields the maximal number of dependencies per transaction.
 	 * Beyond this threshold, a transaction gets rejected.
 	 * 
@@ -207,6 +194,15 @@ public final class Manifest<V extends Validator> extends ExternallyOwnedAccount 
 	 */
 	public final @View long getMaxCumulativeSizeOfDependencies() {
 		return maxCumulativeSizeOfDependencies;
+	}
+
+	/**
+	 * Yields the maximal request size. Beyond this threshold, requests get rejected.
+	 * 
+	 * @return the maximal request size (in bytes)
+	 */
+	public final @View long getMaxRequestSize() {
+		return maxRequestSize;
 	}
 
 	/**
