@@ -45,7 +45,7 @@ public class SimplePoll<Voter extends Contract> extends Storage implements Poll<
 	/**
 	 * An action that is triggered if the goal of the poll has been reached.
 	 */
-	@Exported
+	@Exported // TODO: remove @Exported and let subclasses decide
 	public static abstract class Action extends Storage {
 
 		/**
