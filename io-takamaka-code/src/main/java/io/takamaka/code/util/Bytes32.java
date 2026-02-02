@@ -513,7 +513,7 @@ public class Bytes32 extends AbstractStorageByteArrayView implements Snapshottab
 	}
 
 	@Override
-	public StorageByteArrayView snapshot() {
+	public Bytes32Snapshot snapshot() {
 		return new Bytes32Snapshot(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9, byte10, byte11, byte12, byte13, byte14, byte15,
 			byte16, byte17, byte18, byte19, byte20, byte21, byte22, byte23, byte24, byte25, byte26, byte27, byte28, byte29, byte30, byte31);
 	}

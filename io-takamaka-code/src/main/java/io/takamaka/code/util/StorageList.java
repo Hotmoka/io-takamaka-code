@@ -42,7 +42,7 @@ public interface StorageList<E> extends StorageListView<E> {
 	void addLast(E element);
 
 	/**
-	 * Adds the given element as first element of this list.
+	 * Adds the given element as last element of this list.
 	 * This is synonym of {@link #addLast(Object)}.
 	 * 
 	 * @param element the element, possibly {@code null}

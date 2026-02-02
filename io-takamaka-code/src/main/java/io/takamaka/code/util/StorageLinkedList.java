@@ -34,7 +34,7 @@ import io.takamaka.code.lang.View;
  *
  * @param <E> the type of the elements. This type must be allowed in storage
  */
-public class StorageLinkedList<E> extends Storage implements StorageList<E> {
+public class StorageLinkedList<E> extends Storage implements SnapshottableStorageList<E> {
 
 	/**
 	 * The first node of the list.
@@ -261,7 +261,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 	}
 
 	@Override
-	public StorageListView<E> view() {
+	public SnapshottableStorageListView<E> view() {
 
 		/**
 		 * A read-only view of a parent storage list. A view contains the same elements
@@ -272,7 +272,7 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 		 */
 
 		@Exported
-		class StorageListViewImpl extends Storage implements StorageListView<E> {
+		class StorageListViewImpl extends Storage implements SnapshottableStorageListView<E> {
 
 			@Override
 			public @View int size() {
@@ -318,8 +318,24 @@ public class StorageLinkedList<E> extends Storage implements StorageList<E> {
 			public void forEach(Consumer<? super E> action) {
 				StorageLinkedList.this.forEach(action);
 			}
+
+			@Override
+			public StorageListView<E> snapshot() {
+				return StorageLinkedList.this.snapshot();
+			}
 		}
 
 		return new StorageListViewImpl();
+	}
+
+	@Override
+	public StorageListView<E> snapshot() {
+		// we create a clone of the list and then return a view of the clone
+		// beware: this runs in O(n)
+		var copy = new StorageLinkedList<E>();
+		for (E e: StorageLinkedList.this)
+			copy.add(e);
+
+		return copy.view();
 	}
 }
