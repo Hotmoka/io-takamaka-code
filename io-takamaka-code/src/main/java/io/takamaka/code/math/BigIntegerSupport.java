@@ -157,14 +157,20 @@ public abstract class BigIntegerSupport {
 	 * @return the multiplication of the two
 	 */
 	public static BigInteger multiply(BigInteger first, BigInteger second) {
-		if (first != null) {
-			Takamaka.charge(first.bitLength());
-			Takamaka.chargeForRAM(first.bitLength());
+		if (first != null && second != null) {
+			Takamaka.charge(first.bitLength() * second.bitLength());
+			Takamaka.chargeForRAM(first.bitLength() + second.bitLength());
 		}
+		else {
+			if (first != null) {
+				Takamaka.charge(first.bitLength());
+				Takamaka.chargeForRAM(first.bitLength());
+			}
 
-		if (second != null) {
-			Takamaka.charge(second.bitLength());
-			Takamaka.chargeForRAM(second.bitLength());
+			if (second != null) {
+				Takamaka.charge(second.bitLength());
+				Takamaka.chargeForRAM(second.bitLength());
+			}
 		}
 
 		return first.multiply(second);
@@ -178,14 +184,20 @@ public abstract class BigIntegerSupport {
 	 * @return the quotient of the two
 	 */
 	public static BigInteger divide(BigInteger first, BigInteger second) {
-		if (first != null) {
-			Takamaka.charge(first.bitLength());
-			Takamaka.chargeForRAM(first.bitLength());
+		if (first != null && second != null) {
+			Takamaka.charge(first.bitLength() * second.bitLength());
+			Takamaka.chargeForRAM(first.bitLength() + second.bitLength());
 		}
+		else {
+			if (first != null) {
+				Takamaka.charge(first.bitLength());
+				Takamaka.chargeForRAM(first.bitLength());
+			}
 
-		if (second != null) {
-			Takamaka.charge(second.bitLength());
-			Takamaka.chargeForRAM(second.bitLength());
+			if (second != null) {
+				Takamaka.charge(second.bitLength());
+				Takamaka.chargeForRAM(second.bitLength());
+			}
 		}
 
 		return first.divide(second);
@@ -199,14 +211,20 @@ public abstract class BigIntegerSupport {
 	 * @return the quotient and the remainder
 	 */
 	public static BigInteger[] divideAndRemainder(BigInteger bi, BigInteger divisor) {
-		if (bi != null) {
-			Takamaka.charge(bi.bitLength());
-			Takamaka.chargeForRAM(bi.bitLength());
+		if (bi != null && divisor != null) {
+			Takamaka.charge(bi.bitLength() * divisor.bitLength());
+			Takamaka.chargeForRAM(bi.bitLength() + divisor.bitLength());
 		}
+		else {
+			if (bi != null) {
+				Takamaka.charge(bi.bitLength());
+				Takamaka.chargeForRAM(bi.bitLength());
+			}
 
-		if (divisor != null) {
-			Takamaka.charge(divisor.bitLength());
-			Takamaka.chargeForRAM(divisor.bitLength());
+			if (divisor != null) {
+				Takamaka.charge(divisor.bitLength());
+				Takamaka.chargeForRAM(divisor.bitLength());
+			}
 		}
 
 		return bi.divideAndRemainder(divisor);
@@ -220,14 +238,20 @@ public abstract class BigIntegerSupport {
 	 * @return the remainder
 	 */
 	public static BigInteger mod(BigInteger bi, BigInteger divisor) {
-		if (bi != null) {
-			Takamaka.charge(bi.bitLength());
-			Takamaka.chargeForRAM(bi.bitLength());
+		if (bi != null && divisor != null) {
+			Takamaka.charge(bi.bitLength() * divisor.bitLength());
+			Takamaka.chargeForRAM(bi.bitLength() + divisor.bitLength());
 		}
+		else {
+			if (bi != null) {
+				Takamaka.charge(bi.bitLength());
+				Takamaka.chargeForRAM(bi.bitLength());
+			}
 
-		if (divisor != null) {
-			Takamaka.charge(divisor.bitLength());
-			Takamaka.chargeForRAM(divisor.bitLength());
+			if (divisor != null) {
+				Takamaka.charge(divisor.bitLength());
+				Takamaka.chargeForRAM(divisor.bitLength());
+			}
 		}
 
 		return bi.mod(divisor);
@@ -242,8 +266,9 @@ public abstract class BigIntegerSupport {
 	 */
 	public static BigInteger pow(BigInteger bi, int exponent) {
 		if (bi != null) {
-			Takamaka.charge(bi.bitLength());
-			Takamaka.chargeForRAM(bi.bitLength() * (Math.abs(exponent) + 1));
+			var n = bi.bitLength() * (Math.abs(exponent) + 1);
+			Takamaka.charge(n * n);
+			Takamaka.chargeForRAM(n);
 		}
 
 		return bi.pow(exponent);
